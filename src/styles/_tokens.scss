@@ -1,0 +1,107 @@
+// ---------------------------------------------------------------------------
+// Join — design tokens
+// Source: Figma "Join Version 1", page "Page Components design system".
+// Values measured through the Figma API, not guessed. Never hardcode a hex
+// value in a component — add it here instead.
+// ---------------------------------------------------------------------------
+
+:root {
+  // -- Brand -----------------------------------------------------------------
+  --color-primary: #2a3647; // sidebar, buttons, text
+  --color-primary-hover: #124658; // hover on primary surfaces
+  --color-primary-active: #091931; // pressed
+  --color-accent: #29abe2; // logo, active underline
+  --color-menu: #42526e; // sidebar secondary text
+  --color-menu-hover: #2a3d59; // hover surface of a sidebar item
+
+  // -- Neutrals --------------------------------------------------------------
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-bg-app: #f6f7f8;
+  --color-bg-hover: #eeeeee;
+  --color-bg-selected: #edf2fa;
+  --color-line: #d1d1d1; // input border
+  --color-line-hover: #e7e7e7;
+  --color-icon: #a8a8a8;
+  --color-icon-muted: #cdcdcd; // inactive sidebar text and icons
+  --color-divider: #d9d9d9;
+
+  // -- Semantic --------------------------------------------------------------
+  --color-error: #e60026;
+  --color-link: #124658;
+
+  // -- Priority --------------------------------------------------------------
+  --color-urgent: #ff3d00;
+  --color-medium: #ffa800;
+  --color-low: #7ae229;
+
+  // -- Task categories -------------------------------------------------------
+  --color-cat-user-story: #0038ff;
+  --color-cat-technical: #1fd7c1;
+
+  // -- Contact avatars -------------------------------------------------------
+  --avatar-01: #ff7a00;
+  --avatar-02: #462f8a;
+  --avatar-03: #1fd7c1;
+  --avatar-04: #6e52ff;
+  --avatar-05: #9327ff;
+  --avatar-06: #fc71ff;
+  --avatar-07: #ffbb2b;
+  --avatar-08: #ff4646;
+  --avatar-09: #00bee8;
+  --avatar-10: #124658;
+  --avatar-11: #0038ff;
+  --avatar-12: #29abe2;
+
+  // -- Typography ------------------------------------------------------------
+  // Inter throughout, line height is always 1.2 x font size.
+  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --line-height: 1.2;
+
+  --font-size-t1: 61px;
+  --font-size-t2: 47px;
+  --font-size-t5: 27px;
+  --font-size-t6: 20px;
+  --font-size-body: 16px;
+  --font-size-t7: 12px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  // -- Radii -----------------------------------------------------------------
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 10px; // default
+  --radius-xl: 16px;
+  --radius-2xl: 24px; // board cards
+  --radius-3xl: 30px; // overlays
+  --radius-pill: 45px; // avatars
+
+  // -- Shadows ---------------------------------------------------------------
+  --shadow-card: 0 0 10px 3px rgb(0 0 0 / 0.08);
+  --shadow-card-hover: 0 0 14px 3px rgb(0 0 0 / 0.14);
+  --shadow-overlay: 0 0 4px 0 rgb(0 0 0 / 0.4);
+  --shadow-topbar: 0 4px 4px 0 rgb(0 0 0 / 0.1);
+
+  // -- Spacing ---------------------------------------------------------------
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 10px; // most common spacing in the design
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 35px;
+  --space-9: 48px;
+  --space-10: 64px;
+
+  // -- Layout ----------------------------------------------------------------
+  --sidebar-width: 232px;
+  --sidebar-item-height: 46px;
+  --header-height: 96px;
+
+  // -- Motion ----------------------------------------------------------------
+  // Submission checklist requires transitions between 75ms and 125ms.
+  --transition: 100ms ease;
+}

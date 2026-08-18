@@ -180,4 +180,25 @@ export class ContactService {
 
         return updatedContact;
     }
+
+    async deleteContact(id: string): Promise<boolean> {
+        const { error } = await this.supabase
+            .from('contacts')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error(
+            'Kontakt konnte nicht gelöscht werden:',
+            error
+            );
+            return false;
+        }
+
+        this.contacts.update((contacts) =>
+            contacts.filter((contact) => contact.id !== id)
+        );
+
+        return true;
+    }
 }

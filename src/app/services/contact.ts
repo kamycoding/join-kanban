@@ -49,8 +49,7 @@ export class ContactService {
     async createContact(
         fullName: string,
         email: string,
-        phone: string,
-        color: string
+        phone: string
         ): Promise<Contact | null> {
         if (!fullName.trim()) {
             console.error('Der Name darf nicht leer sein.');
@@ -65,7 +64,7 @@ export class ContactService {
             last_name,
             email: email.trim(),
             phone: phone.trim(),
-            color,
+            color: this.generateContactColor(),
         };
 
         const { data, error } = await this.supabase
@@ -99,5 +98,28 @@ export class ContactService {
         );
 
         return createdContact;
+    }
+
+    private generateContactColor(): string {
+        const colors = [
+            '#ff7a00',
+            '#462f8a',
+            '#1fd7c1',
+            '#6e52ff',
+            '#9327ff',
+            '#fc71ff',
+            '#ffbb2b',
+            '#ff4646',
+            '#00bee8',
+            '#124658',
+            '#0038ff',
+            '#29abe2',
+        ];
+
+        const randomIndex = Math.floor(
+            Math.random() * colors.length
+        );
+
+        return colors[randomIndex];
     }
 }

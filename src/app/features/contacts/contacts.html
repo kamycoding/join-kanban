@@ -1,21 +1,30 @@
-<h1>Contacts</h1>
-
-<button type="button" (click)="openAddDialog()">Add new contact</button>
-
-<app-contact-list
-  [contacts]="contacts()"
-  [selectedContact]="selectedContact()"
-  (contactSelected)="selectContact($event)"
-/>
-
-@if (selectedContact(); as contact) {
-  <app-contact-detail
-    [contact]="contact"
-    (back)="clearSelection()"
-    (editContact)="openEditDialog($event)"
-    (deleteContact)="deleteContact($event)"
+<div class="contacts-page">
+  <app-contact-list
+    [contacts]="contacts()"
+    [selectedContact]="selectedContact()"
+    (contactSelected)="selectContact($event)"
+    (addRequested)="openAddDialog()"
   />
-}
+
+  <main class="contacts-content">
+    <div class="contacts-heading">
+      <h1>Contacts</h1>
+
+      <span class="contacts-heading__divider" aria-hidden="true"></span>
+
+      <p>Better with a team</p>
+    </div>
+
+    @if (selectedContact(); as contact) {
+      <app-contact-detail
+        [contact]="contact"
+        (back)="clearSelection()"
+        (editContact)="openEditDialog($event)"
+        (deleteContact)="deleteContact($event)"
+      />
+    }
+  </main>
+</div>
 
 @if (dialogState(); as dialog) {
   <app-contact-dialog

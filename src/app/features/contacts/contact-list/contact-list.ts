@@ -1,5 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Contact } from '../../../models/contact';
+import { Button } from '../../../shared/components/button/button';
 import { ContactItem } from './contact-item/contact-item';
 
 interface ContactGroup {
@@ -9,7 +10,7 @@ interface ContactGroup {
 
 @Component({
   selector: 'app-contact-list',
-  imports: [ContactItem],
+  imports: [Button, ContactItem],
   templateUrl: './contact-list.html',
   styleUrl: './contact-list.scss',
 })
@@ -18,6 +19,7 @@ export class ContactList {
   readonly selectedContact = input<Contact | null>(null);
 
   readonly contactSelected = output<Contact>();
+  readonly addRequested = output<void>();
 
   readonly groupedContacts = computed<ContactGroup[]>(() => {
     const groups = new Map<string, Contact[]>();

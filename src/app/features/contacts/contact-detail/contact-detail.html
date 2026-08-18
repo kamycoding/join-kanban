@@ -1,35 +1,65 @@
 <section class="contact-detail">
-  <button type="button" (click)="back.emit()">Back</button>
+  <button class="contact-detail__back" type="button" (click)="back.emit()">Back</button>
 
-  <div>
+  <div class="contact-detail__identity">
     <span class="contact-detail__avatar" [style.background-color]="contact().color">
       {{ initials }}
     </span>
 
-    <h2>{{ fullName }}</h2>
+    <div class="contact-detail__summary">
+      <h2>{{ fullName }}</h2>
+
+      <div class="contact-detail__actions">
+        <button
+          class="contact-detail__action"
+          type="button"
+          (click)="editContact.emit(contact())"
+        >
+          <span class="contact-detail__action-icon" aria-hidden="true">
+            <img src="/img/icon-edit.svg" alt="" />
+            <img class="contact-detail__action-icon-hover" src="/img/icon-edit-hover.svg" alt="" />
+          </span>
+          Edit
+        </button>
+
+        <button
+          class="contact-detail__action"
+          type="button"
+          (click)="deleteContact.emit(contact())"
+        >
+          <span class="contact-detail__action-icon" aria-hidden="true">
+            <img src="/img/icon-delete.svg" alt="" />
+            <img
+              class="contact-detail__action-icon-hover"
+              src="/img/icon-delete-hover.svg"
+              alt=""
+            />
+          </span>
+          Delete
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <button type="button" (click)="editContact.emit(contact())">Edit</button>
+  <div class="contact-detail__information">
+    <h3>Contact Information</h3>
 
-    <button type="button" (click)="deleteContact.emit(contact())">Delete</button>
-  </div>
+    <div class="contact-detail__fields">
+      <div class="contact-detail__field">
+        <strong>Email</strong>
 
-  <h3>Contact Information</h3>
+        <a class="contact-detail__email" [href]="'mailto:' + contact().email">
+          {{ contact().email }}
+        </a>
+      </div>
 
-  <div>
-    <strong>Email</strong>
+      <div class="contact-detail__field">
+        <strong>Phone</strong>
 
-    <a [href]="'mailto:' + contact().email">
-      {{ contact().email }}
-    </a>
-  </div>
-
-  <div>
-    <strong>Phone</strong>
-
-    <a [href]="'tel:' + contact().phone">
-      {{ contact().phone }}
-    </a>
+        <a [href]="'tel:' + contact().phone">
+          {{ contact().phone }}
+        </a>
+      </div>
+    </div>
   </div>
 </section>

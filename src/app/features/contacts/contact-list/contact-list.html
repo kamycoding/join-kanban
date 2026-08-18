@@ -1,0 +1,13 @@
+@for (group of groupedContacts(); track group.letter) {
+  <section>
+    <h2>{{ group.letter }}</h2>
+
+    @for (contact of group.contacts; track contact.id) {
+      <app-contact-item
+        [contact]="contact"
+        [selected]="selectedContact()?.id === contact.id"
+        (selectedContact)="contactSelected.emit($event)"
+      />
+    }
+  </section>
+}

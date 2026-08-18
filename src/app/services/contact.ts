@@ -122,4 +122,62 @@ export class ContactService {
 
         return colors[randomIndex];
     }
+
+    async updateContact(
+        id: string,
+        fullName: string,
+        email: string,
+        phone: string
+        ): Promise<Contact | null> {
+        if (!fullName.trim()) {
+            console.error('Der Name darf nicht leer sein.');
+            return null;
+        }
+
+        const { first_name, last_name } =
+            this.splitFullName(fullName);
+
+        const { data, error } = await this.supabase
+            .from('contacts')
+            .update({
+            first_name,
+            last_name,
+            email: email.trim(),
+            phone: phone.trim(),
+            updated_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error(
+            'Kontakt konnte nicht bearbeitet werden:',
+            error
+            );
+            return null;
+        }
+
+        const updatedContact = data as Contact;
+
+        this.contacts.update((contacts) =>
+            contacts
+            .map((contact) =>
+                contact.id === id ? updatedContact : contact
+            )
+            .sort(
+                (contactA, contactB) =>
+                contactA.first_name.localeCompare(
+                    contactB.first_name,
+                    'de'
+                ) ||
+                contactA.last_name.localeCompare(
+                    contactB.last_name,
+                    'de'
+                )
+            )
+        );
+
+        return updatedContact;
+    }
 }

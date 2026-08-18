@@ -16,4 +16,5 @@ export class Button {
   readonly type = input<ButtonType>('button');
   readonly disabled = input(false);
   readonly iconSrc = input<string | null>(null);
+  readonly fullWidth = input(false);
 }

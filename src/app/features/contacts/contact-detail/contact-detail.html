@@ -1,0 +1,35 @@
+<section class="contact-detail">
+  <button type="button" (click)="back.emit()">Back</button>
+
+  <div>
+    <span class="contact-detail__avatar" [style.background-color]="contact().color">
+      {{ initials }}
+    </span>
+
+    <h2>{{ fullName }}</h2>
+  </div>
+
+  <div>
+    <button type="button" (click)="editContact.emit(contact())">Edit</button>
+
+    <button type="button" (click)="deleteContact.emit(contact())">Delete</button>
+  </div>
+
+  <h3>Contact Information</h3>
+
+  <div>
+    <strong>Email</strong>
+
+    <a [href]="'mailto:' + contact().email">
+      {{ contact().email }}
+    </a>
+  </div>
+
+  <div>
+    <strong>Phone</strong>
+
+    <a [href]="'tel:' + contact().phone">
+      {{ contact().phone }}
+    </a>
+  </div>
+</section>

@@ -1,0 +1,18 @@
+<button
+  class="button"
+  [class.button--primary]="variant() === 'primary'"
+  [class.button--outline]="variant() === 'outline'"
+  [class.button--default]="size() === 'default'"
+  [class.button--large]="size() === 'large'"
+  [class.button--with-icon]="iconSrc()"
+  [type]="type()"
+  [disabled]="disabled()"
+>
+  <span class="button__label">
+    <ng-content />
+  </span>
+
+  @if (iconSrc()) {
+    <img class="button__icon" [src]="iconSrc()" alt="" aria-hidden="true" />
+  }
+</button>

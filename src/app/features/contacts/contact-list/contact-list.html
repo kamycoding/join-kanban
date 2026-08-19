@@ -1,0 +1,31 @@
+<div class="contact-list">
+  <app-button
+    class="contact-list__add"
+    size="large"
+    iconSrc="/img/icon-person-add.svg"
+    [fullWidth]="true"
+    (click)="addRequested.emit()"
+  >
+    Add new contact
+  </app-button>
+
+  <div class="contact-list__groups">
+    @for (group of groupedContacts(); track group.letter) {
+      <section class="contact-group">
+        <h2 class="contact-group__letter">
+          {{ group.letter }}
+        </h2>
+
+        <div class="contact-group__divider" aria-hidden="true"></div>
+
+        @for (contact of group.contacts; track contact.id) {
+          <app-contact-item
+            [contact]="contact"
+            [selected]="selectedContact()?.id === contact.id"
+            (selectedContact)="contactSelected.emit($event)"
+          />
+        }
+      </section>
+    }
+  </div>
+</div>

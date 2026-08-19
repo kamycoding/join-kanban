@@ -1,6 +1,7 @@
 import { Component, OnInit, input, output, signal } from '@angular/core';
 import { email, form, FormField, required, submit, validate } from '@angular/forms/signals';
 import { Contact } from '../../../models/contact';
+import { Button } from '../../../shared/components/button/button';
 
 export interface ContactFormValue {
   name: string;
@@ -12,7 +13,7 @@ export type ContactDialogState = { mode: 'add' } | { mode: 'edit'; contact: Cont
 
 @Component({
   selector: 'app-contact-dialog',
-  imports: [FormField],
+  imports: [Button, FormField],
   templateUrl: './contact-dialog.html',
   styleUrl: './contact-dialog.scss',
 })
@@ -56,6 +57,24 @@ export class ContactDialog implements OnInit {
             message: 'Phone is required.',
           },
     );
+
+    validate(path.phone, ({ value }) => {
+      const phone = value().trim();
+
+      if (!phone) {
+        return null;
+      }
+
+      const hasValidCharacters = /^[\d\s+()-]+$/.test(phone);
+      const hasEnoughDigits = phone.replace(/\D/g, '').length >= 6;
+
+      return hasValidCharacters && hasEnoughDigits
+        ? null
+        : {
+            kind: 'phone',
+            message: 'Please enter a valid phone number.',
+          };
+    });
   });
 
   ngOnInit(): void {

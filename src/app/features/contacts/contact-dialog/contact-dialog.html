@@ -1,73 +1,160 @@
 @let dialog = state();
 
-<section
-  class="contact-dialog"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="contact-dialog-title"
+<div
+  class="contact-dialog-overlay"
+  [class.contact-dialog-overlay--add]="dialog.mode === 'add'"
 >
-  <button type="button" aria-label="Close contact dialog" (click)="close.emit()">Close</button>
-
-  @if (dialog.mode === 'add') {
-    <h2 id="contact-dialog-title">Add contact</h2>
-    <p>Tasks are better with a team!</p>
-  } @else {
-    <h2 id="contact-dialog-title">Edit contact</h2>
-  }
-
-  <form novalidate (submit)="onSubmit($event)">
-    <div>
-      <label for="contact-name">Name</label>
-
-      <input id="contact-name" type="text" autocomplete="name" [formField]="contactForm.name" />
-
-      @if (contactForm.name().touched() && contactForm.name().invalid()) {
-        @for (error of contactForm.name().errors(); track error) {
-          <p>{{ error.message }}</p>
-        }
-      }
-    </div>
-
-    <div>
-      <label for="contact-email">Email</label>
-
-      <input id="contact-email" type="email" autocomplete="email" [formField]="contactForm.email" />
-
-      @if (contactForm.email().touched() && contactForm.email().invalid()) {
-        @for (error of contactForm.email().errors(); track error) {
-          <p>{{ error.message }}</p>
-        }
-      }
-    </div>
-
-    <div>
-      <label for="contact-phone">Phone</label>
-
-      <input id="contact-phone" type="tel" autocomplete="tel" [formField]="contactForm.phone" />
-
-      @if (contactForm.phone().touched() && contactForm.phone().invalid()) {
-        @for (error of contactForm.phone().errors(); track error) {
-          <p>{{ error.message }}</p>
-        }
-      }
-    </div>
-
-    <div>
-      @if (dialog.mode === 'edit') {
-        <button type="button" [disabled]="saving()" (click)="deleteContact.emit(dialog.contact)">
-          Delete
-        </button>
-      } @else {
-        <button type="button" [disabled]="saving()" (click)="close.emit()">Cancel</button>
-      }
-
-      <button type="submit" [disabled]="contactForm().invalid() || saving()">
-        @if (dialog.mode === 'add') {
-          Create contact
-        } @else {
-          Save
-        }
+  <section
+    class="contact-dialog"
+    [class.contact-dialog--add]="dialog.mode === 'add'"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="contact-dialog-title"
+  >
+    @if (dialog.mode === 'add') {
+      <button
+        class="contact-dialog__close"
+        type="button"
+        aria-label="Close contact dialog"
+        (click)="close.emit()"
+      >
+        <img src="/img/icon-close.svg" alt="" aria-hidden="true" />
+        <img
+          class="contact-dialog__close-hover"
+          src="/img/icon-close-hover.svg"
+          alt=""
+          aria-hidden="true"
+        />
       </button>
+    } @else {
+      <button type="button" aria-label="Close contact dialog" (click)="close.emit()">Close</button>
+    }
+
+    <div class="contact-dialog__panel">
+      @if (dialog.mode === 'add') {
+        <img class="contact-dialog__logo" src="/img/join-logo-small.svg" alt="" aria-hidden="true" />
+
+        <div class="contact-dialog__heading">
+          <h2 id="contact-dialog-title">Add contact</h2>
+          <p>Tasks are better with a team!</p>
+        </div>
+
+        <span class="contact-dialog__accent" aria-hidden="true"></span>
+      } @else {
+        <h2 id="contact-dialog-title">Edit contact</h2>
+      }
     </div>
-  </form>
-</section>
+
+    @if (dialog.mode === 'add') {
+      <div class="contact-dialog__avatar" aria-hidden="true">
+        <img src="/img/icon-person.svg" alt="" />
+      </div>
+    }
+
+    <form class="contact-dialog__form" novalidate (submit)="onSubmit($event)">
+      <div class="contact-dialog__fields">
+        <div class="contact-dialog__field">
+          <label for="contact-name">Name</label>
+
+          <div class="contact-dialog__input-wrapper">
+            <input
+              id="contact-name"
+              type="text"
+              autocomplete="name"
+              placeholder="Name"
+              [formField]="contactForm.name"
+            />
+
+            @if (dialog.mode === 'add') {
+              <img src="/img/icon-person.svg" alt="" aria-hidden="true" />
+            }
+          </div>
+
+          @if (contactForm.name().touched() && contactForm.name().invalid()) {
+            @for (error of contactForm.name().errors(); track error) {
+              <p class="contact-dialog__error">{{ error.message }}</p>
+            }
+          }
+        </div>
+
+        <div class="contact-dialog__field">
+          <label for="contact-email">Email</label>
+
+          <div class="contact-dialog__input-wrapper">
+            <input
+              id="contact-email"
+              type="email"
+              autocomplete="email"
+              placeholder="Email"
+              [formField]="contactForm.email"
+            />
+
+            @if (dialog.mode === 'add') {
+              <img src="/img/icon-mail.svg" alt="" aria-hidden="true" />
+            }
+          </div>
+
+          @if (contactForm.email().touched() && contactForm.email().invalid()) {
+            @for (error of contactForm.email().errors(); track error) {
+              <p class="contact-dialog__error">{{ error.message }}</p>
+            }
+          }
+        </div>
+
+        <div class="contact-dialog__field">
+          <label for="contact-phone">Phone</label>
+
+          <div class="contact-dialog__input-wrapper">
+            <input
+              id="contact-phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="Phone"
+              [formField]="contactForm.phone"
+            />
+
+            @if (dialog.mode === 'add') {
+              <span class="contact-dialog__phone-icon" aria-hidden="true"></span>
+            }
+          </div>
+
+          @if (contactForm.phone().touched() && contactForm.phone().invalid()) {
+            @for (error of contactForm.phone().errors(); track error) {
+              <p class="contact-dialog__error">{{ error.message }}</p>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="contact-dialog__actions">
+        @if (dialog.mode === 'edit') {
+          <button type="button" [disabled]="saving()" (click)="deleteContact.emit(dialog.contact)">
+            Delete
+          </button>
+
+          <button type="submit" [disabled]="contactForm().invalid() || saving()">Save</button>
+        } @else {
+          <app-button
+            variant="outline"
+            size="action"
+            iconSrc="/img/icon-cancel.svg"
+            [disabled]="saving()"
+            (click)="close.emit()"
+          >
+            Cancel
+          </app-button>
+
+          <app-button
+            size="action"
+            type="submit"
+            iconSrc="/img/icon-check-white.svg"
+            [disabled]="contactForm().invalid() || saving()"
+          >
+            Create contact
+          </app-button>
+        }
+      </div>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,20 @@
+<button
+  class="contact-item"
+  type="button"
+  [class.contact-item--selected]="selected()"
+  (click)="selectContact()"
+>
+  <span class="contact-item__avatar" [style.background-color]="contact().color">
+    {{ initials }}
+  </span>
+
+  <span class="contact-item__content">
+    <span class="contact-item__name">
+      {{ fullName }}
+    </span>
+
+    <span class="contact-item__email">
+      {{ contact().email }}
+    </span>
+  </span>
+</button>

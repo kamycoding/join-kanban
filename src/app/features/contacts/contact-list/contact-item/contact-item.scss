@@ -1,0 +1,89 @@
+:host {
+  display: block;
+  width: 352px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+
+  box-sizing: border-box;
+  width: 352px;
+
+  padding: 15px var(--space-6);
+
+  border: 0;
+  border-radius: var(--radius-lg);
+
+  background: var(--color-white);
+
+  font-family: var(--font-family);
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition),
+    color var(--transition);
+}
+
+.contact-item:hover:not(.contact-item--selected) {
+  background: var(--color-bg-hover);
+}
+
+.contact-item--selected {
+  background: var(--color-primary);
+}
+
+.contact-item__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  border-radius: var(--radius-pill);
+
+  color: var(--color-white);
+
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+}
+
+.contact-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.contact-item__name {
+  color: var(--color-black);
+
+  font-size: var(--font-size-t6);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+
+  white-space: nowrap;
+}
+
+.contact-item--selected .contact-item__name {
+  color: var(--color-white);
+}
+
+.contact-item__email {
+  color: var(--color-contact-email);
+
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

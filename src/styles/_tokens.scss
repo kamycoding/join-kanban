@@ -20,6 +20,7 @@
   --color-bg-app: #f6f7f8;
   --color-bg-hover: #eeeeee;
   --color-bg-selected: #edf2fa;
+  --color-hover-tint: rgb(12 46 98 / 0.12); // fill behind round icon buttons on hover
   --color-line: #d1d1d1; // input border
   --color-line-hover: #e7e7e7;
   --color-icon: #a8a8a8;
@@ -76,6 +77,7 @@
   --radius-md: 8px;
   --radius-lg: 10px; // default
   --radius-xl: 16px;
+  --radius-menu: 20px; // dropdown menus
   --radius-2xl: 24px; // board cards
   --radius-3xl: 30px; // overlays
   --radius-pill: 45px; // avatars

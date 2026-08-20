@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+}
+
+.page-header__title {
+  margin: 0;
+
+  color: var(--color-black);
+
+  font-size: var(--font-size-t1);
+  font-weight: var(--font-weight-bold);
+}
+
+.page-header__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: transparent;
+  color: var(--color-primary);
+
+  cursor: pointer;
+
+  transition: background-color var(--transition);
+}
+
+.page-header__back:hover {
+  background: var(--color-hover-tint);
+}

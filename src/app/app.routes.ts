@@ -26,4 +26,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/contacts/contacts').then((module) => module.Contacts),
   },
+  {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help').then((module) => module.Help),
+  },
+  {
+    path: 'legal-notice',
+    loadComponent: () =>
+      import('./pages/legal-notice/legal-notice').then((module) => module.LegalNotice),
+  },
+  {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./pages/privacy-policy/privacy-policy').then((module) => module.PrivacyPolicy),
+  },
 ];

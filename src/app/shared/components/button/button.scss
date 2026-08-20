@@ -28,6 +28,15 @@
   flex-shrink: 0;
 }
 
+.button--full-width {
+  width: 100%;
+}
+
+.button--large .button__icon {
+  width: 32px;
+  height: 32px;
+}
+
 /* -------------------------------------------------------
    Sizes
    ------------------------------------------------------- */
@@ -52,6 +61,25 @@
   font-weight: var(--font-weight-bold);
 }
 
+.button--action {
+  padding: var(--space-4);
+
+  border-radius: var(--radius-lg);
+
+  font-size: var(--font-size-t6);
+  font-weight: var(--font-weight-regular);
+}
+
+.button--primary.button--action {
+  font-size: var(--font-size-action);
+  font-weight: var(--font-weight-bold);
+}
+
+.button--action:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* -------------------------------------------------------
    Icon spacing
    ------------------------------------------------------- */
@@ -62,6 +90,10 @@
 
 .button--with-icon.button--large {
   gap: var(--space-4);
+}
+
+.button--with-icon.button--action {
+  gap: var(--space-2);
 }
 
 /* -------------------------------------------------------
@@ -95,6 +127,13 @@
   }
 }
 
+.button--primary.button--action {
+  &:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+  }
+}
+
 /* -------------------------------------------------------
    Outline
    ------------------------------------------------------- */
@@ -121,5 +160,13 @@
     color: var(--color-primary-active);
 
     box-shadow: var(--shadow-button-state);
+  }
+}
+
+.button--outline.button--action {
+  &:hover:not(:disabled) {
+    border-color: var(--color-accent);
+
+    color: var(--color-accent);
   }
 }

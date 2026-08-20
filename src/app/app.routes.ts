@@ -1,13 +1,43 @@
 import { Routes } from '@angular/router';
-import { Summary } from './pages/summary/summary';
-import { AddTask } from './pages/add-task/add-task';
-import { Board } from './pages/board/board';
-import { Contacts } from './pages/contacts/contacts';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'summary', pathMatch: 'full' },
-  { path: 'summary', component: Summary },
-  { path: 'add-task', component: AddTask },
-  { path: 'board', component: Board },
-  { path: 'contacts', component: Contacts },
+  {
+    path: '',
+    redirectTo: 'summary',
+    pathMatch: 'full',
+  },
+  {
+    path: 'summary',
+    loadComponent: () =>
+      import('./pages/summary/summary').then((module) => module.Summary),
+  },
+  {
+    path: 'add-task',
+    loadComponent: () =>
+      import('./pages/add-task/add-task').then((module) => module.AddTask),
+  },
+  {
+    path: 'board',
+    loadComponent: () =>
+      import('./pages/board/board').then((module) => module.Board),
+  },
+  {
+    path: 'contacts',
+    loadComponent: () =>
+      import('./features/contacts/contacts').then((module) => module.Contacts),
+  },
+  {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help').then((module) => module.Help),
+  },
+  {
+    path: 'legal-notice',
+    loadComponent: () =>
+      import('./pages/legal-notice/legal-notice').then((module) => module.LegalNotice),
+  },
+  {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./pages/privacy-policy/privacy-policy').then((module) => module.PrivacyPolicy),
+  },
 ];

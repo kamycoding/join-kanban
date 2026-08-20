@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'outline';
-export type ButtonSize = 'default' | 'large';
+export type ButtonSize = 'default' | 'large' | 'action';
 export type ButtonType = 'button' | 'submit' | 'reset';
 
 @Component({
@@ -16,4 +16,5 @@ export class Button {
   readonly type = input<ButtonType>('button');
   readonly disabled = input(false);
   readonly iconSrc = input<string | null>(null);
+  readonly fullWidth = input(false);
 }

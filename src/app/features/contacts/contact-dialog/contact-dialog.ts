@@ -88,6 +88,10 @@ export class ContactDialog implements OnInit {
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
 
+    if (this.saving()) {
+      return;
+    }
+
     await submit(this.contactForm, async (field) => {
       const value = field().value();
 
@@ -97,6 +101,16 @@ export class ContactDialog implements OnInit {
         phone: value.phone.trim(),
       });
     });
+  }
+
+  onDelete(contact: Contact): void {
+    if (!this.saving()) {
+      this.deleteContact.emit(contact);
+    }
+  }
+
+  getInitials(contact: Contact): string {
+    return `${contact.first_name.charAt(0)}${contact.last_name.charAt(0)}`.toUpperCase();
   }
 
   private prefillForm(contact: Contact): void {

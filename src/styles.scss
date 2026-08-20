@@ -2,6 +2,23 @@
 @use './styles/tokens';
 @use './styles/static-page';
 
+/*
+ * Inter is self-hosted (SIL Open Font License, see public/fonts/LICENSE.txt).
+ * One variable file covers every weight from 100 to 900, so no separate
+ * files for regular, medium and bold are needed.
+ */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   margin: 0;
+
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height);
 }

@@ -26,6 +26,21 @@
   line-height: var(--line-height);
 }
 
+.contact-dialog {
+  transform: translateX(100vw);
+  transition: transform 500ms ease-in-out;
+}
+
+.contact-dialog--entered {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-dialog {
+    transition: none;
+  }
+}
+
 .contact-dialog__panel {
   display: grid;
   align-content: center;

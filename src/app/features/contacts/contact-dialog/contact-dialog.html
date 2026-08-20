@@ -3,51 +3,60 @@
 <div
   class="contact-dialog-overlay"
   [class.contact-dialog-overlay--add]="dialog.mode === 'add'"
+  [class.contact-dialog-overlay--edit]="dialog.mode === 'edit'"
 >
   <section
     class="contact-dialog"
     [class.contact-dialog--add]="dialog.mode === 'add'"
+    [class.contact-dialog--edit]="dialog.mode === 'edit'"
+    [class.contact-dialog--entered]="dialogEntered()"
     role="dialog"
     aria-modal="true"
     aria-labelledby="contact-dialog-title"
+    (transitionend)="onDialogTransitionEnd($event)"
   >
-    @if (dialog.mode === 'add') {
-      <button
-        class="contact-dialog__close"
-        type="button"
-        aria-label="Close contact dialog"
-        (click)="close.emit()"
-      >
-        <img src="/img/icon-close.svg" alt="" aria-hidden="true" />
-        <img
-          class="contact-dialog__close-hover"
-          src="/img/icon-close-hover.svg"
-          alt=""
-          aria-hidden="true"
-        />
-      </button>
-    } @else {
-      <button type="button" aria-label="Close contact dialog" (click)="close.emit()">Close</button>
-    }
+    <button
+      class="contact-dialog__close"
+      type="button"
+      aria-label="Close contact dialog"
+      (click)="requestClose()"
+    >
+      <img src="/img/icon-close.svg" alt="" aria-hidden="true" />
+      <img
+        class="contact-dialog__close-hover"
+        src="/img/icon-close-hover.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
 
     <div class="contact-dialog__panel">
-      @if (dialog.mode === 'add') {
-        <img class="contact-dialog__logo" src="/img/join-logo-small.svg" alt="" aria-hidden="true" />
+      <img class="contact-dialog__logo" src="/img/join-logo-small.svg" alt="" aria-hidden="true" />
 
-        <div class="contact-dialog__heading">
-          <h2 id="contact-dialog-title">Add contact</h2>
+      <div class="contact-dialog__heading">
+        <h2 id="contact-dialog-title">
+          {{ dialog.mode === 'add' ? 'Add contact' : 'Edit contact' }}
+        </h2>
+
+        @if (dialog.mode === 'add') {
           <p>Tasks are better with a team!</p>
-        </div>
+        }
+      </div>
 
-        <span class="contact-dialog__accent" aria-hidden="true"></span>
-      } @else {
-        <h2 id="contact-dialog-title">Edit contact</h2>
-      }
+      <span class="contact-dialog__accent" aria-hidden="true"></span>
     </div>
 
     @if (dialog.mode === 'add') {
       <div class="contact-dialog__avatar" aria-hidden="true">
         <img src="/img/icon-person.svg" alt="" />
+      </div>
+    } @else {
+      <div
+        class="contact-dialog__avatar contact-dialog__avatar--contact"
+        [style.background-color]="dialog.contact.color"
+        aria-hidden="true"
+      >
+        {{ getInitials(dialog.contact) }}
       </div>
     }
 
@@ -65,9 +74,7 @@
               [formField]="contactForm.name"
             />
 
-            @if (dialog.mode === 'add') {
-              <img src="/img/icon-person.svg" alt="" aria-hidden="true" />
-            }
+            <img src="/img/icon-person.svg" alt="" aria-hidden="true" />
           </div>
 
           @if (contactForm.name().touched() && contactForm.name().invalid()) {
@@ -89,9 +96,7 @@
               [formField]="contactForm.email"
             />
 
-            @if (dialog.mode === 'add') {
-              <img src="/img/icon-mail.svg" alt="" aria-hidden="true" />
-            }
+            <img src="/img/icon-mail.svg" alt="" aria-hidden="true" />
           </div>
 
           @if (contactForm.email().touched() && contactForm.email().invalid()) {
@@ -114,9 +119,7 @@
               [formField]="contactForm.phone"
             />
 
-            @if (dialog.mode === 'add') {
-              <span class="contact-dialog__phone-icon" aria-hidden="true"></span>
-            }
+            <span class="contact-dialog__phone-icon" aria-hidden="true"></span>
           </div>
 
           @if (contactForm.phone().touched() && contactForm.phone().invalid()) {
@@ -129,18 +132,30 @@
 
       <div class="contact-dialog__actions">
         @if (dialog.mode === 'edit') {
-          <button type="button" [disabled]="saving()" (click)="deleteContact.emit(dialog.contact)">
+          <app-button
+            variant="outline"
+            size="action"
+            [disabled]="saving()"
+            (click)="onDelete(dialog.contact)"
+          >
             Delete
-          </button>
+          </app-button>
 
-          <button type="submit" [disabled]="contactForm().invalid() || saving()">Save</button>
+          <app-button
+            size="action"
+            type="submit"
+            iconSrc="/img/icon-check-white.svg"
+            [disabled]="contactForm().invalid() || saving()"
+          >
+            Save
+          </app-button>
         } @else {
           <app-button
             variant="outline"
             size="action"
             iconSrc="/img/icon-cancel.svg"
             [disabled]="saving()"
-            (click)="close.emit()"
+            (click)="requestClose()"
           >
             Cancel
           </app-button>

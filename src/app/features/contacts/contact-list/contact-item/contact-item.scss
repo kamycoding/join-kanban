@@ -29,7 +29,7 @@
 }
 
 .contact-item:hover:not(.contact-item--selected) {
-  background: var(--color-bg-hover);
+  background: linear-gradient(to top, var(--color-bg-hover), var(--color-white));
 }
 
 .contact-item--selected {

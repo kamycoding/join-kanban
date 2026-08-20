@@ -5,9 +5,9 @@ import { Board } from './pages/board/board';
 import { Contacts } from './pages/contacts/contacts';
 
 export const routes: Routes = [
-    { path: '',         redirectTo: 'summary', pathMatch: 'full' },
-    { path: 'summary',  component: Summary },
-    { path: 'add-task', component: AddTask },
-    { path: 'board',    component: Board },
-    { path: 'contacts', component: Contacts }
+  { path: '', redirectTo: 'summary', pathMatch: 'full' },
+  { path: 'summary', component: Summary },
+  { path: 'add-task', component: AddTask },
+  { path: 'board', component: Board },
+  { path: 'contacts', component: Contacts },
 ];

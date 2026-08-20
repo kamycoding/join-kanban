@@ -8,10 +8,27 @@
   flex-direction: column;
   gap: 21px;
 
+  transform: translateX(100vw);
+
   color: var(--color-black);
 
   font-family: var(--font-family);
   line-height: var(--line-height);
+}
+
+.contact-detail--entered {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-detail {
+    transform: translateX(0);
+  }
+
+  .contact-detail--entered {
+    transition: none;
+  }
 }
 
 .contact-detail__back {

@@ -1,0 +1,57 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.contacts-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+
+  background: var(--color-bg-app);
+}
+
+.contacts-content {
+  flex: 1;
+  min-width: 0;
+  padding: 109px 0 0 55px;
+}
+
+.contacts-heading {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.contacts-heading h1,
+.contacts-heading p {
+  margin: 0;
+
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+}
+
+.contacts-heading h1 {
+  color: var(--color-black);
+
+  font-size: var(--font-size-t1);
+  font-weight: var(--font-weight-bold);
+}
+
+.contacts-heading p {
+  color: var(--color-primary);
+
+  font-size: var(--font-size-t5);
+  font-weight: var(--font-weight-regular);
+}
+
+.contacts-heading__divider {
+  width: 3px;
+  height: 59px;
+  flex-shrink: 0;
+
+  border-radius: var(--radius-lg);
+
+  background: var(--color-accent);
+}

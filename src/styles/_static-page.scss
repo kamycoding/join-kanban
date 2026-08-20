@@ -1,0 +1,95 @@
+// ---------------------------------------------------------------------------
+// Shared prose layout for the static content pages (Help, Legal Notice,
+// Privacy Policy). Global on purpose: all three render the same kind of
+// long-form text, so the rules live here instead of being copied per page.
+// ---------------------------------------------------------------------------
+
+.static-page {
+  box-sizing: border-box;
+  max-width: 1000px;
+  padding: 100px 96px var(--space-10);
+
+  color: var(--color-black);
+
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+.static-page__body {
+  margin-top: var(--space-7);
+}
+
+.static-page h2 {
+  margin: var(--space-8) 0 var(--space-4);
+
+  font-size: var(--font-size-t5);
+  font-weight: var(--font-weight-bold);
+}
+
+.static-page h3 {
+  margin: var(--space-6) 0 var(--space-2);
+
+  font-size: var(--font-size-t6);
+  font-weight: var(--font-weight-bold);
+}
+
+.static-page p {
+  margin: 0 0 var(--space-4);
+}
+
+.static-page ul {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+
+.static-page ul li {
+  margin-bottom: var(--space-2);
+}
+
+.static-page a {
+  color: var(--color-link);
+}
+
+.static-page__brand {
+  color: var(--color-accent);
+}
+
+// Numbered steps: the counter is rendered as a large bold number in the gutter.
+.static-page__steps {
+  list-style: none;
+  counter-reset: step;
+
+  margin: var(--space-6) 0 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.static-page__steps > li {
+  counter-increment: step;
+
+  position: relative;
+
+  padding-left: var(--space-9);
+}
+
+.static-page__steps > li::before {
+  content: counter(step) '.';
+
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  font-size: var(--font-size-t6);
+  font-weight: var(--font-weight-bold);
+}
+
+.static-page__step-title {
+  margin: 0 0 var(--space-1);
+
+  font-size: var(--font-size-t6);
+  font-weight: var(--font-weight-bold);
+}

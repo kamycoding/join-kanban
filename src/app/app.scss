@@ -1,10 +1,33 @@
 :host {
-  display: flex;
-  flex-direction: row;
-  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
 }
 
-router-outlet + * {
+app-sidebar,
+.app-shell__main,
+.app-shell__content {
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-shell__main {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   flex: 1;
-  overflow-y: auto;
+
+  overflow: auto;
+}
+
+router-outlet {
+  display: none;
 }

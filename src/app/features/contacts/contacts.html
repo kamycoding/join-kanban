@@ -24,10 +24,12 @@
       />
     }
 
-    @if (successMessage(); as message) {
-      <div class="contacts-toast-viewport">
-        <app-toast [message]="message" (dismissed)="dismissToast()" />
-      </div>
+    @if (successToast(); as toast) {
+      @for (notification of [toast]; track notification.id) {
+        <div class="contacts-toast-viewport">
+          <app-toast [message]="notification.message" (dismissed)="dismissToast(notification.id)" />
+        </div>
+      }
     }
   </main>
 </div>

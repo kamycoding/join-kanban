@@ -23,6 +23,12 @@
         (deleteContact)="deleteContact($event)"
       />
     }
+
+    @if (successMessage(); as message) {
+      <div class="contacts-toast-viewport">
+        <app-toast [message]="message" (dismissed)="dismissToast()" />
+      </div>
+    }
   </main>
 </div>
 

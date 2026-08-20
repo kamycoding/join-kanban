@@ -12,6 +12,11 @@ import { ContactList } from './contact-list/contact-list';
 
 const CONTACT_CREATED_MESSAGE = 'Contact successfully created';
 
+type ContactToast = {
+  id: number;
+  message: string;
+};
+
 @Component({
   selector: 'app-contacts',
   imports: [ContactList, ContactDetail, ContactDialog, Toast],
@@ -25,7 +30,9 @@ export class Contacts implements OnInit {
   readonly selectedContact = signal<Contact | null>(null);
   readonly dialogState = signal<ContactDialogState | null>(null);
   readonly savingContact = signal(false);
-  readonly successMessage = signal<string | null>(null);
+  readonly successToast = signal<ContactToast | null>(null);
+
+  private nextToastId = 0;
 
   async ngOnInit(): Promise<void> {
     await this.contactService.getContacts();
@@ -54,8 +61,8 @@ export class Contacts implements OnInit {
     this.dialogState.set(null);
   }
 
-  dismissToast(): void {
-    this.successMessage.set(null);
+  dismissToast(id: number): void {
+    this.successToast.update((toast) => (toast?.id === id ? null : toast));
   }
 
   async saveContact(value: ContactFormValue): Promise<void> {
@@ -102,9 +109,16 @@ export class Contacts implements OnInit {
     if (dialog.mode === 'edit') {
       this.selectedContact.set(contact);
     } else {
-      this.successMessage.set(CONTACT_CREATED_MESSAGE);
+      this.showCreationSuccessToast();
     }
 
     this.closeDialog();
+  }
+
+  private showCreationSuccessToast(): void {
+    this.successToast.set({
+      id: ++this.nextToastId,
+      message: CONTACT_CREATED_MESSAGE,
+    });
   }
 }

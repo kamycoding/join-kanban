@@ -63,7 +63,7 @@ describe('Contacts', () => {
     await component.saveContact(validFormValue());
     fixture.detectChanges();
 
-    expect(component.successMessage()).toBe('Contact successfully created');
+    expect(component.successToast()?.message).toBe('Contact successfully created');
     expect(fixture.nativeElement.querySelector('app-toast')?.textContent).toContain(
       'Contact successfully created',
     );
@@ -79,7 +79,7 @@ describe('Contacts', () => {
     await component.saveContact(validFormValue());
     fixture.detectChanges();
 
-    expect(component.successMessage()).toBeNull();
+    expect(component.successToast()).toBeNull();
     expect(fixture.nativeElement.querySelector('app-toast')).toBeNull();
   });
 
@@ -89,7 +89,37 @@ describe('Contacts', () => {
 
     await component.saveContact(validFormValue());
 
-    expect(component.successMessage()).toBeNull();
+    expect(component.successToast()).toBeNull();
+  });
+
+  it('creates a fresh toast identity for each successful creation', async () => {
+    contactService.createContact.mockResolvedValue(createdContact);
+    component.openAddDialog();
+    await component.saveContact(validFormValue());
+    fixture.detectChanges();
+    const firstToast = component.successToast();
+    const firstElement = fixture.nativeElement.querySelector('app-toast');
+
+    component.openAddDialog();
+    await component.saveContact(validFormValue());
+    fixture.detectChanges();
+
+    expect(component.successToast()?.id).not.toBe(firstToast?.id);
+    expect(fixture.nativeElement.querySelector('app-toast')).not.toBe(firstElement);
+  });
+
+  it('does not let a stale dismissal clear the current toast', async () => {
+    contactService.createContact.mockResolvedValue(createdContact);
+    component.openAddDialog();
+    await component.saveContact(validFormValue());
+    const firstToastId = component.successToast()!.id;
+
+    component.openAddDialog();
+    await component.saveContact(validFormValue());
+    const currentToast = component.successToast();
+    component.dismissToast(firstToastId);
+
+    expect(component.successToast()).toBe(currentToast);
   });
 
   function validFormValue() {

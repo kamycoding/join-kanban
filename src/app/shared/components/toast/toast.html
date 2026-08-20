@@ -1,0 +1,10 @@
+<div
+  class="toast"
+  [class.toast--entered]="entered()"
+  [class.toast--exiting]="exiting()"
+  role="status"
+  aria-live="polite"
+  (transitionend)="onTransitionEnd($event)"
+>
+  {{ message() }}
+</div>

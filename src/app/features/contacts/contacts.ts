@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Contact } from '../../models/contact';
 import { ContactService } from '../../services/contact';
+import { Toast } from '../../shared/components/toast/toast';
 import {
   ContactDialog,
   ContactDialogState,
@@ -9,9 +10,11 @@ import {
 import { ContactDetail } from './contact-detail/contact-detail';
 import { ContactList } from './contact-list/contact-list';
 
+const CONTACT_CREATED_MESSAGE = 'Contact successfully created';
+
 @Component({
   selector: 'app-contacts',
-  imports: [ContactList, ContactDetail, ContactDialog],
+  imports: [ContactList, ContactDetail, ContactDialog, Toast],
   templateUrl: './contacts.html',
   styleUrl: './contacts.scss',
 })
@@ -22,6 +25,7 @@ export class Contacts implements OnInit {
   readonly selectedContact = signal<Contact | null>(null);
   readonly dialogState = signal<ContactDialogState | null>(null);
   readonly savingContact = signal(false);
+  readonly successMessage = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
     await this.contactService.getContacts();
@@ -48,6 +52,10 @@ export class Contacts implements OnInit {
 
   closeDialog(): void {
     this.dialogState.set(null);
+  }
+
+  dismissToast(): void {
+    this.successMessage.set(null);
   }
 
   async saveContact(value: ContactFormValue): Promise<void> {
@@ -93,6 +101,8 @@ export class Contacts implements OnInit {
   private handleSuccessfulSave(dialog: ContactDialogState, contact: Contact): void {
     if (dialog.mode === 'edit') {
       this.selectedContact.set(contact);
+    } else {
+      this.successMessage.set(CONTACT_CREATED_MESSAGE);
     }
 
     this.closeDialog();

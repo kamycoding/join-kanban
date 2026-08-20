@@ -37,9 +37,9 @@ nav {
   text-decoration: none;
   transition: var(--transition);
 
+  // Figma: on hover only the surface changes, text and icon stay #CDCDCD.
   &:hover {
     background-color: var(--color-menu-hover);
-    color: var(--color-white);
   }
 
   &:focus-visible {

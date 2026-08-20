@@ -13,9 +13,30 @@
 }
 
 .contacts-content {
+  --contacts-content-inline-start: 55px;
+
+  position: relative;
+
   flex: 1;
   min-width: 0;
-  padding: 109px 0 0 55px;
+  padding: 109px 0 0 var(--contacts-content-inline-start);
+}
+
+.contacts-toast-viewport {
+  --toast-width: 326px;
+  --toast-height: 74px;
+  --toast-track-distance: calc(100cqi - var(--toast-width) - var(--space-1));
+
+  position: absolute;
+  inset-inline-start: var(--contacts-content-inline-start);
+  inset-inline-end: 0;
+  bottom: var(--space-10);
+
+  height: var(--toast-height);
+
+  container-type: inline-size;
+
+  pointer-events: none;
 }
 
 .contacts-heading {

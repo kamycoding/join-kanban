@@ -1,4 +1,4 @@
-.contact-dialog-overlay--add {
+.contact-dialog-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -9,7 +9,7 @@
   background: rgb(0 0 0 / 0.2);
 }
 
-.contact-dialog--add {
+.contact-dialog {
   position: relative;
 
   width: 1212px;
@@ -26,7 +26,22 @@
   line-height: var(--line-height);
 }
 
-.contact-dialog--add .contact-dialog__panel {
+.contact-dialog {
+  transform: translateX(100vw);
+  transition: transform 500ms ease-in-out;
+}
+
+.contact-dialog--entered {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-dialog {
+    transition: none;
+  }
+}
+
+.contact-dialog__panel {
   display: grid;
   align-content: center;
 
@@ -40,34 +55,34 @@
   color: var(--color-white);
 }
 
-.contact-dialog--add .contact-dialog__logo {
+.contact-dialog__logo {
   width: 50px;
   height: 60px;
   margin-bottom: 12px;
 }
 
-.contact-dialog--add .contact-dialog__heading {
+.contact-dialog__heading {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.contact-dialog--add .contact-dialog__heading h2,
-.contact-dialog--add .contact-dialog__heading p {
+.contact-dialog__heading h2,
+.contact-dialog__heading p {
   margin: 0;
 }
 
-.contact-dialog--add .contact-dialog__heading h2 {
+.contact-dialog__heading h2 {
   font-size: var(--font-size-t1);
   font-weight: var(--font-weight-bold);
 }
 
-.contact-dialog--add .contact-dialog__heading p {
+.contact-dialog__heading p {
   font-size: var(--font-size-t5);
   font-weight: var(--font-weight-regular);
 }
 
-.contact-dialog--add .contact-dialog__accent {
+.contact-dialog__accent {
   width: 90px;
   height: 3px;
   margin-top: var(--space-4);
@@ -77,7 +92,7 @@
   background: var(--color-accent);
 }
 
-.contact-dialog--add .contact-dialog__avatar {
+.contact-dialog__avatar {
   position: absolute;
   top: 204px;
   left: 550px;
@@ -97,14 +112,14 @@
   box-shadow: var(--shadow-overlay);
 }
 
-.contact-dialog--add .contact-dialog__avatar img {
+.contact-dialog__avatar img {
   width: 64px;
   height: 64px;
 
   filter: brightness(0) invert(1);
 }
 
-.contact-dialog--add .contact-dialog__close {
+.contact-dialog__close {
   position: absolute;
   top: 48px;
   right: 48px;
@@ -121,7 +136,7 @@
   cursor: pointer;
 }
 
-.contact-dialog--add .contact-dialog__close img {
+.contact-dialog__close img {
   position: absolute;
   inset: var(--space-1);
 
@@ -131,15 +146,15 @@
   transition: opacity var(--transition);
 }
 
-.contact-dialog--add .contact-dialog__close-hover {
+.contact-dialog__close-hover {
   opacity: 0;
 }
 
-.contact-dialog--add .contact-dialog__close:hover .contact-dialog__close-hover {
+.contact-dialog__close:hover .contact-dialog__close-hover {
   opacity: 1;
 }
 
-.contact-dialog--add .contact-dialog__form {
+.contact-dialog__form {
   position: absolute;
   top: 137px;
   left: 742px;
@@ -147,17 +162,17 @@
   width: 422px;
 }
 
-.contact-dialog--add .contact-dialog__fields {
+.contact-dialog__fields {
   display: flex;
   flex-direction: column;
   gap: var(--space-7);
 }
 
-.contact-dialog--add .contact-dialog__field {
+.contact-dialog__field {
   position: relative;
 }
 
-.contact-dialog--add .contact-dialog__field label {
+.contact-dialog__field label {
   position: absolute;
 
   width: 1px;
@@ -171,11 +186,11 @@
   border: 0;
 }
 
-.contact-dialog--add .contact-dialog__input-wrapper {
+.contact-dialog__input-wrapper {
   position: relative;
 }
 
-.contact-dialog--add .contact-dialog__input-wrapper input {
+.contact-dialog__input-wrapper input {
   box-sizing: border-box;
   width: 100%;
   min-height: 50px;
@@ -196,18 +211,18 @@
   transition: border-color var(--transition);
 }
 
-.contact-dialog--add .contact-dialog__input-wrapper input::placeholder {
+.contact-dialog__input-wrapper input::placeholder {
   color: var(--color-icon);
   opacity: 1;
 }
 
-.contact-dialog--add .contact-dialog__input-wrapper input:focus {
+.contact-dialog__input-wrapper input:focus {
   border-color: var(--color-accent);
   outline: none;
 }
 
-.contact-dialog--add .contact-dialog__input-wrapper img,
-.contact-dialog--add .contact-dialog__phone-icon {
+.contact-dialog__input-wrapper img,
+.contact-dialog__phone-icon {
   position: absolute;
   top: 50%;
   right: 21px;
@@ -220,12 +235,12 @@
   pointer-events: none;
 }
 
-.contact-dialog--add .contact-dialog__phone-icon {
+.contact-dialog__phone-icon {
   background-color: var(--color-icon);
   mask: url('/img/icon-phone.svg') center / contain no-repeat;
 }
 
-.contact-dialog--add .contact-dialog__error {
+.contact-dialog__error {
   position: absolute;
   top: 100%;
   left: 0;
@@ -239,10 +254,22 @@
   line-height: var(--line-height);
 }
 
-.contact-dialog--add .contact-dialog__actions {
+.contact-dialog__actions {
   display: flex;
   align-items: center;
   gap: var(--space-6);
 
   margin-top: 48px;
+}
+
+.contact-dialog--edit .contact-dialog__panel {
+  width: 453px;
+}
+
+.contact-dialog__avatar--contact {
+  color: var(--color-white);
+
+  font-size: var(--font-size-t2);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
 }

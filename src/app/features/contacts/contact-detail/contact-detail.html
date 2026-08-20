@@ -1,4 +1,4 @@
-<section class="contact-detail">
+<section class="contact-detail" [class.contact-detail--entered]="detailEntered()">
   <button class="contact-detail__back" type="button" (click)="back.emit()">Back</button>
 
   <div class="contact-detail__identity">
@@ -10,11 +10,7 @@
       <h2>{{ fullName }}</h2>
 
       <div class="contact-detail__actions">
-        <button
-          class="contact-detail__action"
-          type="button"
-          (click)="editContact.emit(contact())"
-        >
+        <button class="contact-detail__action" type="button" (click)="editContact.emit(contact())">
           <span class="contact-detail__action-icon" aria-hidden="true">
             <img src="/img/icon-edit.svg" alt="" />
             <img class="contact-detail__action-icon-hover" src="/img/icon-edit-hover.svg" alt="" />

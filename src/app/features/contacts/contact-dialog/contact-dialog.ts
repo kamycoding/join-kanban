@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output, signal } from '@angular/core';
+import { Component, OnInit, afterNextRender, input, output, signal } from '@angular/core';
 import { email, form, FormField, required, submit, validate } from '@angular/forms/signals';
 import { Contact } from '../../../models/contact';
 import { Button } from '../../../shared/components/button/button';
@@ -20,6 +20,7 @@ export type ContactDialogState = { mode: 'add' } | { mode: 'edit'; contact: Cont
 export class ContactDialog implements OnInit {
   readonly state = input.required<ContactDialogState>();
   readonly saving = input(false);
+  readonly dialogEntered = signal(false);
 
   readonly close = output<void>();
   readonly submitted = output<ContactFormValue>();
@@ -77,6 +78,18 @@ export class ContactDialog implements OnInit {
     });
   });
 
+  private isClosing = false;
+
+  constructor() {
+    afterNextRender(() => {
+      requestAnimationFrame(() => {
+        if (!this.isClosing) {
+          this.dialogEntered.set(true);
+        }
+      });
+    });
+  }
+
   ngOnInit(): void {
     const state = this.state();
 
@@ -109,8 +122,33 @@ export class ContactDialog implements OnInit {
     }
   }
 
+  requestClose(): void {
+    if (!this.dialogEntered() || this.prefersReducedMotion()) {
+      this.close.emit();
+      return;
+    }
+
+    if (!this.isClosing) {
+      this.isClosing = true;
+      this.dialogEntered.set(false);
+    }
+  }
+
+  onDialogTransitionEnd(event: TransitionEvent): void {
+    const isDialogTransform =
+      event.target === event.currentTarget && event.propertyName === 'transform';
+
+    if (this.isClosing && isDialogTransform) {
+      this.close.emit();
+    }
+  }
+
   getInitials(contact: Contact): string {
     return `${contact.first_name.charAt(0)}${contact.last_name.charAt(0)}`.toUpperCase();
+  }
+
+  private prefersReducedMotion(): boolean {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   }
 
   private prefillForm(contact: Contact): void {

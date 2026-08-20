@@ -9,7 +9,4 @@ export interface Contact {
   updated_at: string;
 }
 
-export type NewContact = Omit<
-  Contact,
-  'id' | 'created_at' | 'updated_at'
->;
+export type NewContact = Omit<Contact, 'id' | 'created_at' | 'updated_at'>;

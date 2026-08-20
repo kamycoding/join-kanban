@@ -1,1 +1,23 @@
-<p>sidebar works!</p>
+<nav>
+  <div class="sidebar__logo">
+    <img src="img/join-logo.svg" alt="Join" />
+  </div>
+
+  <div class="sidebar__nav">
+    @for (link of links; track link.path) {
+      <a
+        class="sidebar__link"
+        [routerLink]="link.path"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+      >
+        <span class="sidebar__icon" [style.--icon]="'url(img/' + link.icon + '.svg)'"></span>
+        {{ link.label }}
+      </a>
+    }
+  </div>
+
+  <div class="sidebar__legal">
+    <p>legal</p>
+  </div>
+</nav>

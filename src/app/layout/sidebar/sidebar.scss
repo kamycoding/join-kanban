@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as *;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -66,4 +68,65 @@ nav {
 .sidebar__legal {
   margin-top: auto;
   padding-inline: var(--space-8);
+}
+
+// ---------------------------------------------------------------------------
+// Below the tablet breakpoint the sidebar becomes the bottom navigation bar.
+// Figma "Join Version 1", component "Menu 2 mobile a v1" (428 x 80).
+// ---------------------------------------------------------------------------
+@media (max-width: $bp-tablet) {
+  :host {
+    flex-direction: row;
+    width: 100%;
+    height: var(--bottom-nav-height);
+  }
+
+  nav {
+    padding-block: 0;
+  }
+
+  // On mobile the logo sits in the header and the legal links in the profile
+  // menu, so both are dropped from the bar.
+  .sidebar__logo,
+  .sidebar__legal {
+    display: none;
+  }
+
+  .sidebar__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+
+    padding-inline: var(--space-4);
+  }
+
+  .sidebar__link {
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-1);
+
+    // 80 x 76 touch target from the Figma spec; the 25px gaps between the four
+    // items fall out of space-between at the 428px design width. The items may
+    // shrink but never grow, so they still fit the 320px the checklist demands
+    // (4 x 80 + 2 x 16 padding would need 352px).
+    flex: 0 1 80px;
+    height: 76px;
+    padding-inline: 0;
+
+    border-radius: var(--radius-md);
+
+    // The bar uses a lighter grey for inactive items than the desktop sidebar
+    // does (#E7E7E7 instead of #CDCDCD).
+    color: var(--color-line-hover);
+
+    &.active {
+      border-radius: var(--radius-xl);
+    }
+  }
+
+  .sidebar__icon {
+    width: 24px;
+    height: 24px;
+  }
 }

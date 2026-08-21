@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as *;
+
 :host {
   display: block;
 
@@ -19,6 +21,13 @@
 
   font-family: var(--font-family);
   line-height: var(--line-height);
+}
+
+// Both only appear below the tablet breakpoint: on desktop the logo sits in the
+// sidebar and Help is the icon to the left of the avatar.
+.header__logo,
+.header__menu-item--mobile {
+  display: none;
 }
 
 .header__heading {
@@ -146,4 +155,53 @@
 .header__menu-item:hover {
   background: var(--color-menu-hover);
   color: var(--color-white);
+}
+
+// ---------------------------------------------------------------------------
+// Below the tablet breakpoint the header keeps only the logo and the avatar.
+// Figma "Join Version 1", component "Header Mobile" (428 x 80).
+// ---------------------------------------------------------------------------
+@media (max-width: $bp-tablet) {
+  .header {
+    height: var(--header-height-mobile);
+    padding-inline: var(--space-4);
+  }
+
+  .header__logo {
+    display: block;
+
+    // 32 x 39 in the design; the asset carries the ratio, so only the width is
+    // set and the height follows.
+    width: 32px;
+  }
+
+  // The page title has no room next to the logo and is dropped, as is the help
+  // icon — Figma moves Help into the profile menu instead.
+  .header__heading,
+  .header__help {
+    display: none;
+  }
+
+  .header__menu-item--mobile {
+    display: block;
+  }
+
+  .header__menu-item--hidden {
+    display: none;
+  }
+
+  // 40px outer, 4px ring, 32px inner circle. The initials scale with it:
+  // 21px of 56 is 16px of 40.
+  .header__avatar {
+    width: 40px;
+    height: 40px;
+
+    font-size: var(--font-size-body);
+  }
+
+  // The header pads 16px here instead of 40px, so the menu lines up flush with
+  // the avatar and still keeps 16px to the edge of the viewport.
+  .header__menu {
+    right: 0;
+  }
 }

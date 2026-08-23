@@ -1,6 +1,4 @@
 <section class="contact-detail" [class.contact-detail--entered]="detailEntered()">
-  <button class="contact-detail__back" type="button" (click)="back.emit()">Back</button>
-
   <div class="contact-detail__identity">
     <span class="contact-detail__avatar" [style.background-color]="contact().color">
       {{ initials }}

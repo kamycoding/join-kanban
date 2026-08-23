@@ -1,3 +1,5 @@
+@use '../../../../styles/breakpoints' as breakpoints;
+
 :host {
   display: block;
   margin-top: var(--space-7);
@@ -29,10 +31,6 @@
   .contact-detail--entered {
     transition: none;
   }
-}
-
-.contact-detail__back {
-  display: none;
 }
 
 .contact-detail__identity {
@@ -177,4 +175,46 @@
 
 .contact-detail__field .contact-detail__email {
   color: var(--color-contact-email);
+}
+
+@media (max-width: breakpoints.$bp-mobile) {
+  :host {
+    width: 100%;
+    max-width: 330px;
+    margin-top: var(--space-7);
+  }
+
+  .contact-detail__identity {
+    width: 100%;
+
+    justify-content: flex-start;
+    gap: 20px;
+  }
+
+  .contact-detail__avatar {
+    width: 80px;
+    height: 80px;
+    flex-basis: 80px;
+
+    font-size: var(--font-size-t5);
+  }
+
+  .contact-detail__summary {
+    min-width: 0;
+  }
+
+  .contact-detail__summary h2 {
+    overflow-wrap: anywhere;
+
+    font-size: var(--font-size-t5);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .contact-detail__field a {
+    overflow-wrap: anywhere;
+  }
+
+  .contact-detail__actions {
+    display: none;
+  }
 }

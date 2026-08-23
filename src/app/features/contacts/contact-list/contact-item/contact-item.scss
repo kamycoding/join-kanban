@@ -1,3 +1,5 @@
+@use '../../../../../styles/breakpoints' as breakpoints;
+
 :host {
   display: block;
   width: 352px;
@@ -86,4 +88,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width: breakpoints.$bp-mobile) {
+  :host,
+  .contact-item {
+    width: 100%;
+  }
+
+  .contact-item__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

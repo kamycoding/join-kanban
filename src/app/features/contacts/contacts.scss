@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as breakpoints;
+
 :host {
   display: block;
   height: 100%;
@@ -75,4 +77,14 @@
   border-radius: var(--radius-lg);
 
   background: var(--color-accent);
+}
+
+@media (max-width: breakpoints.$bp-mobile) {
+  .contacts-page {
+    display: block;
+  }
+
+  .contacts-content {
+    display: none;
+  }
 }

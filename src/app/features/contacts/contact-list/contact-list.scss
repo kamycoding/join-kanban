@@ -1,3 +1,5 @@
+@use '../../../../styles/breakpoints' as breakpoints;
+
 :host {
   display: block;
   width: 424px;
@@ -24,6 +26,10 @@
 .contact-list__add {
   display: block;
   width: 352px;
+}
+
+.contact-list__add-mobile {
+  display: none;
 }
 
 .contact-list__groups {
@@ -66,4 +72,77 @@
 
   background: var(--color-divider);
   background-clip: content-box;
+}
+
+@media (max-width: breakpoints.$bp-mobile) {
+  :host {
+    position: relative;
+
+    width: 100%;
+
+    overflow: hidden;
+  }
+
+  .contact-list {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    margin-inline: auto;
+  }
+
+  .contact-list__add {
+    display: none;
+  }
+
+  .contact-list__groups {
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 72px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .contact-list__add-mobile {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+    width: 56px;
+    height: 56px;
+    padding: 12px;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: var(--color-primary);
+
+    cursor: pointer;
+  }
+
+  .contact-list__add-mobile:hover {
+    background: var(--color-accent);
+  }
+
+  .contact-list__add-mobile:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .contact-list__add-mobile img {
+    display: block;
+    width: 32px;
+    height: 32px;
+
+    object-fit: contain;
+  }
 }

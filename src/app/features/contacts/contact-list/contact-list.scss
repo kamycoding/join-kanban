@@ -74,6 +74,17 @@
   background-clip: content-box;
 }
 
+@media (max-width: breakpoints.$bp-tablet) {
+  :host,
+  .contact-list {
+    width: 360px;
+  }
+
+  .contact-list__add {
+    width: 312px;
+  }
+}
+
 @media (max-width: breakpoints.$bp-mobile) {
   :host {
     position: relative;

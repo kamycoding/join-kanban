@@ -83,13 +83,25 @@ describe('Contacts', () => {
     expect(fixture.nativeElement.querySelector('app-toast')).toBeNull();
   });
 
-  it('does not show the create success toast after an edit', async () => {
+  it('shows success feedback and refreshes the selected contact after an edit', async () => {
     contactService.updateContact.mockResolvedValue(createdContact);
     component.openEditDialog(createdContact);
 
     await component.saveContact(validFormValue());
 
-    expect(component.successToast()).toBeNull();
+    expect(component.successToast()?.message).toBe('Contact successfully updated');
+    expect(component.selectedContact()).toBe(createdContact);
+    expect(component.dialogState()).toBeNull();
+  });
+
+  it('clears the selected contact after a successful deletion', async () => {
+    contactService.deleteContact.mockResolvedValue(true);
+    component.selectContact(createdContact);
+
+    await component.deleteContact(createdContact);
+
+    expect(component.selectedContact()).toBeNull();
+    expect(contactService.deleteContact).toHaveBeenCalledWith(createdContact.id);
   });
 
   it('creates a fresh toast identity for each successful creation', async () => {

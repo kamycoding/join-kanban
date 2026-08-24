@@ -1,0 +1,190 @@
+@use '../../../../../styles/breakpoints' as breakpoints;
+
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+
+.contact-dialog-hero__panel {
+  display: grid;
+  align-content: center;
+
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 66px var(--space-9);
+
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.contact-dialog-hero__logo {
+  width: 50px;
+  height: 60px;
+  margin-bottom: 12px;
+}
+
+.contact-dialog-hero__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.contact-dialog-hero__heading h2,
+.contact-dialog-hero__heading p {
+  margin: 0;
+}
+
+.contact-dialog-hero__heading h2 {
+  font-size: var(--font-size-t1);
+  font-weight: var(--font-weight-bold);
+}
+
+.contact-dialog-hero__heading p {
+  font-size: var(--font-size-t5);
+  font-weight: var(--font-weight-regular);
+}
+
+.contact-dialog-hero__accent {
+  width: 90px;
+  height: 3px;
+  margin-top: var(--space-4);
+
+  border-radius: var(--radius-lg);
+
+  background: var(--color-accent);
+}
+
+.contact-dialog-hero__avatar {
+  position: absolute;
+  top: 204px;
+  left: var(--dialog-avatar-anchor);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  width: 120px;
+  height: 120px;
+
+  transform: translateX(clamp(var(--space-4), 6vw, 83px));
+
+  border: 3px solid var(--color-white);
+  border-radius: 50%;
+
+  background: var(--color-divider);
+  box-shadow: var(--shadow-overlay);
+}
+
+.contact-dialog-hero__avatar img {
+  width: 64px;
+  height: 64px;
+
+  filter: brightness(0) invert(1);
+}
+
+.contact-dialog-hero__avatar--contact {
+  color: var(--color-white);
+
+  font-size: var(--font-size-t2);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height);
+}
+
+.contact-dialog-hero__close {
+  position: absolute;
+  top: var(--space-9);
+  right: var(--space-9);
+  z-index: 1;
+
+  width: 32px;
+  height: 32px;
+  padding: var(--space-1);
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.contact-dialog-hero__close img {
+  position: absolute;
+  inset: var(--space-1);
+
+  width: 24px;
+  height: 24px;
+
+  transition: opacity var(--transition);
+}
+
+.contact-dialog-hero__close-hover {
+  opacity: 0;
+}
+
+.contact-dialog-hero__close:hover .contact-dialog-hero__close-hover {
+  opacity: 1;
+}
+
+.contact-dialog-hero__close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: breakpoints.$bp-tablet) {
+  :host {
+    height: 240px;
+  }
+
+  .contact-dialog-hero__panel {
+    padding: var(--space-7);
+  }
+
+  .contact-dialog-hero__logo {
+    display: none;
+  }
+
+  .contact-dialog-hero__avatar {
+    top: 180px;
+    left: 50%;
+
+    transform: translateX(-50%);
+  }
+
+  .contact-dialog-hero__close {
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .contact-dialog-hero__close img {
+    filter: brightness(0) invert(1);
+  }
+
+  .contact-dialog-hero__close .contact-dialog-hero__close-hover {
+    filter: none;
+  }
+}
+
+@media (max-width: breakpoints.$bp-mobile) {
+  :host {
+    height: 230px;
+  }
+
+  .contact-dialog-hero__panel {
+    padding-inline: var(--space-4);
+  }
+
+  .contact-dialog-hero__heading h2 {
+    font-size: var(--font-size-t2);
+  }
+
+  .contact-dialog-hero__heading p {
+    font-size: var(--font-size-t6);
+  }
+
+  .contact-dialog-hero__avatar {
+    top: 170px;
+  }
+}

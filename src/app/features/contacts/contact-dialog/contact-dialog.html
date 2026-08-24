@@ -15,50 +15,7 @@
     aria-labelledby="contact-dialog-title"
     (transitionend)="onDialogTransitionEnd($event)"
   >
-    <button
-      class="contact-dialog__close"
-      type="button"
-      aria-label="Close contact dialog"
-      (click)="requestClose()"
-    >
-      <img src="/img/icon-close.svg" alt="" aria-hidden="true" />
-      <img
-        class="contact-dialog__close-hover"
-        src="/img/icon-close-hover.svg"
-        alt=""
-        aria-hidden="true"
-      />
-    </button>
-
-    <div class="contact-dialog__panel">
-      <img class="contact-dialog__logo" src="/img/join-logo-small.svg" alt="" aria-hidden="true" />
-
-      <div class="contact-dialog__heading">
-        <h2 id="contact-dialog-title">
-          {{ dialog.mode === 'add' ? 'Add contact' : 'Edit contact' }}
-        </h2>
-
-        @if (dialog.mode === 'add') {
-          <p>Tasks are better with a team!</p>
-        }
-      </div>
-
-      <span class="contact-dialog__accent" aria-hidden="true"></span>
-    </div>
-
-    @if (dialog.mode === 'add') {
-      <div class="contact-dialog__avatar" aria-hidden="true">
-        <img src="/img/icon-person.svg" alt="" />
-      </div>
-    } @else {
-      <div
-        class="contact-dialog__avatar contact-dialog__avatar--contact"
-        [style.background-color]="dialog.contact.color"
-        aria-hidden="true"
-      >
-        {{ getInitials(dialog.contact) }}
-      </div>
-    }
+    <app-contact-dialog-hero [state]="dialog" (close)="requestClose()" />
 
     <form class="contact-dialog__form" novalidate (submit)="onSubmit($event)">
       <div class="contact-dialog__fields">

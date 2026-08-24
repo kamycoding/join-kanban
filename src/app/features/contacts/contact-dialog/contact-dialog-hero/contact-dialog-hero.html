@@ -1,0 +1,51 @@
+@let dialog = state();
+
+<button
+  class="contact-dialog-hero__close"
+  type="button"
+  aria-label="Close contact dialog"
+  (click)="close.emit()"
+>
+  <img src="/img/icon-close.svg" alt="" aria-hidden="true" />
+  <img
+    class="contact-dialog-hero__close-hover"
+    src="/img/icon-close-hover.svg"
+    alt=""
+    aria-hidden="true"
+  />
+</button>
+
+<div class="contact-dialog-hero__panel">
+  <img
+    class="contact-dialog-hero__logo"
+    src="/img/join-logo-small.svg"
+    alt=""
+    aria-hidden="true"
+  />
+
+  <div class="contact-dialog-hero__heading">
+    <h2 id="contact-dialog-title">
+      {{ dialog.mode === 'add' ? 'Add contact' : 'Edit contact' }}
+    </h2>
+
+    @if (dialog.mode === 'add') {
+      <p>Tasks are better with a team!</p>
+    }
+  </div>
+
+  <span class="contact-dialog-hero__accent" aria-hidden="true"></span>
+</div>
+
+@if (dialog.mode === 'add') {
+  <div class="contact-dialog-hero__avatar" aria-hidden="true">
+    <img src="/img/icon-person.svg" alt="" />
+  </div>
+} @else {
+  <div
+    class="contact-dialog-hero__avatar contact-dialog-hero__avatar--contact"
+    [style.background-color]="dialog.contact.color"
+    aria-hidden="true"
+  >
+    {{ initials }}
+  </div>
+}

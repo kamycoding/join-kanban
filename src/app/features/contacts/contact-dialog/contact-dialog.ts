@@ -2,6 +2,7 @@ import { Component, OnInit, afterNextRender, input, output, signal } from '@angu
 import { email, form, FormField, required, submit, validate } from '@angular/forms/signals';
 import { Contact } from '../../../models/contact';
 import { Button } from '../../../shared/components/button/button';
+import { ContactDialogHero } from './contact-dialog-hero/contact-dialog-hero';
 
 export interface ContactFormValue {
   name: string;
@@ -13,7 +14,7 @@ export type ContactDialogState = { mode: 'add' } | { mode: 'edit'; contact: Cont
 
 @Component({
   selector: 'app-contact-dialog',
-  imports: [Button, FormField],
+  imports: [Button, ContactDialogHero, FormField],
   templateUrl: './contact-dialog.html',
   styleUrl: './contact-dialog.scss',
 })
@@ -105,15 +106,7 @@ export class ContactDialog implements OnInit {
       return;
     }
 
-    await submit(this.contactForm, async (field) => {
-      const value = field().value();
-
-      this.submitted.emit({
-        name: value.name.trim(),
-        email: value.email.trim(),
-        phone: value.phone.trim(),
-      });
-    });
+    await submit(this.contactForm, async (field) => this.emitFormValue(field().value()));
   }
 
   onDelete(contact: Contact): void {
@@ -143,10 +136,6 @@ export class ContactDialog implements OnInit {
     }
   }
 
-  getInitials(contact: Contact): string {
-    return `${contact.first_name.charAt(0)}${contact.last_name.charAt(0)}`.toUpperCase();
-  }
-
   private prefersReducedMotion(): boolean {
     return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   }
@@ -156,6 +145,14 @@ export class ContactDialog implements OnInit {
       name: `${contact.first_name} ${contact.last_name}`.trim(),
       email: contact.email,
       phone: contact.phone,
+    });
+  }
+
+  private emitFormValue(value: ContactFormValue): void {
+    this.submitted.emit({
+      name: value.name.trim(),
+      email: value.email.trim(),
+      phone: value.phone.trim(),
     });
   }
 }

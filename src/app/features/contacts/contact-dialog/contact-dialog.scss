@@ -1,3 +1,5 @@
+@use '../../../../styles/breakpoints' as breakpoints;
+
 .contact-dialog-overlay {
   position: fixed;
   inset: 0;
@@ -5,29 +7,39 @@
 
   display: grid;
   place-items: center;
+  box-sizing: border-box;
+  padding: var(--space-4);
+
+  overflow: hidden;
 
   background: rgb(0 0 0 / 0.2);
 }
 
 .contact-dialog {
+  --dialog-avatar-anchor: clamp(360px, calc(100% - 745px), 467px);
+  --dialog-panel-width: var(--dialog-avatar-anchor);
+
   position: relative;
 
-  width: 1212px;
-  height: 592px;
+  display: grid;
+  grid-template-columns: var(--dialog-panel-width) minmax(0, 1fr);
 
-  overflow: hidden;
+  width: min(1212px, calc(100vw - var(--space-10)));
+  height: min(592px, calc(100dvh - var(--space-7)));
+
+  overflow-y: auto;
+  overflow-x: hidden;
 
   border-radius: var(--radius-3xl);
 
   background: var(--color-white);
   box-shadow: var(--shadow-overlay);
 
+  transform: translateX(100vw);
+
   font-family: var(--font-family);
   line-height: var(--line-height);
-}
 
-.contact-dialog {
-  transform: translateX(100vw);
   transition: transform 500ms ease-in-out;
 }
 
@@ -41,125 +53,14 @@
   }
 }
 
-.contact-dialog__panel {
-  display: grid;
-  align-content: center;
-
-  box-sizing: border-box;
-  width: 467px;
-  height: 100%;
-
-  padding: 66px 48px;
-
-  background: var(--color-primary);
-  color: var(--color-white);
-}
-
-.contact-dialog__logo {
-  width: 50px;
-  height: 60px;
-  margin-bottom: 12px;
-}
-
-.contact-dialog__heading {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.contact-dialog__heading h2,
-.contact-dialog__heading p {
-  margin: 0;
-}
-
-.contact-dialog__heading h2 {
-  font-size: var(--font-size-t1);
-  font-weight: var(--font-weight-bold);
-}
-
-.contact-dialog__heading p {
-  font-size: var(--font-size-t5);
-  font-weight: var(--font-weight-regular);
-}
-
-.contact-dialog__accent {
-  width: 90px;
-  height: 3px;
-  margin-top: var(--space-4);
-
-  border-radius: var(--radius-lg);
-
-  background: var(--color-accent);
-}
-
-.contact-dialog__avatar {
-  position: absolute;
-  top: 204px;
-  left: 550px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  box-sizing: border-box;
-  width: 120px;
-  height: 120px;
-
-  border: 3px solid var(--color-white);
-  border-radius: 50%;
-
-  background: var(--color-divider);
-  box-shadow: var(--shadow-overlay);
-}
-
-.contact-dialog__avatar img {
-  width: 64px;
-  height: 64px;
-
-  filter: brightness(0) invert(1);
-}
-
-.contact-dialog__close {
-  position: absolute;
-  top: 48px;
-  right: 48px;
-  z-index: 1;
-
-  width: 32px;
-  height: 32px;
-  padding: var(--space-1);
-
-  border: 0;
-
-  background: transparent;
-
-  cursor: pointer;
-}
-
-.contact-dialog__close img {
-  position: absolute;
-  inset: var(--space-1);
-
-  width: 24px;
-  height: 24px;
-
-  transition: opacity var(--transition);
-}
-
-.contact-dialog__close-hover {
-  opacity: 0;
-}
-
-.contact-dialog__close:hover .contact-dialog__close-hover {
-  opacity: 1;
-}
-
 .contact-dialog__form {
-  position: absolute;
-  top: 137px;
-  left: 742px;
+  grid-row: 1;
+  grid-column: 2;
+  align-self: center;
+  justify-self: end;
 
-  width: 422px;
+  width: clamp(330px, 35vw, 422px);
+  margin-right: var(--space-9);
 }
 
 .contact-dialog__fields {
@@ -262,14 +163,41 @@
   margin-top: 48px;
 }
 
-.contact-dialog--edit .contact-dialog__panel {
-  width: 453px;
+.contact-dialog--edit {
+  --dialog-panel-width: clamp(360px, calc(100% - 745px), 453px);
 }
 
-.contact-dialog__avatar--contact {
-  color: var(--color-white);
+@media (max-width: breakpoints.$bp-tablet) {
+  .contact-dialog {
+    display: block;
+    width: min(560px, 100%);
+    height: auto;
+    max-height: calc(100dvh - var(--space-7));
+  }
 
-  font-size: var(--font-size-t2);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height);
+  .contact-dialog__form {
+    position: static;
+
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 88px var(--space-7) var(--space-7);
+  }
+
+  .contact-dialog__actions {
+    justify-content: center;
+    flex-wrap: wrap;
+
+    margin-top: var(--space-7);
+  }
+}
+
+@media (max-width: breakpoints.$bp-mobile) {
+  .contact-dialog__form {
+    padding: 88px var(--space-4) var(--space-6);
+  }
+
+  .contact-dialog__actions {
+    gap: var(--space-4);
+  }
 }

@@ -1,3 +1,5 @@
+@use '../../../../../styles/breakpoints' as breakpoints;
+
 :host {
   display: block;
   width: 352px;
@@ -70,6 +72,8 @@
   line-height: var(--line-height);
 
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .contact-item--selected .contact-item__name {
@@ -86,4 +90,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width: breakpoints.$bp-tablet) {
+  :host,
+  .contact-item {
+    width: 100%;
+  }
 }

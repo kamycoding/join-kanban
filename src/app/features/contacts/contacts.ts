@@ -11,6 +11,7 @@ import { ContactDetail } from './contact-detail/contact-detail';
 import { ContactList } from './contact-list/contact-list';
 
 const CONTACT_CREATED_MESSAGE = 'Contact successfully created';
+const CONTACT_UPDATED_MESSAGE = 'Contact successfully updated';
 
 type ContactToast = {
   id: number;
@@ -108,17 +109,18 @@ export class Contacts implements OnInit {
   private handleSuccessfulSave(dialog: ContactDialogState, contact: Contact): void {
     if (dialog.mode === 'edit') {
       this.selectedContact.set(contact);
+      this.showSuccessToast(CONTACT_UPDATED_MESSAGE);
     } else {
-      this.showCreationSuccessToast();
+      this.showSuccessToast(CONTACT_CREATED_MESSAGE);
     }
 
     this.closeDialog();
   }
 
-  private showCreationSuccessToast(): void {
+  private showSuccessToast(message: string): void {
     this.successToast.set({
       id: ++this.nextToastId,
-      message: CONTACT_CREATED_MESSAGE,
+      message,
     });
   }
 }

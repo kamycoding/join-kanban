@@ -1,5 +1,5 @@
 import { Service, signal } from '@angular/core';
-import { createClient, RealtimeChannel } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { Contact, NewContact } from '../models/contact';
 
 @Service()

@@ -66,9 +66,18 @@ describe('Contact validation', () => {
       expect(validateContactEmail(email)).toBeNull();
     });
 
+    it('accepts a 64 character local part and rejects a 65 character local part', () => {
+      expect(validateContactEmail(`${'a'.repeat(64)}@example.com`)).toBeNull();
+      expect(validateContactEmail(`${'a'.repeat(65)}@example.com`)).not.toBeNull();
+    });
+
+    it('accepts a 63 character domain label and rejects a 64 character domain label', () => {
+      expect(validateContactEmail(`test@${'a'.repeat(63)}.com`)).toBeNull();
+      expect(validateContactEmail(`test@${'a'.repeat(64)}.com`)).not.toBeNull();
+    });
+
     it('accepts the maximum length and rejects values above it', () => {
-      const suffix = '@example.com';
-      const maximumEmail = `${'a'.repeat(CONTACT_EMAIL_MAX_LENGTH - suffix.length)}${suffix}`;
+      const maximumEmail = `${'a'.repeat(64)}@${'a'.repeat(63)}.${'a'.repeat(63)}.${'a'.repeat(61)}`;
 
       expect(maximumEmail).toHaveLength(CONTACT_EMAIL_MAX_LENGTH);
       expect(validateContactEmail(maximumEmail)).toBeNull();

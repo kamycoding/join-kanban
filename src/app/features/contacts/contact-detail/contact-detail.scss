@@ -13,9 +13,6 @@
   transform: translateX(100vw);
 
   color: var(--color-black);
-
-  font-family: var(--font-family);
-  line-height: var(--line-height);
 }
 
 .contact-detail--entered {
@@ -95,10 +92,7 @@
   background: transparent;
   color: var(--color-primary);
 
-  font-family: var(--font-family);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height);
+  font: inherit;
 
   cursor: pointer;
 
@@ -160,12 +154,6 @@
   gap: 15px;
 }
 
-.contact-detail__field strong,
-.contact-detail__field a {
-  font-size: var(--font-size-body);
-  line-height: var(--line-height);
-}
-
 .contact-detail__field strong {
   font-weight: var(--font-weight-bold);
 }
@@ -173,12 +161,30 @@
 .contact-detail__field a {
   color: var(--color-black);
 
-  font-weight: var(--font-weight-regular);
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
 .contact-detail__field .contact-detail__email {
   color: var(--color-contact-email);
+}
+
+@container contacts-detail-pane (max-width: 500px) {
+  .contact-detail__identity {
+    gap: clamp(var(--space-5), 8cqi, 54px);
+  }
+
+  .contact-detail__avatar {
+    width: clamp(80px, 22cqi, 120px);
+    height: clamp(80px, 22cqi, 120px);
+    flex-basis: clamp(80px, 22cqi, 120px);
+
+    font-size: clamp(var(--font-size-t5), 8cqi, var(--font-size-t2));
+  }
+
+  .contact-detail__summary h2 {
+    font-size: clamp(var(--font-size-t5), 8cqi, var(--font-size-t2));
+  }
 }
 
 @media (max-width: breakpoints.$bp-mobile) {
@@ -200,7 +206,6 @@
   }
 
   .contact-detail__identity {
-
     justify-content: flex-start;
     gap: 20px;
   }
@@ -216,10 +221,6 @@
   .contact-detail__summary h2 {
     font-size: var(--font-size-t5);
     font-weight: var(--font-weight-bold);
-  }
-
-  .contact-detail__field a {
-    overflow-wrap: anywhere;
   }
 
   .contact-detail__actions {

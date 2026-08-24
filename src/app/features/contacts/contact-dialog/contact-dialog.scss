@@ -17,6 +17,7 @@
 
 .contact-dialog {
   --dialog-avatar-anchor: clamp(360px, calc(100% - 745px), 467px);
+  --dialog-avatar-size: 120px;
   --dialog-panel-width: var(--dialog-avatar-anchor);
 
   position: relative;
@@ -193,11 +194,35 @@
 }
 
 @media (max-width: breakpoints.$bp-mobile) {
+  .contact-dialog {
+    --dialog-avatar-size: clamp(88px, 26vw, 120px);
+    --dialog-hero-height: clamp(184px, 52vw, 230px);
+  }
+
   .contact-dialog__form {
-    padding: 88px var(--space-4) var(--space-6);
+    padding: calc(var(--dialog-avatar-size) * 0.5 + var(--space-6)) var(--space-4)
+      var(--space-6);
+  }
+
+  .contact-dialog__input-wrapper input {
+    padding-inline: var(--space-5) calc(24px + var(--space-5) + var(--space-4));
+
+    font-size: clamp(var(--font-size-body), 5vw, var(--font-size-t6));
+  }
+
+  .contact-dialog__input-wrapper img,
+  .contact-dialog__phone-icon {
+    right: var(--space-5);
   }
 
   .contact-dialog__actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: var(--space-4);
+  }
+
+  .contact-dialog__actions app-button {
+    display: grid;
+    min-width: 0;
   }
 }

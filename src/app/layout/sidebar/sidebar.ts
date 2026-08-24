@@ -14,4 +14,9 @@ export class Sidebar {
     { path: '/board', label: 'Board', icon: 'icon-board' },
     { path: '/contacts', label: 'Contacts', icon: 'icon-contacts' },
   ];
+
+  readonly legalLinks = [
+    { path: '/privacy-policy', label: 'Privacy Policy' },
+    { path: '/legal-notice', label: 'Legal notice' },
+  ];
 }

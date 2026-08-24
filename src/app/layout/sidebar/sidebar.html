@@ -18,6 +18,15 @@
   </div>
 
   <div class="sidebar__legal">
-    <p>legal</p>
+    @for (link of legalLinks; track link.path) {
+      <a
+        class="sidebar__legal-link"
+        [routerLink]="link.path"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+      >
+        {{ link.label }}
+      </a>
+    }
   </div>
 </nav>

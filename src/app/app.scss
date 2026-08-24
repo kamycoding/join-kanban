@@ -1,3 +1,5 @@
+@use '../styles/breakpoints' as *;
+
 :host {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
@@ -30,4 +32,29 @@ app-sidebar,
 
 router-outlet {
   display: none;
+}
+
+// ---------------------------------------------------------------------------
+// Below the tablet breakpoint the sidebar leaves the left column and becomes a
+// bar in the last row. The bar keeps its own height, so the content row takes
+// whatever is left and nothing overlaps.
+// ---------------------------------------------------------------------------
+@media (max-width: $bp-tablet) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'main'
+      'nav';
+  }
+
+  .app-shell__main {
+    grid-area: main;
+  }
+
+  // The sidebar stays first in the DOM, so keyboard and screen reader users
+  // still reach the navigation before the content.
+  app-sidebar {
+    grid-area: nav;
+  }
 }

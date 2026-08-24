@@ -4,6 +4,8 @@
 // long-form text, so the rules live here instead of being copied per page.
 // ---------------------------------------------------------------------------
 
+@use 'breakpoints' as *;
+
 .static-page {
   box-sizing: border-box;
   max-width: 1000px;
@@ -92,4 +94,20 @@
 
   font-size: var(--font-size-t6);
   font-weight: var(--font-weight-bold);
+}
+
+// ---------------------------------------------------------------------------
+// Below the tablet breakpoint the desktop gutters are dropped: 96px of padding
+// on each side leaves under 200px of text on a 390px phone. The prose gets the
+// full width instead, and the bottom keeps clear of the navigation bar.
+// ---------------------------------------------------------------------------
+@media (max-width: $bp-tablet) {
+  .static-page {
+    padding: var(--space-9) var(--space-6) var(--space-10);
+  }
+
+  // The gutter for the step number shrinks with everything else.
+  .static-page__steps > li {
+    padding-left: var(--space-7);
+  }
 }

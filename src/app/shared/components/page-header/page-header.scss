@@ -1,3 +1,5 @@
+@use '../../../../styles/breakpoints' as *;
+
 :host {
   display: block;
 }
@@ -43,4 +45,13 @@
 
 .page-header__back:hover {
   background: var(--color-hover-tint);
+}
+
+// 61px eats a third of the first screen on a phone, so the title drops to the
+// next step down in the scale. "Privacy Policy" and "Legal Notice" still wrap
+// onto two lines below roughly 400px — "Help" is the only one that always fits.
+@media (max-width: $bp-tablet) {
+  .page-header__title {
+    font-size: var(--font-size-t2);
+  }
 }

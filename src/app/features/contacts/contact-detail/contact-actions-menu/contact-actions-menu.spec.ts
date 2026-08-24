@@ -88,6 +88,19 @@ describe('ContactActionsMenu', () => {
     expect(component.menuRendered()).toBe(false);
   });
 
+  it('restores focus to the trigger before hiding a focused popup', () => {
+    openMenu();
+    const item = fixture.nativeElement.querySelector('.contact-actions-menu__item');
+    const trigger = fixture.nativeElement.querySelector('.contact-actions-menu__trigger');
+    item.focus();
+
+    component.toggleMenu();
+
+    expect(document.activeElement).toBe(trigger);
+    expect(component.menuOpen()).toBe(false);
+    expect(component.menuRendered()).toBe(true);
+  });
+
   function openMenu(): HTMLElement {
     component.toggleMenu();
     component.menuOpen.set(true);

@@ -144,6 +144,11 @@ nav {
     // does (#E7E7E7 instead of #CDCDCD).
     color: var(--color-line-hover);
 
+    // The labels do not shrink with the items: at 320px an item is 72px wide,
+    // but "Summary" measures 71.5px at the 16px body size and ends up touching
+    // "Add Task". 12px keeps 18px between the two.
+    font-size: var(--font-size-t7);
+
     &.active {
       border-radius: var(--radius-xl);
     }

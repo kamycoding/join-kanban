@@ -1,4 +1,6 @@
 <header class="header">
+  <img class="header__logo" src="img/join-logo-dark.svg" alt="Join" />
+
   <span class="header__heading">{{ heading() }}</span>
 
   <div class="header__actions">
@@ -30,6 +32,15 @@
 
       @if (menuOpen()) {
         <nav class="header__menu">
+          <a
+            class="header__menu-item header__menu-item--mobile"
+            routerLink="/help"
+            routerLinkActive="header__menu-item--hidden"
+            (click)="closeMenu()"
+          >
+            Help
+          </a>
+
           <a class="header__menu-item" routerLink="/legal-notice" (click)="closeMenu()">
             Legal Notice
           </a>

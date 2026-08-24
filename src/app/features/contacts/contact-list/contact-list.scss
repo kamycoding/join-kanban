@@ -128,8 +128,8 @@
     justify-content: center;
 
     box-sizing: border-box;
-    width: 56px;
-    height: 56px;
+    width: var(--contacts-mobile-action-size);
+    height: var(--contacts-mobile-action-size);
     padding: 12px;
 
     border: 0;

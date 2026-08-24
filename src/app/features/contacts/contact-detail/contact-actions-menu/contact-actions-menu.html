@@ -1,5 +1,6 @@
 @if (menuRendered()) {
   <div
+    #popup
     id="contact-actions-menu"
     class="contact-actions-menu__popup"
     [class.contact-actions-menu__popup--open]="menuOpen()"
@@ -32,6 +33,7 @@
 }
 
 <button
+  #trigger
   class="contact-actions-menu__trigger"
   type="button"
   aria-label="Contact actions"

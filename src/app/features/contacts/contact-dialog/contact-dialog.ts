@@ -1,14 +1,17 @@
 import { Component, OnInit, afterNextRender, input, output, signal } from '@angular/core';
-import { email, form, FormField, required, submit, validate } from '@angular/forms/signals';
+import { form, FormField, submit, validate } from '@angular/forms/signals';
 import { Contact } from '../../../models/contact';
+import {
+  ContactInput,
+  validateContactEmail,
+  validateContactInput,
+  validateContactName,
+  validateContactPhone,
+} from '../../../models/contact-validation';
 import { Button } from '../../../shared/components/button/button';
 import { ContactDialogHero } from './contact-dialog-hero/contact-dialog-hero';
 
-export interface ContactFormValue {
-  name: string;
-  email: string;
-  phone: string;
-}
+export type ContactFormValue = ContactInput;
 
 export type ContactDialogState = { mode: 'add' } | { mode: 'edit'; contact: Contact };
 
@@ -34,49 +37,9 @@ export class ContactDialog implements OnInit {
   });
 
   readonly contactForm = form(this.formModel, (path) => {
-    validate(path.name, ({ value }) =>
-      value().trim()
-        ? null
-        : {
-            kind: 'required',
-            message: 'Name is required.',
-          },
-    );
-
-    required(path.email, {
-      message: 'Email is required.',
-    });
-
-    email(path.email, {
-      message: 'Please enter a valid email address.',
-    });
-
-    validate(path.phone, ({ value }) =>
-      value().trim()
-        ? null
-        : {
-            kind: 'required',
-            message: 'Phone is required.',
-          },
-    );
-
-    validate(path.phone, ({ value }) => {
-      const phone = value().trim();
-
-      if (!phone) {
-        return null;
-      }
-
-      const hasValidCharacters = /^[\d\s+()-]+$/.test(phone);
-      const hasEnoughDigits = phone.replace(/\D/g, '').length >= 6;
-
-      return hasValidCharacters && hasEnoughDigits
-        ? null
-        : {
-            kind: 'phone',
-            message: 'Please enter a valid phone number.',
-          };
-    });
+    validate(path.name, ({ value }) => validateContactName(value()));
+    validate(path.email, ({ value }) => validateContactEmail(value()));
+    validate(path.phone, ({ value }) => validateContactPhone(value()));
   });
 
   private isClosing = false;
@@ -149,10 +112,10 @@ export class ContactDialog implements OnInit {
   }
 
   private emitFormValue(value: ContactFormValue): void {
-    this.submitted.emit({
-      name: value.name.trim(),
-      email: value.email.trim(),
-      phone: value.phone.trim(),
-    });
+    const result = validateContactInput(value);
+
+    if (result.valid) {
+      this.submitted.emit(result.value);
+    }
   }
 }

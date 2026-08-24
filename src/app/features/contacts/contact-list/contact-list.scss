@@ -99,9 +99,8 @@
     flex-direction: column;
 
     width: 100%;
-    max-width: 400px;
     height: 100%;
-    margin-inline: auto;
+    padding-block-end: 0;
   }
 
   .contact-list__add {
@@ -111,10 +110,11 @@
   .contact-list__groups {
     flex: 1;
     min-height: 0;
-    padding-bottom: 72px;
+    padding-inline-end: var(--space-2);
 
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-gutter: stable;
   }
 
   .contact-list__add-mobile {

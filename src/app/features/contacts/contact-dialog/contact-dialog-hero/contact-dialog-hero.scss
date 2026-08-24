@@ -66,8 +66,8 @@
   justify-content: center;
 
   box-sizing: border-box;
-  width: 120px;
-  height: 120px;
+  width: var(--dialog-avatar-size);
+  height: var(--dialog-avatar-size);
 
   transform: translateX(clamp(var(--space-4), 6vw, 83px));
 
@@ -135,7 +135,7 @@
 
 @media (max-width: breakpoints.$bp-tablet) {
   :host {
-    height: 240px;
+    height: var(--dialog-hero-height, 240px);
   }
 
   .contact-dialog-hero__panel {
@@ -147,7 +147,7 @@
   }
 
   .contact-dialog-hero__avatar {
-    top: 180px;
+    top: calc(var(--dialog-hero-height, 240px) - var(--dialog-avatar-size) * 0.5);
     left: 50%;
 
     transform: translateX(-50%);
@@ -156,9 +156,15 @@
   .contact-dialog-hero__close {
     top: var(--space-4);
     right: var(--space-4);
+
+    width: 44px;
+    height: 44px;
+    padding: var(--space-3);
   }
 
   .contact-dialog-hero__close img {
+    inset: var(--space-3);
+
     filter: brightness(0) invert(1);
   }
 
@@ -169,22 +175,35 @@
 
 @media (max-width: breakpoints.$bp-mobile) {
   :host {
-    height: 230px;
+    height: var(--dialog-hero-height);
   }
 
   .contact-dialog-hero__panel {
-    padding-inline: var(--space-4);
+    padding: var(--space-6) var(--space-4) var(--space-7);
+  }
+
+  .contact-dialog-hero__heading {
+    gap: clamp(var(--space-1), 1.5vw, var(--space-2));
   }
 
   .contact-dialog-hero__heading h2 {
-    font-size: var(--font-size-t2);
+    font-size: clamp(30px, 9.5vw, var(--font-size-t2));
   }
 
   .contact-dialog-hero__heading p {
-    font-size: var(--font-size-t6);
+    font-size: clamp(15px, 4.5vw, var(--font-size-t6));
   }
 
-  .contact-dialog-hero__avatar {
-    top: 170px;
+  .contact-dialog-hero__accent {
+    margin-top: clamp(var(--space-3), 3vw, var(--space-4));
+  }
+
+  .contact-dialog-hero__avatar img {
+    width: clamp(52px, 15vw, 64px);
+    height: clamp(52px, 15vw, 64px);
+  }
+
+  .contact-dialog-hero__avatar--contact {
+    font-size: clamp(var(--font-size-t5), 9vw, var(--font-size-t2));
   }
 }

@@ -1,6 +1,7 @@
 import { Service, signal } from '@angular/core';
 import { createClient } from '@supabase/supabase-js';
 import { Contact, NewContact } from '../models/contact';
+import { splitContactName, validateContactInput } from '../models/contact-validation';
 
 @Service()
 export class ContactService {
@@ -10,7 +11,7 @@ export class ContactService {
 
   readonly contacts = signal<Contact[]>([]);
 
-  async getContacts() {
+  async getContacts(): Promise<void> {
     const { data, error } = await this.supabase
       .from('contacts')
       .select('*')
@@ -18,47 +19,27 @@ export class ContactService {
       .order('last_name', { ascending: true });
 
     if (error) {
-      console.error('Kontakte konnten nicht geladen werden:', error);
+      console.error('Contacts could not be loaded.');
       return;
     }
 
     this.contacts.set(data as Contact[]);
   }
 
-  private splitFullName(fullName: string): {
-    first_name: string;
-    last_name: string;
-  } {
-    const nameParts = fullName.trim().split(/\s+/);
-
-    if (nameParts.length === 1) {
-      return {
-        first_name: nameParts[0],
-        last_name: '',
-      };
-    }
-
-    const lastName = nameParts.pop()!;
-
-    return {
-      first_name: nameParts.join(' '),
-      last_name: lastName,
-    };
-  }
-
   async createContact(fullName: string, email: string, phone: string): Promise<Contact | null> {
-    if (!fullName.trim()) {
-      console.error('Der Name darf nicht leer sein.');
+    const result = validateContactInput({ name: fullName, email, phone });
+
+    if (!result.valid) {
       return null;
     }
 
-    const { first_name, last_name } = this.splitFullName(fullName);
+    const { first_name, last_name } = splitContactName(result.value.name);
 
     const newContact: NewContact = {
       first_name,
       last_name,
-      email: email.trim(),
-      phone: phone.trim(),
+      email: result.value.email,
+      phone: result.value.phone,
       color: this.generateContactColor(),
     };
 
@@ -69,7 +50,7 @@ export class ContactService {
       .single();
 
     if (error) {
-      console.error('Kontakt konnte nicht gespeichert werden:', error);
+      console.error('Contact could not be created.');
       return null;
     }
 
@@ -113,20 +94,21 @@ export class ContactService {
     email: string,
     phone: string,
   ): Promise<Contact | null> {
-    if (!fullName.trim()) {
-      console.error('Der Name darf nicht leer sein.');
+    const result = validateContactInput({ name: fullName, email, phone });
+
+    if (!result.valid) {
       return null;
     }
 
-    const { first_name, last_name } = this.splitFullName(fullName);
+    const { first_name, last_name } = splitContactName(result.value.name);
 
     const { data, error } = await this.supabase
       .from('contacts')
       .update({
         first_name,
         last_name,
-        email: email.trim(),
-        phone: phone.trim(),
+        email: result.value.email,
+        phone: result.value.phone,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
@@ -134,7 +116,7 @@ export class ContactService {
       .single();
 
     if (error) {
-      console.error('Kontakt konnte nicht bearbeitet werden:', error);
+      console.error('Contact could not be updated.');
       return null;
     }
 
@@ -157,7 +139,7 @@ export class ContactService {
     const { error } = await this.supabase.from('contacts').delete().eq('id', id);
 
     if (error) {
-      console.error('Kontakt konnte nicht gelöscht werden:', error);
+      console.error('Contact could not be deleted.');
       return false;
     }
 

@@ -8,10 +8,11 @@ import {
   signal,
 } from '@angular/core';
 import { Contact } from '../../../models/contact';
+import { ContactActionsMenu } from './contact-actions-menu/contact-actions-menu';
 
 @Component({
   selector: 'app-contact-detail',
-  imports: [],
+  imports: [ContactActionsMenu],
   templateUrl: './contact-detail.html',
   styleUrl: './contact-detail.scss',
 })

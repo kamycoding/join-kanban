@@ -56,4 +56,10 @@
       </div>
     </div>
   </div>
+
+  <app-contact-actions-menu
+    [contact]="contact()"
+    (editContact)="editContact.emit($event)"
+    (deleteContact)="deleteContact.emit($event)"
+  />
 </section>

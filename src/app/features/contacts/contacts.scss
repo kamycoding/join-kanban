@@ -26,6 +26,8 @@
   flex: 1;
   min-width: 0;
   padding: 109px 0 0 var(--contacts-content-inline-start);
+
+  container: contacts-detail-pane / inline-size;
 }
 
 .contacts-toast-viewport {
@@ -85,6 +87,38 @@
 
 .contacts-heading__back {
   display: none;
+}
+
+@container contacts-detail-pane (max-width: 560px) {
+  .contacts-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+  }
+
+  .contacts-heading h1 {
+    grid-row: 1;
+    grid-column: 1;
+
+    font-size: var(--font-size-t2);
+  }
+
+  .contacts-heading p {
+    grid-row: 2;
+    grid-column: 1;
+
+    font-size: var(--font-size-t6);
+  }
+
+  .contacts-heading__divider {
+    grid-row: 3;
+    grid-column: 1;
+
+    width: 90px;
+    height: 3px;
+  }
 }
 
 @media (max-width: breakpoints.$bp-tablet) {

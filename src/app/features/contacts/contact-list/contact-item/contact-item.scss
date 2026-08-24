@@ -72,6 +72,8 @@
   line-height: var(--line-height);
 
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .contact-item--selected .contact-item__name {
@@ -90,14 +92,9 @@
   text-overflow: ellipsis;
 }
 
-@media (max-width: breakpoints.$bp-mobile) {
+@media (max-width: breakpoints.$bp-tablet) {
   :host,
   .contact-item {
     width: 100%;
-  }
-
-  .contact-item__name {
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }

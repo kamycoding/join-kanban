@@ -66,8 +66,32 @@ nav {
 }
 
 .sidebar__legal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+
   margin-top: auto;
   padding-inline: var(--space-8);
+}
+
+.sidebar__legal-link {
+  // #42526E from the Figma spec is unreadable on the #2A3647 sidebar (1.4:1),
+  // so the secondary links use the icon grey instead - same family, 4.9:1.
+  color: var(--color-icon);
+  font-size: var(--font-size-body);
+  text-decoration: none;
+  transition: color var(--transition);
+
+  &:hover,
+  &.active {
+    color: var(--color-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: var(--space-1);
+    border-radius: var(--radius-sm);
+  }
 }
 
 // ---------------------------------------------------------------------------

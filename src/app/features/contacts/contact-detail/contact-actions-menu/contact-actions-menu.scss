@@ -12,8 +12,8 @@
     z-index: 2;
 
     display: block;
-    width: 56px;
-    height: 56px;
+    width: var(--contacts-mobile-action-size);
+    height: var(--contacts-mobile-action-size);
     align-self: flex-end;
     margin-top: auto;
   }
@@ -24,8 +24,8 @@
     justify-content: center;
 
     box-sizing: border-box;
-    width: 56px;
-    height: 56px;
+    width: var(--contacts-mobile-action-size);
+    height: var(--contacts-mobile-action-size);
     padding: 0;
 
     border: 0;

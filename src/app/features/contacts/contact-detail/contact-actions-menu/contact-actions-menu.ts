@@ -1,4 +1,14 @@
-import { Component, ElementRef, HostListener, OnDestroy, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Contact } from '../../../../models/contact';
 
 @Component({
@@ -9,6 +19,8 @@ import { Contact } from '../../../../models/contact';
 })
 export class ContactActionsMenu implements OnDestroy {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly popup = viewChild<ElementRef<HTMLElement>>('popup');
+  private readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
 
   readonly contact = input.required<Contact>();
   readonly editContact = output<Contact>();
@@ -101,6 +113,7 @@ export class ContactActionsMenu implements OnDestroy {
 
     const wasOpen = this.menuOpen();
     this.cancelPendingAnimationFrame();
+    this.restoreTriggerFocus();
     this.menuOpen.set(false);
 
     if (this.prefersReducedMotion() || !wasOpen) {
@@ -125,6 +138,14 @@ export class ContactActionsMenu implements OnDestroy {
 
   private isInsideMenu(event: MouseEvent): boolean {
     return this.elementRef.nativeElement.contains(event.target as Node);
+  }
+
+  private restoreTriggerFocus(): void {
+    const activeElement = document.activeElement;
+
+    if (activeElement && this.popup()?.nativeElement.contains(activeElement)) {
+      this.trigger()?.nativeElement.focus();
+    }
   }
 
   private prefersReducedMotion(): boolean {

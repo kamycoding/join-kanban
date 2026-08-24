@@ -9,6 +9,7 @@
 .contacts-page {
   --contacts-list-width: 424px;
   --contacts-content-inline-start: clamp(var(--space-6), 4vw, 55px);
+  --contacts-mobile-action-size: 56px;
 
   position: relative;
 
@@ -187,6 +188,6 @@
     --toast-track-distance: calc(100cqi + var(--space-4));
 
     inset-inline: var(--space-4);
-    bottom: var(--space-4);
+    bottom: calc(var(--contacts-mobile-action-size) + var(--space-4) * 2);
   }
 }

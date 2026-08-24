@@ -20,6 +20,8 @@ export type ContactValidationResult =
   | { valid: false; value: ContactInput; errors: ContactValidationErrors };
 
 const PHONE_FORMAT = /^\+?[\d\s()-]+$/;
+const EMAIL_LOCAL_PART_MAX_LENGTH = 64;
+const EMAIL_DOMAIN_LABEL_MAX_LENGTH = 63;
 const EMAIL_LOCAL_PART = /^[a-z\d.!#$%&'*+/=?^_`{|}~-]+$/i;
 const DOMAIN_LABEL = /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i;
 const TOP_LEVEL_DOMAIN = /^[a-z]{2,}$/i;
@@ -158,6 +160,7 @@ function isPracticalEmail(email: string): boolean {
   const localPart = parts[0];
 
   if (
+    localPart.length > EMAIL_LOCAL_PART_MAX_LENGTH ||
     !EMAIL_LOCAL_PART.test(localPart) ||
     localPart.startsWith('.') ||
     localPart.endsWith('.') ||
@@ -168,7 +171,12 @@ function isPracticalEmail(email: string): boolean {
 
   const domainParts = parts[1].split('.');
 
-  if (domainParts.length < 2 || domainParts.some((part) => !DOMAIN_LABEL.test(part))) {
+  if (
+    domainParts.length < 2 ||
+    domainParts.some(
+      (part) => part.length > EMAIL_DOMAIN_LABEL_MAX_LENGTH || !DOMAIN_LABEL.test(part),
+    )
+  ) {
     return false;
   }
 

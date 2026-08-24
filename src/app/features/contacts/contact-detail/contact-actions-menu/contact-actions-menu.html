@@ -1,0 +1,44 @@
+@if (menuRendered()) {
+  <div
+    id="contact-actions-menu"
+    class="contact-actions-menu__popup"
+    [class.contact-actions-menu__popup--open]="menuOpen()"
+    [attr.aria-hidden]="!menuOpen()"
+    role="menu"
+    (transitionend)="onTransitionEnd($event)"
+  >
+    <button
+      class="contact-actions-menu__item"
+      type="button"
+      role="menuitem"
+      [tabIndex]="menuOpen() ? 0 : -1"
+      (click)="editCurrentContact()"
+    >
+      <img src="/img/icon-edit.svg" alt="" aria-hidden="true" />
+      Edit
+    </button>
+
+    <button
+      class="contact-actions-menu__item"
+      type="button"
+      role="menuitem"
+      [tabIndex]="menuOpen() ? 0 : -1"
+      (click)="deleteCurrentContact()"
+    >
+      <img src="/img/icon-delete.svg" alt="" aria-hidden="true" />
+      Delete
+    </button>
+  </div>
+}
+
+<button
+  class="contact-actions-menu__trigger"
+  type="button"
+  aria-label="Contact actions"
+  aria-haspopup="menu"
+  aria-controls="contact-actions-menu"
+  [attr.aria-expanded]="menuOpen()"
+  (click)="toggleMenu()"
+>
+  <img src="/img/icon-more-vert.svg" alt="" aria-hidden="true" />
+</button>

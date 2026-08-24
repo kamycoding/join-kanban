@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
 import { Contact } from '../../../models/contact';
+import { ContactActionsMenu } from './contact-actions-menu/contact-actions-menu';
 import { ContactDetail } from './contact-detail';
 
 describe('ContactDetail', () => {
@@ -32,5 +34,20 @@ describe('ContactDetail', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('forwards mobile action menu events through its existing outputs', () => {
+    const edited: Contact[] = [];
+    const deleted: Contact[] = [];
+    const menu = fixture.debugElement.query(By.directive(ContactActionsMenu))
+      .componentInstance as ContactActionsMenu;
+    component.editContact.subscribe((value) => edited.push(value));
+    component.deleteContact.subscribe((value) => deleted.push(value));
+
+    menu.editContact.emit(contact);
+    menu.deleteContact.emit(contact);
+
+    expect(edited).toEqual([contact]);
+    expect(deleted).toEqual([contact]);
   });
 });

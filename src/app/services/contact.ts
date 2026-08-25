@@ -1,13 +1,11 @@
-import { Service, signal } from '@angular/core';
-import { createClient } from '@supabase/supabase-js';
+import { Service, inject, signal } from '@angular/core';
 import { Contact, NewContact } from '../models/contact';
 import { splitContactName, validateContactInput } from '../models/contact-validation';
+import { SupabaseService } from './supabase';
 
 @Service()
 export class ContactService {
-  private readonly supabaseUrl = 'https://oslontuktgqzrsbetdur.supabase.co';
-  private readonly supabaseKey = 'sb_publishable_wneSRSKtk-Tg8TmwtheD5w_nX9Cj4ue';
-  private readonly supabase = createClient(this.supabaseUrl, this.supabaseKey);
+  private readonly supabase = inject(SupabaseService).client;
 
   readonly contacts = signal<Contact[]>([]);
 

@@ -5,14 +5,16 @@ import { SupabaseService } from './supabase';
 import { TaskService } from './task';
 
 const from = vi.fn();
+const rpc = vi.fn();
 
 describe('TaskService', () => {
   const supabaseService = {
-    client: { from },
+    client: { from, rpc },
   } as unknown as SupabaseService;
 
   beforeEach(() => {
     from.mockReset();
+    rpc.mockReset();
 
     TestBed.configureTestingModule({
       providers: [{ provide: SupabaseService, useValue: supabaseService }],
@@ -88,6 +90,53 @@ describe('TaskService', () => {
     await expect(service.createTask(createNewTask())).resolves.toBeNull();
     expect(service.tasks()).toEqual([]);
     expect(service.error()).toBe('Task could not be created');
+    expect(service.saving()).toBe(false);
+  });
+
+  it('creates a task with subtasks and unique contact assignments atomically', async () => {
+    const createdTask = createTask();
+    rpc.mockResolvedValue({ data: createdTask, error: null });
+
+    const service = TestBed.inject(TaskService);
+    const details = {
+      task: createNewTask(),
+      subtasks: [{ title: 'First subtask' }, { title: 'Second subtask', is_completed: true }],
+      contactIds: ['contact-1', 'contact-1', 'contact-2'],
+    };
+
+    await expect(service.createTaskWithDetails(details)).resolves.toEqual(createdTask);
+    expect(rpc).toHaveBeenCalledWith('create_task_with_details', {
+      p_title: 'Test task',
+      p_description: 'Test description',
+      p_due_date: '2026-08-30',
+      p_priority: 'medium',
+      p_category: 'user_story',
+      p_status: 'todo',
+      p_position: 0,
+      p_subtasks: [
+        { title: 'First subtask', position: 0 },
+        { title: 'Second subtask', is_completed: true, position: 1 },
+      ],
+      p_contact_ids: ['contact-1', 'contact-2'],
+    });
+    expect(service.tasks()).toEqual([createdTask]);
+    expect(service.error()).toBeNull();
+    expect(service.saving()).toBe(false);
+  });
+
+  it('does not add a task when atomic creation fails', async () => {
+    rpc.mockResolvedValue({
+      data: null,
+      error: { message: 'Complete task could not be created' },
+    });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(
+      service.createTaskWithDetails({ task: createNewTask(), subtasks: [{ title: 'Subtask' }] }),
+    ).resolves.toBeNull();
+    expect(service.tasks()).toEqual([]);
+    expect(service.error()).toBe('Complete task could not be created');
     expect(service.saving()).toBe(false);
   });
 

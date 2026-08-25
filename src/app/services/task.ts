@@ -1,12 +1,19 @@
 import { Service, inject, signal } from '@angular/core';
 
-import { NewTask, NewTaskWithDetails, Task, TaskChanges, TaskStatus } from '../models/task';
+import {
+  NewTask,
+  NewTaskWithDetails,
+  Task,
+  TaskChanges,
+  TaskStatus,
+  TaskWithDetails,
+} from '../models/task';
 import { SupabaseService } from './supabase';
 
 @Service()
 export class TaskService {
   private readonly supabase = inject(SupabaseService).client;
-  private readonly tasksState = signal<Task[]>([]);
+  private readonly tasksState = signal<TaskWithDetails[]>([]);
   private readonly loadingState = signal(false);
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
@@ -22,7 +29,18 @@ export class TaskService {
 
     const { data, error } = await this.supabase
       .from('tasks')
-      .select('*')
+      .select(
+        `
+          *,
+          subtasks (*),
+          assignees:task_assignees (
+            task_id,
+            contact_id,
+            created_at,
+            contact:contacts!task_assignees_contact_id_fkey (*)
+          )
+        `,
+      )
       .order('position', { ascending: true })
       .order('created_at', { ascending: true });
 
@@ -33,7 +51,9 @@ export class TaskService {
       return false;
     }
 
-    this.tasksState.set(data as Task[]);
+    this.tasksState.set(
+      ((data ?? []) as TaskWithDetails[]).map((task) => this.normalizeTaskDetails(task)),
+    );
     return true;
   }
 
@@ -51,7 +71,7 @@ export class TaskService {
     }
 
     const createdTask = data as Task;
-    this.addTaskToState(createdTask);
+    this.addTaskToState(this.withEmptyDetails(createdTask));
 
     return createdTask;
   }
@@ -93,7 +113,7 @@ export class TaskService {
       return null;
     }
 
-    this.addTaskToState(createdTask);
+    this.addTaskToState(this.withEmptyDetails(createdTask));
     return createdTask;
   }
 
@@ -118,7 +138,11 @@ export class TaskService {
     const updatedTask = data as Task;
     this.tasksState.update((tasks) =>
       tasks
-        .map((task) => (task.id === id ? updatedTask : task))
+        .map((task) =>
+          task.id === id
+            ? { ...updatedTask, subtasks: task.subtasks, assignees: task.assignees }
+            : task,
+        )
         .sort(
           (taskA, taskB) =>
             taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
@@ -154,13 +178,31 @@ export class TaskService {
     return this.updateTask(id, { status, position });
   }
 
-  private addTaskToState(task: Task): void {
+  private addTaskToState(task: TaskWithDetails): void {
     this.tasksState.update((tasks) =>
       [...tasks, task].sort(
         (taskA, taskB) =>
           taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
       ),
     );
+  }
+
+  private withEmptyDetails(task: Task): TaskWithDetails {
+    return { ...task, subtasks: [], assignees: [] };
+  }
+
+  private normalizeTaskDetails(task: TaskWithDetails): TaskWithDetails {
+    return {
+      ...task,
+      subtasks: [...(task.subtasks ?? [])].sort(
+        (subtaskA, subtaskB) =>
+          subtaskA.position - subtaskB.position ||
+          subtaskA.created_at.localeCompare(subtaskB.created_at),
+      ),
+      assignees: [...(task.assignees ?? [])].sort((assigneeA, assigneeB) =>
+        assigneeA.created_at.localeCompare(assigneeB.created_at),
+      ),
+    };
   }
 
   private nextTaskPosition(status: TaskStatus): number {

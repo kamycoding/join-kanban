@@ -3,8 +3,6 @@ import { Session } from '@supabase/supabase-js';
 
 import { SupabaseService } from './supabase';
 
-const GUEST_EMAIL = 'guest@join-demo.local';
-
 @Service()
 export class AuthService {
   private readonly supabase = inject(SupabaseService).client;
@@ -18,7 +16,7 @@ export class AuthService {
   readonly error = this.errorState.asReadonly();
   readonly user = computed(() => this.session()?.user ?? null);
   readonly isAuthenticated = computed(() => this.user() !== null);
-  readonly isGuest = computed(() => this.user()?.email === GUEST_EMAIL);
+  readonly isGuest = computed(() => this.user()?.is_anonymous === true);
   readonly ready: Promise<void>;
 
   constructor() {
@@ -48,8 +46,21 @@ export class AuthService {
     return data.session !== null;
   }
 
-  signInAsGuest(password: string): Promise<boolean> {
-    return this.signInWithPassword(GUEST_EMAIL, password);
+  async signInAnonymously(): Promise<boolean> {
+    this.loadingState.set(true);
+    this.errorState.set(null);
+
+    const { data, error } = await this.supabase.auth.signInAnonymously();
+
+    if (error) {
+      this.errorState.set(error.message);
+      this.loadingState.set(false);
+      return false;
+    }
+
+    this.sessionState.set(data.session);
+    this.loadingState.set(false);
+    return data.session !== null;
   }
 
   async signOut(): Promise<boolean> {

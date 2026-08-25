@@ -8,6 +8,7 @@ describe('AuthService', () => {
   const unsubscribe = vi.fn();
   const getSession = vi.fn();
   const signInWithPassword = vi.fn();
+  const signInAnonymously = vi.fn();
   const signOut = vi.fn();
   const onAuthStateChange = vi.fn(() => ({
     data: { subscription: { unsubscribe } },
@@ -18,6 +19,7 @@ describe('AuthService', () => {
       auth: {
         getSession,
         signInWithPassword,
+        signInAnonymously,
         signOut,
         onAuthStateChange,
       },
@@ -28,6 +30,7 @@ describe('AuthService', () => {
     unsubscribe.mockReset();
     getSession.mockReset();
     signInWithPassword.mockReset();
+    signInAnonymously.mockReset();
     signOut.mockReset();
     onAuthStateChange.mockClear();
     getSession.mockResolvedValue({ data: { session: null }, error: null });
@@ -68,9 +71,9 @@ describe('AuthService', () => {
     expect(service.session()).toBe(session);
   });
 
-  it('signs in with the configured guest account', async () => {
-    const session = createSession('guest-user', 'guest@join-demo.local');
-    signInWithPassword.mockResolvedValue({
+  it('signs in anonymously as a guest', async () => {
+    const session = createSession('guest-user', undefined, true);
+    signInAnonymously.mockResolvedValue({
       data: { session, user: session.user },
       error: null,
     });
@@ -78,11 +81,8 @@ describe('AuthService', () => {
     const service = TestBed.inject(AuthService);
     await service.ready;
 
-    await expect(service.signInAsGuest('demo-password')).resolves.toBe(true);
-    expect(signInWithPassword).toHaveBeenCalledWith({
-      email: 'guest@join-demo.local',
-      password: 'demo-password',
-    });
+    await expect(service.signInAnonymously()).resolves.toBe(true);
+    expect(signInAnonymously).toHaveBeenCalledOnce();
     expect(service.isGuest()).toBe(true);
   });
 
@@ -113,7 +113,7 @@ describe('AuthService', () => {
   });
 });
 
-function createSession(userId: string, email?: string): Session {
+function createSession(userId: string, email?: string, isAnonymous = false): Session {
   return {
     access_token: 'access-token',
     refresh_token: 'refresh-token',
@@ -122,6 +122,7 @@ function createSession(userId: string, email?: string): Session {
     user: {
       id: userId,
       email,
+      is_anonymous: isAnonymous,
     },
   } as Session;
 }

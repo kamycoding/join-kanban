@@ -27,8 +27,7 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public",
-                "ignore": ["guest-auth.local.json"]
+                "input": "public"
               }
             ],
             "styles": ["src/styles.scss"]
@@ -52,13 +51,7 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "assets": [
-                {
-                  "glob": "**/*",
-                  "input": "public"
-                }
-              ]
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"

@@ -107,8 +107,9 @@ export class Contacts implements OnInit {
   }
 
   private handleSuccessfulSave(dialog: ContactDialogState, contact: Contact): void {
+    this.selectedContact.set(contact);
+
     if (dialog.mode === 'edit') {
-      this.selectedContact.set(contact);
       this.showSuccessToast(CONTACT_UPDATED_MESSAGE);
     } else {
       this.showSuccessToast(CONTACT_CREATED_MESSAGE);

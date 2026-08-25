@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { NewTask, Task } from '../models/task';
+import { NewTask, Task, TaskWithDetails } from '../models/task';
 import { SupabaseService } from './supabase';
 import { TaskService } from './task';
 
@@ -22,7 +22,16 @@ describe('TaskService', () => {
   });
 
   it('loads tasks ordered by position and creation time', async () => {
-    const tasks = [createTask()];
+    const tasks = [
+      {
+        ...createTask(),
+        subtasks: [
+          createSubtask('subtask-2', 1, '2026-08-25T00:02:00.000Z'),
+          createSubtask('subtask-1', 0, '2026-08-25T00:01:00.000Z'),
+        ],
+        assignees: [],
+      },
+    ];
     const orderByCreatedAt = vi.fn().mockResolvedValue({ data: tasks, error: null });
     const orderByPosition = vi.fn().mockReturnValue({ order: orderByCreatedAt });
     const select = vi.fn().mockReturnValue({ order: orderByPosition });
@@ -32,10 +41,16 @@ describe('TaskService', () => {
 
     await expect(service.getTasks()).resolves.toBe(true);
     expect(from).toHaveBeenCalledWith('tasks');
-    expect(select).toHaveBeenCalledWith('*');
+    expect(select).toHaveBeenCalledWith(expect.stringContaining('subtasks (*)'));
+    expect(select).toHaveBeenCalledWith(expect.stringContaining('assignees:task_assignees'));
     expect(orderByPosition).toHaveBeenCalledWith('position', { ascending: true });
     expect(orderByCreatedAt).toHaveBeenCalledWith('created_at', { ascending: true });
-    expect(service.tasks()).toEqual(tasks);
+    expect(service.tasks()).toEqual([
+      {
+        ...tasks[0],
+        subtasks: [tasks[0].subtasks[1], tasks[0].subtasks[0]],
+      },
+    ]);
     expect(service.error()).toBeNull();
     expect(service.loading()).toBe(false);
   });
@@ -71,7 +86,7 @@ describe('TaskService', () => {
     expect(from).toHaveBeenCalledWith('tasks');
     expect(insert).toHaveBeenCalledWith(newTask);
     expect(select).toHaveBeenCalledWith('*');
-    expect(service.tasks()).toEqual([createdTask]);
+    expect(service.tasks()).toEqual([withEmptyDetails(createdTask)]);
     expect(service.error()).toBeNull();
     expect(service.saving()).toBe(false);
   });
@@ -119,7 +134,7 @@ describe('TaskService', () => {
       ],
       p_contact_ids: ['contact-1', 'contact-2'],
     });
-    expect(service.tasks()).toEqual([createdTask]);
+    expect(service.tasks()).toEqual([withEmptyDetails(createdTask)]);
     expect(service.error()).toBeNull();
     expect(service.saving()).toBe(false);
   });
@@ -157,7 +172,7 @@ describe('TaskService', () => {
     await expect(service.updateTask(originalTask.id, changes)).resolves.toEqual(updatedTask);
     expect(update).toHaveBeenCalledWith(changes);
     expect(eq).toHaveBeenCalledWith('id', originalTask.id);
-    expect(service.tasks()).toEqual([updatedTask]);
+    expect(service.tasks()).toEqual([withEmptyDetails(updatedTask)]);
     expect(service.error()).toBeNull();
     expect(service.saving()).toBe(false);
   });
@@ -281,5 +296,20 @@ function createTask(): Task {
     position: 0,
     created_at: '2026-08-25T00:00:00.000Z',
     updated_at: '2026-08-25T00:00:00.000Z',
+  };
+}
+
+function withEmptyDetails(task: Task): TaskWithDetails {
+  return { ...task, subtasks: [], assignees: [] };
+}
+
+function createSubtask(id: string, position: number, createdAt: string) {
+  return {
+    id,
+    task_id: 'task-1',
+    title: id,
+    is_completed: false,
+    position,
+    created_at: createdAt,
   };
 }

@@ -1,3 +1,5 @@
+import { TaskAssigneeWithContact } from './task-assignee';
+
 export const TASK_PRIORITIES = ['low', 'medium', 'urgent'] as const;
 export const TASK_CATEGORIES = ['user_story', 'technical_task'] as const;
 export const TASK_STATUSES = ['todo', 'in_progress', 'await_feedback', 'done'] as const;
@@ -34,6 +36,11 @@ export interface Subtask {
   is_completed: boolean;
   position: number;
   created_at: string;
+}
+
+export interface TaskWithDetails extends Task {
+  subtasks: Subtask[];
+  assignees: TaskAssigneeWithContact[];
 }
 
 export type NewSubtask = Pick<Subtask, 'task_id' | 'title'> &

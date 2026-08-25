@@ -4,8 +4,9 @@ import { NewSubtask, NewTask, Subtask, Task } from '../models/task';
 import { SupabaseService } from './supabase';
 import { TaskService } from './task';
 
+const from = vi.fn();
+
 describe('TaskService', () => {
-  const from = vi.fn();
   const supabaseService = {
     client: { from },
   } as unknown as SupabaseService;
@@ -267,7 +268,108 @@ describe('TaskService', () => {
     expect(service.subtasks()).toEqual([]);
     expect(service.error()).toBe('Subtask could not be created');
   });
+
+  it('updates a subtask title, completion state and position', async () => {
+    const originalSubtask = createSubtask();
+    const updatedSubtask = {
+      ...originalSubtask,
+      title: 'Updated subtask',
+      is_completed: true,
+      position: 2,
+    };
+    const service = TestBed.inject(TaskService);
+    await loadSubtasks(service, [originalSubtask]);
+
+    const single = vi.fn().mockResolvedValue({ data: updatedSubtask, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValueOnce({ update });
+
+    const changes = {
+      title: 'Updated subtask',
+      is_completed: true,
+      position: 2,
+    };
+
+    await expect(service.updateSubtask(originalSubtask.id, changes)).resolves.toEqual(
+      updatedSubtask,
+    );
+    expect(update).toHaveBeenCalledWith(changes);
+    expect(eq).toHaveBeenCalledWith('id', originalSubtask.id);
+    expect(service.subtasks()).toEqual([updatedSubtask]);
+    expect(service.error()).toBeNull();
+  });
+
+  it('sets the completion state through the dedicated method', async () => {
+    const completedSubtask = { ...createSubtask(), is_completed: true };
+    const single = vi.fn().mockResolvedValue({ data: completedSubtask, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ update });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.setSubtaskCompleted('subtask-1', true)).resolves.toEqual(completedSubtask);
+    expect(update).toHaveBeenCalledWith({ is_completed: true });
+  });
+
+  it('rejects an invalid subtask position before starting a Supabase request', async () => {
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.updateSubtask('subtask-1', { position: -1 })).resolves.toBeNull();
+    expect(from).not.toHaveBeenCalled();
+    expect(service.error()).toBe('Subtask position must be a non-negative integer.');
+  });
+
+  it('deletes a subtask and removes it from the local subtask list', async () => {
+    const subtask = createSubtask();
+    const service = TestBed.inject(TaskService);
+    await loadSubtasks(service, [subtask]);
+
+    const single = vi.fn().mockResolvedValue({ data: { id: subtask.id }, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const deleteSubtask = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValueOnce({ delete: deleteSubtask });
+
+    await expect(service.deleteSubtask(subtask.id)).resolves.toBe(true);
+    expect(deleteSubtask).toHaveBeenCalledOnce();
+    expect(eq).toHaveBeenCalledWith('id', subtask.id);
+    expect(select).toHaveBeenCalledWith('id');
+    expect(service.subtasks()).toEqual([]);
+  });
+
+  it('keeps the subtask when deleting it fails', async () => {
+    const subtask = createSubtask();
+    const service = TestBed.inject(TaskService);
+    await loadSubtasks(service, [subtask]);
+
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'Subtask could not be deleted' },
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const deleteSubtask = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValueOnce({ delete: deleteSubtask });
+
+    await expect(service.deleteSubtask(subtask.id)).resolves.toBe(false);
+    expect(service.subtasks()).toEqual([subtask]);
+    expect(service.error()).toBe('Subtask could not be deleted');
+  });
 });
+
+async function loadSubtasks(service: TaskService, subtasks: Subtask[]): Promise<void> {
+  const orderByCreatedAt = vi.fn().mockResolvedValue({ data: subtasks, error: null });
+  const orderByPosition = vi.fn().mockReturnValue({ order: orderByCreatedAt });
+  const eq = vi.fn().mockReturnValue({ order: orderByPosition });
+  const select = vi.fn().mockReturnValue({ eq });
+  from.mockReturnValueOnce({ select });
+
+  await service.getSubtasks('task-1');
+}
 
 function createNewTask(): NewTask {
   return {

@@ -1,6 +1,14 @@
 import { Service, inject, signal } from '@angular/core';
 
-import { NewSubtask, NewTask, Subtask, Task, TaskChanges, TaskStatus } from '../models/task';
+import {
+  NewSubtask,
+  NewTask,
+  Subtask,
+  SubtaskChanges,
+  Task,
+  TaskChanges,
+  TaskStatus,
+} from '../models/task';
 import { SupabaseService } from './supabase';
 
 @Service()
@@ -110,6 +118,7 @@ export class TaskService {
     }
 
     this.tasksState.update((tasks) => tasks.filter((task) => task.id !== id));
+    this.subtasksState.update((subtasks) => subtasks.filter((subtask) => subtask.task_id !== id));
     return true;
   }
 
@@ -174,6 +183,65 @@ export class TaskService {
     const createdSubtask = data as Subtask;
     this.subtasksState.update((subtasks) => this.sortSubtasks([...subtasks, createdSubtask]));
     return createdSubtask;
+  }
+
+  async updateSubtask(id: string, changes: SubtaskChanges): Promise<Subtask | null> {
+    if (
+      changes.position !== undefined &&
+      (!Number.isInteger(changes.position) || changes.position < 0)
+    ) {
+      this.errorState.set('Subtask position must be a non-negative integer.');
+      return null;
+    }
+
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const { data, error } = await this.supabase
+      .from('subtasks')
+      .update(changes)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return null;
+    }
+
+    const updatedSubtask = data as Subtask;
+    this.subtasksState.update((subtasks) =>
+      this.sortSubtasks(subtasks.map((subtask) => (subtask.id === id ? updatedSubtask : subtask))),
+    );
+    return updatedSubtask;
+  }
+
+  setSubtaskCompleted(id: string, isCompleted: boolean): Promise<Subtask | null> {
+    return this.updateSubtask(id, { is_completed: isCompleted });
+  }
+
+  async deleteSubtask(id: string): Promise<boolean> {
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const { error } = await this.supabase
+      .from('subtasks')
+      .delete()
+      .eq('id', id)
+      .select('id')
+      .single();
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return false;
+    }
+
+    this.subtasksState.update((subtasks) => subtasks.filter((subtask) => subtask.id !== id));
+    return true;
   }
 
   private nextSubtaskPosition(taskId: string): number {

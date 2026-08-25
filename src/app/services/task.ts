@@ -1,6 +1,6 @@
 import { Service, inject, signal } from '@angular/core';
 
-import { NewTask, Task } from '../models/task';
+import { NewTask, Task, TaskChanges } from '../models/task';
 import { SupabaseService } from './supabase';
 
 @Service()
@@ -59,5 +59,36 @@ export class TaskService {
     );
 
     return createdTask;
+  }
+
+  async updateTask(id: string, changes: TaskChanges): Promise<Task | null> {
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .update(changes)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return null;
+    }
+
+    const updatedTask = data as Task;
+    this.tasksState.update((tasks) =>
+      tasks
+        .map((task) => (task.id === id ? updatedTask : task))
+        .sort(
+          (taskA, taskB) =>
+            taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
+        ),
+    );
+
+    return updatedTask;
   }
 }

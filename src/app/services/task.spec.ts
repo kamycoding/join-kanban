@@ -90,6 +90,56 @@ describe('TaskService', () => {
     expect(service.error()).toBe('Task could not be created');
     expect(service.saving()).toBe(false);
   });
+
+  it('updates a task and replaces it in the local task list', async () => {
+    const originalTask = createTask();
+    const updatedTask = { ...originalTask, title: 'Updated task', priority: 'urgent' as const };
+
+    const loadOrderByCreatedAt = vi.fn().mockResolvedValue({
+      data: [originalTask],
+      error: null,
+    });
+    const loadOrderByPosition = vi.fn().mockReturnValue({ order: loadOrderByCreatedAt });
+    const loadSelect = vi.fn().mockReturnValue({ order: loadOrderByPosition });
+    from.mockReturnValueOnce({ select: loadSelect });
+
+    const service = TestBed.inject(TaskService);
+    await service.getTasks();
+
+    const single = vi.fn().mockResolvedValue({ data: updatedTask, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValueOnce({ update });
+
+    const changes = { title: 'Updated task', priority: 'urgent' as const };
+
+    await expect(service.updateTask(originalTask.id, changes)).resolves.toEqual(updatedTask);
+    expect(update).toHaveBeenCalledWith(changes);
+    expect(eq).toHaveBeenCalledWith('id', originalTask.id);
+    expect(select).toHaveBeenCalledWith('*');
+    expect(service.tasks()).toEqual([updatedTask]);
+    expect(service.error()).toBeNull();
+    expect(service.saving()).toBe(false);
+  });
+
+  it('exposes an update error without replacing the task', async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'Task could not be updated' },
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ update });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.updateTask('task-1', { status: 'done' })).resolves.toBeNull();
+    expect(service.tasks()).toEqual([]);
+    expect(service.error()).toBe('Task could not be updated');
+    expect(service.saving()).toBe(false);
+  });
 });
 
 function createNewTask(): NewTask {

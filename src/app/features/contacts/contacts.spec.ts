@@ -69,11 +69,17 @@ describe('Contacts', () => {
     );
     expect(fixture.nativeElement.querySelector('.contacts-toast-viewport')).toBeTruthy();
     expect(component.contacts()).toContain(createdContact);
+    expect(component.selectedContact()).toBe(createdContact);
     expect(component.dialogState()).toBeNull();
   });
 
-  it('does not show the success toast when creation fails', async () => {
+  it('preserves the selected contact and dialog without success feedback when creation fails', async () => {
+    const previouslySelectedContact: Contact = {
+      ...createdContact,
+      id: 'previously-selected-contact',
+    };
     contactService.createContact.mockResolvedValue(null);
+    component.selectContact(previouslySelectedContact);
     component.openAddDialog();
 
     await component.saveContact(validFormValue());
@@ -81,6 +87,8 @@ describe('Contacts', () => {
 
     expect(component.successToast()).toBeNull();
     expect(fixture.nativeElement.querySelector('app-toast')).toBeNull();
+    expect(component.selectedContact()).toBe(previouslySelectedContact);
+    expect(component.dialogState()).toEqual({ mode: 'add' });
   });
 
   it('shows success feedback and refreshes the selected contact after an edit', async () => {

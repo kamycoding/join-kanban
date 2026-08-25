@@ -1,19 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ContactService } from './contact';
+import { SupabaseService } from './supabase';
 
-const supabase = vi.hoisted(() => ({ from: vi.fn() }));
-
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => supabase),
-}));
+const from = vi.fn();
 
 describe('ContactService', () => {
   let service: ContactService;
+  const supabaseService = {
+    client: { from },
+  } as unknown as SupabaseService;
 
   beforeEach(() => {
-    supabase.from.mockReset();
-    TestBed.configureTestingModule({});
+    from.mockReset();
+    TestBed.configureTestingModule({
+      providers: [{ provide: SupabaseService, useValue: supabaseService }],
+    });
     service = TestBed.inject(ContactService);
   });
 
@@ -25,7 +27,7 @@ describe('ContactService', () => {
     await expect(service.createContact('A', 'test@test.a', '12345')).resolves.toBeNull();
     await expect(service.updateContact('1', 'A', 'test@test.a', '12345')).resolves.toBeNull();
 
-    expect(supabase.from).not.toHaveBeenCalled();
+    expect(from).not.toHaveBeenCalled();
   });
 
   it('normalizes valid input before creating a contact', async () => {
@@ -42,7 +44,7 @@ describe('ContactService', () => {
     const single = vi.fn().mockResolvedValue({ data: createdContact, error: null });
     const select = vi.fn().mockReturnValue({ single });
     const insert = vi.fn().mockReturnValue({ select });
-    supabase.from.mockReturnValue({ insert });
+    from.mockReturnValue({ insert });
 
     const result = await service.createContact(
       '  Anna   Weber ',
@@ -50,7 +52,7 @@ describe('ContactService', () => {
       ' +49 151 1234567 ',
     );
 
-    expect(supabase.from).toHaveBeenCalledWith('contacts');
+    expect(from).toHaveBeenCalledWith('contacts');
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({
         first_name: 'Anna',

@@ -40,9 +40,3 @@ export type NewSubtask = Pick<Subtask, 'task_id' | 'title'> &
   Partial<Pick<Subtask, 'is_completed' | 'position'>>;
 
 export type SubtaskChanges = Partial<Pick<Subtask, 'title' | 'is_completed' | 'position'>>;
-
-export interface TaskAssignee {
-  task_id: string;
-  contact_id: string;
-  created_at: string;
-}

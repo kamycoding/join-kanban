@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Task } from '../models/task';
+import { NewTask, Task } from '../models/task';
 import { SupabaseService } from './supabase';
 import { TaskService } from './task';
 
@@ -53,7 +53,56 @@ describe('TaskService', () => {
     expect(service.error()).toBe('Tasks could not be loaded');
     expect(service.loading()).toBe(false);
   });
+
+  it('creates a task and adds it to the local task list', async () => {
+    const newTask = createNewTask();
+    const createdTask = createTask();
+    const single = vi.fn().mockResolvedValue({ data: createdTask, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const insert = vi.fn().mockReturnValue({ select });
+    from.mockReturnValue({ insert });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.createTask(newTask)).resolves.toEqual(createdTask);
+    expect(from).toHaveBeenCalledWith('tasks');
+    expect(insert).toHaveBeenCalledWith(newTask);
+    expect(select).toHaveBeenCalledWith('*');
+    expect(single).toHaveBeenCalledOnce();
+    expect(service.tasks()).toEqual([createdTask]);
+    expect(service.error()).toBeNull();
+    expect(service.saving()).toBe(false);
+  });
+
+  it('exposes a create error without adding a task', async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'Task could not be created' },
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const insert = vi.fn().mockReturnValue({ select });
+    from.mockReturnValue({ insert });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.createTask(createNewTask())).resolves.toBeNull();
+    expect(service.tasks()).toEqual([]);
+    expect(service.error()).toBe('Task could not be created');
+    expect(service.saving()).toBe(false);
+  });
 });
+
+function createNewTask(): NewTask {
+  return {
+    title: 'Test task',
+    description: 'Test description',
+    due_date: '2026-08-30',
+    priority: 'medium',
+    category: 'user_story',
+    status: 'todo',
+    position: 0,
+  };
+}
 
 function createTask(): Task {
   return {

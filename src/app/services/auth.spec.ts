@@ -68,6 +68,24 @@ describe('AuthService', () => {
     expect(service.session()).toBe(session);
   });
 
+  it('signs in with the configured guest account', async () => {
+    const session = createSession('guest-user', 'guest@join-demo.local');
+    signInWithPassword.mockResolvedValue({
+      data: { session, user: session.user },
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signInAsGuest('demo-password')).resolves.toBe(true);
+    expect(signInWithPassword).toHaveBeenCalledWith({
+      email: 'guest@join-demo.local',
+      password: 'demo-password',
+    });
+    expect(service.isGuest()).toBe(true);
+  });
+
   it('exposes authentication errors without creating a session', async () => {
     signInWithPassword.mockResolvedValue({
       data: { session: null, user: null },
@@ -95,7 +113,7 @@ describe('AuthService', () => {
   });
 });
 
-function createSession(userId: string): Session {
+function createSession(userId: string, email?: string): Session {
   return {
     access_token: 'access-token',
     refresh_token: 'refresh-token',
@@ -103,6 +121,7 @@ function createSession(userId: string): Session {
     token_type: 'bearer',
     user: {
       id: userId,
+      email,
     },
   } as Session;
 }

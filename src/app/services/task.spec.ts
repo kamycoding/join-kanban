@@ -233,24 +233,49 @@ describe('TaskService', () => {
     expect(service.saving()).toBe(false);
   });
 
-  it('updates status and position when moving a task', async () => {
-    const movedTask = {
+  it('moves a task atomically and applies all normalized positions', async () => {
+    const firstTask = createTask();
+    const secondTask = {
       ...createTask(),
-      status: 'in_progress' as const,
-      position: 2,
+      id: 'task-2',
+      position: 1,
+      created_at: '2026-08-25T00:01:00.000Z',
     };
-    const single = vi.fn().mockResolvedValue({ data: movedTask, error: null });
-    const select = vi.fn().mockReturnValue({ single });
-    const eq = vi.fn().mockReturnValue({ select });
-    const update = vi.fn().mockReturnValue({ eq });
-    from.mockReturnValue({ update });
+    const movedTask = {
+      ...firstTask,
+      status: 'in_progress' as const,
+      position: 0,
+    };
+    const normalizedSecondTask = { ...secondTask, position: 0 };
 
     const service = TestBed.inject(TaskService);
+    await loadTasks(service, [firstTask, secondTask]);
+    rpc.mockResolvedValue({ data: [movedTask, normalizedSecondTask], error: null });
 
-    await expect(service.moveTask('task-1', 'in_progress', 2)).resolves.toEqual(movedTask);
-    expect(update).toHaveBeenCalledWith({ status: 'in_progress', position: 2 });
-    expect(eq).toHaveBeenCalledWith('id', 'task-1');
+    await expect(service.moveTask('task-1', 'in_progress', 0)).resolves.toEqual(movedTask);
+    expect(rpc).toHaveBeenCalledWith('move_task', {
+      p_task_id: 'task-1',
+      p_status: 'in_progress',
+      p_position: 0,
+    });
+    expect(service.tasks()).toEqual([
+      withEmptyDetails(movedTask),
+      withEmptyDetails(normalizedSecondTask),
+    ]);
     expect(service.error()).toBeNull();
+    expect(service.saving()).toBe(false);
+  });
+
+  it('keeps the task list unchanged when moving a task fails', async () => {
+    const task = createTask();
+    const service = TestBed.inject(TaskService);
+    await loadTasks(service, [task]);
+    rpc.mockResolvedValue({ data: null, error: { message: 'Task could not be moved' } });
+
+    await expect(service.moveTask(task.id, 'done', 0)).resolves.toBeNull();
+    expect(service.tasks()).toEqual([withEmptyDetails(task)]);
+    expect(service.error()).toBe('Task could not be moved');
+    expect(service.saving()).toBe(false);
   });
 
   it('rejects an invalid board position before starting a Supabase request', async () => {
@@ -258,6 +283,7 @@ describe('TaskService', () => {
 
     await expect(service.moveTask('task-1', 'done', -1)).resolves.toBeNull();
     expect(from).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
     expect(service.error()).toBe('Task position must be a non-negative integer.');
   });
 });

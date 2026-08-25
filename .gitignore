@@ -31,6 +31,7 @@ yarn-error.log
 
 # Miscellaneous
 /.angular/cache
+/public/guest-auth.local.json
 .sass-cache/
 /connect.lock
 /coverage

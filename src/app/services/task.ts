@@ -169,13 +169,46 @@ export class TaskService {
     return true;
   }
 
-  moveTask(id: string, status: TaskStatus, position: number): Promise<Task | null> {
+  async moveTask(id: string, status: TaskStatus, position: number): Promise<Task | null> {
     if (!Number.isInteger(position) || position < 0) {
       this.errorState.set('Task position must be a non-negative integer.');
-      return Promise.resolve(null);
+      return null;
     }
 
-    return this.updateTask(id, { status, position });
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const { data, error } = await this.supabase.rpc('move_task', {
+      p_task_id: id,
+      p_status: status,
+      p_position: position,
+    });
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return null;
+    }
+
+    const updatedTasks = (data ?? []) as Task[];
+    const updatesById = new Map(updatedTasks.map((task) => [task.id, task]));
+
+    this.tasksState.update((tasks) =>
+      tasks
+        .map((task) => {
+          const updatedTask = updatesById.get(task.id);
+          return updatedTask
+            ? { ...updatedTask, subtasks: task.subtasks, assignees: task.assignees }
+            : task;
+        })
+        .sort(
+          (taskA, taskB) =>
+            taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
+        ),
+    );
+
+    return updatesById.get(id) ?? null;
   }
 
   private addTaskToState(task: TaskWithDetails): void {

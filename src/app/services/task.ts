@@ -1,6 +1,6 @@
 import { Service, inject, signal } from '@angular/core';
 
-import { NewTask, Task, TaskChanges } from '../models/task';
+import { NewTask, Task, TaskChanges, TaskStatus } from '../models/task';
 import { SupabaseService } from './supabase';
 
 @Service()
@@ -107,5 +107,14 @@ export class TaskService {
 
     this.tasksState.update((tasks) => tasks.filter((task) => task.id !== id));
     return true;
+  }
+
+  moveTask(id: string, status: TaskStatus, position: number): Promise<Task | null> {
+    if (!Number.isInteger(position) || position < 0) {
+      this.errorState.set('Task position must be a non-negative integer.');
+      return Promise.resolve(null);
+    }
+
+    return this.updateTask(id, { status, position });
   }
 }

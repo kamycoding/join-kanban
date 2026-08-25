@@ -183,6 +183,34 @@ describe('TaskService', () => {
     expect(service.error()).toBe('Task could not be deleted');
     expect(service.saving()).toBe(false);
   });
+
+  it('updates status and position when moving a task', async () => {
+    const movedTask = {
+      ...createTask(),
+      status: 'in_progress' as const,
+      position: 2,
+    };
+    const single = vi.fn().mockResolvedValue({ data: movedTask, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const update = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ update });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.moveTask('task-1', 'in_progress', 2)).resolves.toEqual(movedTask);
+    expect(update).toHaveBeenCalledWith({ status: 'in_progress', position: 2 });
+    expect(eq).toHaveBeenCalledWith('id', 'task-1');
+    expect(service.error()).toBeNull();
+  });
+
+  it('rejects an invalid board position before starting a Supabase request', async () => {
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.moveTask('task-1', 'done', -1)).resolves.toBeNull();
+    expect(from).not.toHaveBeenCalled();
+    expect(service.error()).toBe('Task position must be a non-negative integer.');
+  });
 });
 
 function createNewTask(): NewTask {

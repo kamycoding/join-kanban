@@ -1,18 +1,22 @@
 import { Service, inject, signal } from '@angular/core';
 
-import { NewTask, Task, TaskChanges, TaskStatus } from '../models/task';
+import { NewSubtask, NewTask, Subtask, Task, TaskChanges, TaskStatus } from '../models/task';
 import { SupabaseService } from './supabase';
 
 @Service()
 export class TaskService {
   private readonly supabase = inject(SupabaseService).client;
   private readonly tasksState = signal<Task[]>([]);
+  private readonly subtasksState = signal<Subtask[]>([]);
   private readonly loadingState = signal(false);
+  private readonly loadingSubtasksState = signal(false);
   private readonly savingState = signal(false);
   private readonly errorState = signal<string | null>(null);
 
   readonly tasks = this.tasksState.asReadonly();
+  readonly subtasks = this.subtasksState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
+  readonly loadingSubtasks = this.loadingSubtasksState.asReadonly();
   readonly saving = this.savingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
@@ -116,5 +120,76 @@ export class TaskService {
     }
 
     return this.updateTask(id, { status, position });
+  }
+
+  async getSubtasks(taskId: string): Promise<boolean> {
+    this.loadingSubtasksState.set(true);
+    this.errorState.set(null);
+
+    const { data, error } = await this.supabase
+      .from('subtasks')
+      .select('*')
+      .eq('task_id', taskId)
+      .order('position', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    this.loadingSubtasksState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return false;
+    }
+
+    this.subtasksState.update((subtasks) =>
+      this.sortSubtasks([
+        ...subtasks.filter((subtask) => subtask.task_id !== taskId),
+        ...(data as Subtask[]),
+      ]),
+    );
+    return true;
+  }
+
+  async createSubtask(newSubtask: NewSubtask): Promise<Subtask | null> {
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const subtaskToCreate: NewSubtask = {
+      ...newSubtask,
+      position: newSubtask.position ?? this.nextSubtaskPosition(newSubtask.task_id),
+    };
+
+    const { data, error } = await this.supabase
+      .from('subtasks')
+      .insert(subtaskToCreate)
+      .select('*')
+      .single();
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return null;
+    }
+
+    const createdSubtask = data as Subtask;
+    this.subtasksState.update((subtasks) => this.sortSubtasks([...subtasks, createdSubtask]));
+    return createdSubtask;
+  }
+
+  private nextSubtaskPosition(taskId: string): number {
+    const positions = this.subtasksState()
+      .filter((subtask) => subtask.task_id === taskId)
+      .map((subtask) => subtask.position);
+
+    return positions.length === 0 ? 0 : Math.max(...positions) + 1;
+  }
+
+  private sortSubtasks(subtasks: Subtask[]): Subtask[] {
+    return subtasks.sort(
+      (subtaskA, subtaskB) =>
+        subtaskA.task_id.localeCompare(subtaskB.task_id) ||
+        subtaskA.position - subtaskB.position ||
+        subtaskA.created_at.localeCompare(subtaskB.created_at),
+    );
   }
 }

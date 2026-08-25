@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { NewTask, Task } from '../models/task';
+import { NewSubtask, NewTask, Subtask, Task } from '../models/task';
 import { SupabaseService } from './supabase';
 import { TaskService } from './task';
 
@@ -211,6 +211,62 @@ describe('TaskService', () => {
     expect(from).not.toHaveBeenCalled();
     expect(service.error()).toBe('Task position must be a non-negative integer.');
   });
+
+  it('loads the subtasks of one task in their display order', async () => {
+    const subtasks = [createSubtask()];
+    const orderByCreatedAt = vi.fn().mockResolvedValue({ data: subtasks, error: null });
+    const orderByPosition = vi.fn().mockReturnValue({ order: orderByCreatedAt });
+    const eq = vi.fn().mockReturnValue({ order: orderByPosition });
+    const select = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ select });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.getSubtasks('task-1')).resolves.toBe(true);
+    expect(from).toHaveBeenCalledWith('subtasks');
+    expect(select).toHaveBeenCalledWith('*');
+    expect(eq).toHaveBeenCalledWith('task_id', 'task-1');
+    expect(orderByPosition).toHaveBeenCalledWith('position', { ascending: true });
+    expect(orderByCreatedAt).toHaveBeenCalledWith('created_at', { ascending: true });
+    expect(service.subtasks()).toEqual(subtasks);
+    expect(service.loadingSubtasks()).toBe(false);
+  });
+
+  it('creates a subtask at the next available position', async () => {
+    const newSubtask: NewSubtask = { task_id: 'task-1', title: 'New subtask' };
+    const createdSubtask = createSubtask();
+    const single = vi.fn().mockResolvedValue({ data: createdSubtask, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const insert = vi.fn().mockReturnValue({ select });
+    from.mockReturnValue({ insert });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.createSubtask(newSubtask)).resolves.toEqual(createdSubtask);
+    expect(insert).toHaveBeenCalledWith({ ...newSubtask, position: 0 });
+    expect(select).toHaveBeenCalledWith('*');
+    expect(service.subtasks()).toEqual([createdSubtask]);
+    expect(service.error()).toBeNull();
+    expect(service.saving()).toBe(false);
+  });
+
+  it('exposes a subtask creation error without changing the subtask list', async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'Subtask could not be created' },
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const insert = vi.fn().mockReturnValue({ select });
+    from.mockReturnValue({ insert });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(
+      service.createSubtask({ task_id: 'task-1', title: 'New subtask' }),
+    ).resolves.toBeNull();
+    expect(service.subtasks()).toEqual([]);
+    expect(service.error()).toBe('Subtask could not be created');
+  });
 });
 
 function createNewTask(): NewTask {
@@ -238,5 +294,16 @@ function createTask(): Task {
     position: 0,
     created_at: '2026-08-25T00:00:00.000Z',
     updated_at: '2026-08-25T00:00:00.000Z',
+  };
+}
+
+function createSubtask(): Subtask {
+  return {
+    id: 'subtask-1',
+    task_id: 'task-1',
+    title: 'New subtask',
+    is_completed: false,
+    position: 0,
+    created_at: '2026-08-25T00:00:00.000Z',
   };
 }

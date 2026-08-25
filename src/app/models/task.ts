@@ -40,3 +40,11 @@ export type NewSubtask = Pick<Subtask, 'task_id' | 'title'> &
   Partial<Pick<Subtask, 'is_completed' | 'position'>>;
 
 export type SubtaskChanges = Partial<Pick<Subtask, 'title' | 'is_completed' | 'position'>>;
+
+export type NewTaskSubtask = Omit<NewSubtask, 'task_id'>;
+
+export interface NewTaskWithDetails {
+  task: NewTask;
+  subtasks?: NewTaskSubtask[];
+  contactIds?: string[];
+}

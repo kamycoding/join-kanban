@@ -1,6 +1,6 @@
 import { Service, inject, signal } from '@angular/core';
 
-import { NewTask, Task, TaskChanges, TaskStatus } from '../models/task';
+import { NewTask, NewTaskWithDetails, Task, TaskChanges, TaskStatus } from '../models/task';
 import { SupabaseService } from './supabase';
 
 @Service()
@@ -51,13 +51,49 @@ export class TaskService {
     }
 
     const createdTask = data as Task;
-    this.tasksState.update((tasks) =>
-      [...tasks, createdTask].sort(
-        (taskA, taskB) =>
-          taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
-      ),
-    );
+    this.addTaskToState(createdTask);
 
+    return createdTask;
+  }
+
+  async createTaskWithDetails(details: NewTaskWithDetails): Promise<Task | null> {
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const status = details.task.status ?? 'todo';
+    const position = details.task.position ?? this.nextTaskPosition(status);
+    const subtasks = (details.subtasks ?? []).map((subtask, index) => ({
+      ...subtask,
+      position: subtask.position ?? index,
+    }));
+
+    const { data, error } = await this.supabase.rpc('create_task_with_details', {
+      p_title: details.task.title,
+      p_description: details.task.description,
+      p_due_date: details.task.due_date,
+      p_priority: details.task.priority,
+      p_category: details.task.category,
+      p_status: status,
+      p_position: position,
+      p_subtasks: subtasks,
+      p_contact_ids: [...new Set(details.contactIds ?? [])],
+    });
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return null;
+    }
+
+    const createdTask = (Array.isArray(data) ? data[0] : data) as Task | undefined;
+
+    if (!createdTask) {
+      this.errorState.set('Task could not be created.');
+      return null;
+    }
+
+    this.addTaskToState(createdTask);
     return createdTask;
   }
 
@@ -116,5 +152,22 @@ export class TaskService {
     }
 
     return this.updateTask(id, { status, position });
+  }
+
+  private addTaskToState(task: Task): void {
+    this.tasksState.update((tasks) =>
+      [...tasks, task].sort(
+        (taskA, taskB) =>
+          taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
+      ),
+    );
+  }
+
+  private nextTaskPosition(status: TaskStatus): number {
+    const positions = this.tasksState()
+      .filter((task) => task.status === status)
+      .map((task) => task.position);
+
+    return positions.length === 0 ? 0 : Math.max(...positions) + 1;
   }
 }

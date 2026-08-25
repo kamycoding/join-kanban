@@ -78,6 +78,17 @@ describe('ContactDialog', () => {
     expect(closeCount).toBe(1);
   });
 
+  it('ignores close requests while saving', () => {
+    const close = vi.fn();
+    component.close.subscribe(close);
+    fixture.componentRef.setInput('saving', true);
+    component.dialogEntered.set(false);
+
+    component.requestClose();
+
+    expect(close).not.toHaveBeenCalled();
+  });
+
   it('emits consistently normalized values on valid submit', async () => {
     let submittedValue: unknown;
     component.submitted.subscribe((value) => (submittedValue = value));

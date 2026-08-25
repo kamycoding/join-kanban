@@ -102,6 +102,41 @@ describe('Contacts', () => {
     expect(component.dialogState()).toBeNull();
   });
 
+  it('does not let a stale create result replace a newer selection', async () => {
+    const previouslySelectedContact: Contact = {
+      ...createdContact,
+      id: 'previously-selected-contact',
+    };
+    const createResult = deferred<Contact | null>();
+    contactService.createContact.mockReturnValue(createResult.promise);
+    component.openAddDialog();
+    const save = component.saveContact(validFormValue());
+
+    component.closeDialog();
+    component.selectContact(previouslySelectedContact);
+    createResult.resolve(createdContact);
+    await save;
+
+    expect(component.selectedContact()).toBe(previouslySelectedContact);
+    expect(component.successToast()).toBeNull();
+  });
+
+  it('does not let a stale create result close a newer dialog', async () => {
+    const createResult = deferred<Contact | null>();
+    contactService.createContact.mockReturnValue(createResult.promise);
+    component.openAddDialog();
+    const save = component.saveContact(validFormValue());
+
+    component.closeDialog();
+    component.openEditDialog(createdContact);
+    const newerDialog = component.dialogState();
+    createResult.resolve(createdContact);
+    await save;
+
+    expect(component.dialogState()).toBe(newerDialog);
+    expect(component.successToast()).toBeNull();
+  });
+
   it('clears the selected contact after a successful deletion', async () => {
     contactService.deleteContact.mockResolvedValue(true);
     component.selectContact(createdContact);
@@ -148,5 +183,14 @@ describe('Contacts', () => {
       email: 'anna@example.com',
       phone: '+49123456789',
     };
+  }
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((promiseResolve) => {
+      resolve = promiseResolve;
+    });
+
+    return { promise, resolve };
   }
 });

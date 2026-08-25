@@ -69,11 +69,17 @@ describe('Contacts', () => {
     );
     expect(fixture.nativeElement.querySelector('.contacts-toast-viewport')).toBeTruthy();
     expect(component.contacts()).toContain(createdContact);
+    expect(component.selectedContact()).toBe(createdContact);
     expect(component.dialogState()).toBeNull();
   });
 
-  it('does not show the success toast when creation fails', async () => {
+  it('preserves the selected contact and dialog without success feedback when creation fails', async () => {
+    const previouslySelectedContact: Contact = {
+      ...createdContact,
+      id: 'previously-selected-contact',
+    };
     contactService.createContact.mockResolvedValue(null);
+    component.selectContact(previouslySelectedContact);
     component.openAddDialog();
 
     await component.saveContact(validFormValue());
@@ -81,6 +87,8 @@ describe('Contacts', () => {
 
     expect(component.successToast()).toBeNull();
     expect(fixture.nativeElement.querySelector('app-toast')).toBeNull();
+    expect(component.selectedContact()).toBe(previouslySelectedContact);
+    expect(component.dialogState()).toEqual({ mode: 'add' });
   });
 
   it('shows success feedback and refreshes the selected contact after an edit', async () => {
@@ -92,6 +100,41 @@ describe('Contacts', () => {
     expect(component.successToast()?.message).toBe('Contact successfully updated');
     expect(component.selectedContact()).toBe(createdContact);
     expect(component.dialogState()).toBeNull();
+  });
+
+  it('does not let a stale create result replace a newer selection', async () => {
+    const previouslySelectedContact: Contact = {
+      ...createdContact,
+      id: 'previously-selected-contact',
+    };
+    const createResult = deferred<Contact | null>();
+    contactService.createContact.mockReturnValue(createResult.promise);
+    component.openAddDialog();
+    const save = component.saveContact(validFormValue());
+
+    component.closeDialog();
+    component.selectContact(previouslySelectedContact);
+    createResult.resolve(createdContact);
+    await save;
+
+    expect(component.selectedContact()).toBe(previouslySelectedContact);
+    expect(component.successToast()).toBeNull();
+  });
+
+  it('does not let a stale create result close a newer dialog', async () => {
+    const createResult = deferred<Contact | null>();
+    contactService.createContact.mockReturnValue(createResult.promise);
+    component.openAddDialog();
+    const save = component.saveContact(validFormValue());
+
+    component.closeDialog();
+    component.openEditDialog(createdContact);
+    const newerDialog = component.dialogState();
+    createResult.resolve(createdContact);
+    await save;
+
+    expect(component.dialogState()).toBe(newerDialog);
+    expect(component.successToast()).toBeNull();
   });
 
   it('clears the selected contact after a successful deletion', async () => {
@@ -140,5 +183,14 @@ describe('Contacts', () => {
       email: 'anna@example.com',
       phone: '+49123456789',
     };
+  }
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((promiseResolve) => {
+      resolve = promiseResolve;
+    });
+
+    return { promise, resolve };
   }
 });

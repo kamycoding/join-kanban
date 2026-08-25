@@ -79,6 +79,10 @@ export class ContactDialog implements OnInit {
   }
 
   requestClose(): void {
+    if (this.saving()) {
+      return;
+    }
+
     if (!this.dialogEntered() || this.prefersReducedMotion()) {
       this.close.emit();
       return;

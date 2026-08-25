@@ -81,7 +81,7 @@ export class Contacts implements OnInit {
           ? await this.createContact(value)
           : await this.updateContact(dialog.contact, value);
 
-      if (savedContact) {
+      if (savedContact && this.dialogState() === dialog) {
         this.handleSuccessfulSave(dialog, savedContact);
       }
     } finally {
@@ -107,8 +107,9 @@ export class Contacts implements OnInit {
   }
 
   private handleSuccessfulSave(dialog: ContactDialogState, contact: Contact): void {
+    this.selectedContact.set(contact);
+
     if (dialog.mode === 'edit') {
-      this.selectedContact.set(contact);
       this.showSuccessToast(CONTACT_UPDATED_MESSAGE);
     } else {
       this.showSuccessToast(CONTACT_CREATED_MESSAGE);

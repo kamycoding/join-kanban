@@ -91,4 +91,21 @@ export class TaskService {
 
     return updatedTask;
   }
+
+  async deleteTask(id: string): Promise<boolean> {
+    this.savingState.set(true);
+    this.errorState.set(null);
+
+    const { error } = await this.supabase.from('tasks').delete().eq('id', id).select('id').single();
+
+    this.savingState.set(false);
+
+    if (error) {
+      this.errorState.set(error.message);
+      return false;
+    }
+
+    this.tasksState.update((tasks) => tasks.filter((task) => task.id !== id));
+    return true;
+  }
 }

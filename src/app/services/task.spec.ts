@@ -140,6 +140,49 @@ describe('TaskService', () => {
     expect(service.error()).toBe('Task could not be updated');
     expect(service.saving()).toBe(false);
   });
+
+  it('deletes a task and removes it from the local task list', async () => {
+    const task = createTask();
+    const loadOrderByCreatedAt = vi.fn().mockResolvedValue({ data: [task], error: null });
+    const loadOrderByPosition = vi.fn().mockReturnValue({ order: loadOrderByCreatedAt });
+    const loadSelect = vi.fn().mockReturnValue({ order: loadOrderByPosition });
+    from.mockReturnValueOnce({ select: loadSelect });
+
+    const service = TestBed.inject(TaskService);
+    await service.getTasks();
+
+    const single = vi.fn().mockResolvedValue({ data: { id: task.id }, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const deleteTask = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValueOnce({ delete: deleteTask });
+
+    await expect(service.deleteTask(task.id)).resolves.toBe(true);
+    expect(deleteTask).toHaveBeenCalledOnce();
+    expect(eq).toHaveBeenCalledWith('id', task.id);
+    expect(select).toHaveBeenCalledWith('id');
+    expect(service.tasks()).toEqual([]);
+    expect(service.error()).toBeNull();
+    expect(service.saving()).toBe(false);
+  });
+
+  it('exposes a delete error without removing the task', async () => {
+    const single = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: 'Task could not be deleted' },
+    });
+    const select = vi.fn().mockReturnValue({ single });
+    const eq = vi.fn().mockReturnValue({ select });
+    const deleteTask = vi.fn().mockReturnValue({ eq });
+    from.mockReturnValue({ delete: deleteTask });
+
+    const service = TestBed.inject(TaskService);
+
+    await expect(service.deleteTask('task-1')).resolves.toBe(false);
+    expect(service.tasks()).toEqual([]);
+    expect(service.error()).toBe('Task could not be deleted');
+    expect(service.saving()).toBe(false);
+  });
 });
 
 function createNewTask(): NewTask {

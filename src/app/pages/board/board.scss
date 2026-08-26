@@ -1,0 +1,65 @@
+@use '../../../styles/breakpoints' as *;
+
+.board-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+
+  padding: var(--space-9) var(--space-10);
+
+  background: var(--color-bg-app);
+}
+
+.board-heading h1 {
+  margin: 0;
+
+  color: var(--color-primary);
+  font-size: var(--font-size-t2);
+  font-weight: var(--font-weight-bold);
+}
+
+.board-page__loading,
+.board-page__error {
+  margin: 0;
+
+  color: var(--color-icon);
+  font-size: var(--font-size-body);
+}
+
+.board-page__error {
+  color: var(--color-error);
+}
+
+.board-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-6);
+
+  align-items: start;
+}
+
+@media (max-width: $bp-tablet) {
+  .board-page {
+    padding: var(--space-7) var(--space-5);
+    gap: var(--space-5);
+  }
+
+  .board-heading h1 {
+    font-size: var(--font-size-t5);
+  }
+
+  .board-columns {
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: $bp-mobile) {
+  .board-page {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .board-columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+}

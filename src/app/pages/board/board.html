@@ -1,1 +1,19 @@
-<p>board works!</p>
+<div class="board-page">
+  <div class="board-heading">
+    <h1>Board</h1>
+  </div>
+
+  @if (error(); as message) {
+    <p class="board-page__error" role="alert">{{ message }}</p>
+  }
+
+  @if (loading()) {
+    <p class="board-page__loading">Loading tasks…</p>
+  }
+
+  <div class="board-columns">
+    @for (column of columns; track column.status) {
+      <app-board-column [heading]="column.heading" [tasks]="tasksFor(column.status)" />
+    }
+  </div>
+</div>

@@ -1,22 +1,95 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { WritableSignal, signal } from '@angular/core';
+import { vi } from 'vitest';
 
+import { TaskStatus, TaskWithDetails } from '../../models/task';
+import { TaskService } from '../../services/task';
 import { Board } from './board';
 
 describe('Board', () => {
   let component: Board;
   let fixture: ComponentFixture<Board>;
+  let tasks: WritableSignal<TaskWithDetails[]>;
+  let taskService: {
+    tasks: typeof tasks;
+    loading: WritableSignal<boolean>;
+    error: WritableSignal<string | null>;
+    getTasks: ReturnType<typeof vi.fn>;
+  };
+
+  function createTask(id: string, title: string, status: TaskStatus): TaskWithDetails {
+    return {
+      id,
+      owner_id: 'owner-1',
+      title,
+      description: '',
+      due_date: '2026-09-01',
+      priority: 'medium',
+      category: 'user_story',
+      status,
+      position: 0,
+      created_at: '2026-08-26T00:00:00.000Z',
+      updated_at: '2026-08-26T00:00:00.000Z',
+      subtasks: [],
+      assignees: [],
+    };
+  }
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Board],
-    }).compileComponents();
+    tasks = signal<TaskWithDetails[]>([]);
+    taskService = {
+      tasks,
+      loading: signal(false),
+      error: signal<string | null>(null),
+      getTasks: vi.fn().mockResolvedValue(true),
+    };
+
+    await TestBed.configureTestingModule({ imports: [Board] })
+      .overrideProvider(TaskService, { useValue: taskService })
+      .compileComponents();
 
     fixture = TestBed.createComponent(Board);
     component = fixture.componentInstance;
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('loads the tasks once when it starts', () => {
+    expect(taskService.getTasks).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders one column per status', () => {
+    const columns = fixture.nativeElement.querySelectorAll('app-board-column');
+
+    expect(columns.length).toBe(4);
+  });
+
+  it('puts every task into the column of its status', async () => {
+    tasks.set([
+      createTask('task-1', 'Plan the sprint', 'todo'),
+      createTask('task-2', 'Build the board', 'in_progress'),
+      createTask('task-3', 'Check the layout', 'in_progress'),
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.tasksFor('todo').map((task) => task.id)).toEqual(['task-1']);
+    expect(component.tasksFor('in_progress').map((task) => task.id)).toEqual(['task-2', 'task-3']);
+    expect(component.tasksFor('await_feedback')).toEqual([]);
+    expect(component.tasksFor('done')).toEqual([]);
+  });
+
+  it('shows the error message when loading fails', async () => {
+    taskService.error.set('Tasks could not be loaded.');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const alert = fixture.nativeElement.querySelector('.board-page__error');
+
+    expect(alert?.textContent).toContain('Tasks could not be loaded.');
   });
 });

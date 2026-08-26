@@ -80,6 +80,22 @@ export class AuthService {
     return true;
   }
 
+  async validateSession(): Promise<boolean> {
+    if (!this.isAuthenticated()) {
+      return false;
+    }
+
+    const { data, error } = await this.supabase.auth.getUser();
+
+    if (!error && data.user) {
+      return true;
+    }
+
+    await this.supabase.auth.signOut({ scope: 'local' });
+    this.sessionState.set(null);
+    return false;
+  }
+
   clearError(): void {
     this.errorState.set(null);
   }

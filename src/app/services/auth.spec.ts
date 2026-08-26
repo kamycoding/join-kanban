@@ -7,6 +7,7 @@ import { SupabaseService } from './supabase';
 describe('AuthService', () => {
   const unsubscribe = vi.fn();
   const getSession = vi.fn();
+  const getUser = vi.fn();
   const signInWithPassword = vi.fn();
   const signInAnonymously = vi.fn();
   const signOut = vi.fn();
@@ -18,6 +19,7 @@ describe('AuthService', () => {
     client: {
       auth: {
         getSession,
+        getUser,
         signInWithPassword,
         signInAnonymously,
         signOut,
@@ -29,6 +31,7 @@ describe('AuthService', () => {
   beforeEach(() => {
     unsubscribe.mockReset();
     getSession.mockReset();
+    getUser.mockReset();
     signInWithPassword.mockReset();
     signInAnonymously.mockReset();
     signOut.mockReset();
@@ -108,6 +111,33 @@ describe('AuthService', () => {
     await service.ready;
 
     await expect(service.signOut()).resolves.toBe(true);
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(service.session()).toBeNull();
+  });
+
+  it('accepts a session whose user still exists', async () => {
+    const session = createSession('guest-user', undefined, true);
+    getSession.mockResolvedValue({ data: { session }, error: null });
+    getUser.mockResolvedValue({ data: { user: session.user }, error: null });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.validateSession()).resolves.toBe(true);
+    expect(signOut).not.toHaveBeenCalled();
+    expect(service.session()).toBe(session);
+  });
+
+  it('removes a local session whose guest user was cleaned up', async () => {
+    const session = createSession('expired-guest', undefined, true);
+    getSession.mockResolvedValue({ data: { session }, error: null });
+    getUser.mockResolvedValue({ data: { user: null }, error: { message: 'User not found' } });
+    signOut.mockResolvedValue({ error: null });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.validateSession()).resolves.toBe(false);
     expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(service.session()).toBeNull();
   });

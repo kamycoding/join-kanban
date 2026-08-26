@@ -9,7 +9,7 @@ export class GuestAutoLoginService {
   async initialize(): Promise<void> {
     await this.auth.ready;
 
-    if (this.auth.isAuthenticated()) {
+    if (this.auth.isAuthenticated() && (await this.auth.validateSession())) {
       return;
     }
 

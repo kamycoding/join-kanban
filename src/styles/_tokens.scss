@@ -17,6 +17,7 @@
   // -- Neutrals --------------------------------------------------------------
   --color-white: #ffffff;
   --color-black: #000000;
+  --color-text-secondary: #686868;
   --color-bg-app: #f6f7f8;
   --color-bg-hover: #eeeeee;
   --color-bg-selected: #edf2fa;
@@ -36,6 +37,10 @@
   --color-urgent: #ff3d00;
   --color-medium: #ffa800;
   --color-low: #7ae229;
+
+  // -- Progress --------------------------------------------------------------
+  --color-progress-track: #f4f4f4;
+  --color-progress-fill: #4589ff;
 
   // -- Task categories -------------------------------------------------------
   --color-cat-user-story: #0038ff;

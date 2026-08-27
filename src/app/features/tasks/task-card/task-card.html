@@ -1,0 +1,58 @@
+<article class="task-card" [class.task-card--without-subtasks]="totalSubtasks() === 0">
+  <span
+    class="task-card__category"
+    [class.task-card__category--user-story]="task().category === 'user_story'"
+    [class.task-card__category--technical-task]="task().category === 'technical_task'"
+  >
+    {{ categoryLabel() }}
+  </span>
+
+  <div class="task-card__content">
+    <h3 class="task-card__title">
+      <button
+        class="task-card__open"
+        type="button"
+        [attr.aria-label]="accessibleName()"
+        (click)="activate()"
+      >
+        {{ task().title }}
+      </button>
+    </h3>
+
+    @if (task().description.trim()) {
+      <p class="task-card__description">{{ task().description }}</p>
+    }
+  </div>
+
+  @if (totalSubtasks() > 0) {
+    <div class="task-card__subtasks">
+      <progress
+        class="task-card__progress"
+        max="100"
+        [value]="progressPercentage()"
+        [attr.aria-label]="
+          'Subtask completion: ' + completedSubtasks() + ' of ' + totalSubtasks() + ' completed'
+        "
+      ></progress>
+
+      <span class="task-card__subtask-count">
+        {{ completedSubtasks() }}/{{ totalSubtasks() }} Subtasks
+      </span>
+    </div>
+  }
+
+  <footer class="task-card__footer">
+    @if (task().assignees.length > 0) {
+      <ul class="task-card__assignees" aria-label="Assigned contacts">
+        @for (assignment of task().assignees; track assignment.contact_id) {
+          <li class="task-card__avatar" [style.background-color]="assignment.contact.color">
+            <span aria-hidden="true">{{ contactInitials(assignment) }}</span>
+            <span class="task-card__avatar-name">{{ contactFullName(assignment) }}</span>
+          </li>
+        }
+      </ul>
+    }
+
+    <img class="task-card__priority" [src]="priorityIcon()" [alt]="priorityLabel() + ' priority'" />
+  </footer>
+</article>

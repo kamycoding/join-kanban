@@ -62,6 +62,6 @@ export class TaskCard {
   }
 
   private firstCharacter(value: string): string {
-    return value.trim().charAt(0);
+    return Array.from(value.trim())[0] ?? '';
   }
 }

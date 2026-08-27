@@ -121,7 +121,7 @@ describe('TaskCard', () => {
     expect(element<HTMLElement>('.task-card').classList).toContain('task-card--without-subtasks');
   });
 
-  it('renders assigned contact initials and colors', () => {
+  it('builds initials from normal first and last names', () => {
     renderTask(
       createTask({
         assignees: [createAssignee('contact-1', 'Anna', 'Schmidt', '#ff7a00')],
@@ -130,9 +130,30 @@ describe('TaskCard', () => {
 
     const avatar = element<HTMLElement>('.task-card__avatar');
 
-    expect(avatar.textContent).toContain('AS');
+    expect(visibleInitials()).toBe('AS');
     expect(avatar.style.backgroundColor).toBe('rgb(255, 122, 0)');
     expect(element<HTMLElement>('.task-card__avatar-name').textContent).toBe('Anna Schmidt');
+  });
+
+  it('trims surrounding whitespace before building initials', () => {
+    renderTask(
+      createTask({
+        assignees: [createAssignee('contact-1', '  Anna  ', '  Schmidt  ', '#ff7a00')],
+      }),
+    );
+
+    expect(visibleInitials()).toBe('AS');
+    expect(element<HTMLElement>('.task-card__avatar-name').textContent).toBe('Anna Schmidt');
+  });
+
+  it('keeps a non-BMP Unicode code point intact when building initials', () => {
+    renderTask(
+      createTask({
+        assignees: [createAssignee('contact-1', '😀lex', 'Schmidt', '#ff7a00')],
+      }),
+    );
+
+    expect(visibleInitials()).toBe('😀S');
   });
 
   it('handles zero assigned contacts', () => {
@@ -177,15 +198,22 @@ describe('TaskCard', () => {
   it('builds initials when the first name is missing', () => {
     renderTask(createTask({ assignees: [createAssignee('contact-1', '', 'Schmidt', '#ff7a00')] }));
 
-    expect(element<HTMLElement>('.task-card__avatar').textContent).toContain('S');
+    expect(visibleInitials()).toBe('S');
     expect(element<HTMLElement>('.task-card__avatar-name').textContent).toBe('Schmidt');
   });
 
   it('builds initials when the last name is missing', () => {
     renderTask(createTask({ assignees: [createAssignee('contact-1', 'Anna', '', '#ff7a00')] }));
 
-    expect(element<HTMLElement>('.task-card__avatar').textContent).toContain('A');
+    expect(visibleInitials()).toBe('A');
     expect(element<HTMLElement>('.task-card__avatar-name').textContent).toBe('Anna');
+  });
+
+  it('keeps the empty initials and unnamed-contact fallback for empty names', () => {
+    renderTask(createTask({ assignees: [createAssignee('contact-1', ' ', ' ', '#ff7a00')] }));
+
+    expect(visibleInitials()).toBe('');
+    expect(element<HTMLElement>('.task-card__avatar-name').textContent).toBe('Unnamed contact');
   });
 
   it('emits the exact supplied task when activated', () => {
@@ -251,6 +279,12 @@ describe('TaskCard', () => {
 
   function element<T extends Element>(selector: string): T {
     return fixture.nativeElement.querySelector(selector) as T;
+  }
+
+  function visibleInitials(): string {
+    return (
+      element<HTMLElement>('.task-card__avatar [aria-hidden="true"]').textContent?.trim() ?? ''
+    );
   }
 });
 

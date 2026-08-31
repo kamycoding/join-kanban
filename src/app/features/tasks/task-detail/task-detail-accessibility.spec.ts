@@ -157,6 +157,74 @@ describe('TaskDetail accessibility', () => {
     outside.remove();
   });
 
+  it('captures the opener before initial focus moves into the dialog', async () => {
+    const opener = openFrom();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(element<HTMLButtonElement>('.task-detail__close'));
+    opener.remove();
+  });
+
+  it('restores focus to the opener after a normal close', () => {
+    const opener = openFrom();
+    component.closeRequested.subscribe(() => fixture.destroy());
+    element<HTMLButtonElement>('.task-detail__close').click();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('restores focus to the opener after Escape closes the dialog', () => {
+    const opener = openFrom();
+    component.closeRequested.subscribe(() => fixture.destroy());
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('restores focus to the opener after a backdrop click closes the dialog', () => {
+    const opener = openFrom();
+    component.closeRequested.subscribe(() => fixture.destroy());
+    element<HTMLElement>('.task-detail-backdrop').click();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('does not restore focus to a disconnected opener', () => {
+    const opener = openFrom();
+    component.closeRequested.subscribe(() => fixture.destroy());
+    opener.remove();
+    expect(() =>
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
+    ).not.toThrow();
+    expect(document.activeElement).not.toBe(opener);
+  });
+
+  it('does not restore focus to the opener when Edit is requested', () => {
+    const opener = openFrom();
+    component.editRequested.subscribe(() => fixture.destroy());
+    actionButton('Edit').click();
+    expect(document.activeElement).not.toBe(opener);
+    opener.remove();
+  });
+
+  it('does not restore focus to the opener when Delete is requested', () => {
+    const opener = openFrom();
+    component.deleteRequested.subscribe(() => fixture.destroy());
+    actionButton('Delete').click();
+    expect(document.activeElement).not.toBe(opener);
+    opener.remove();
+  });
+
+  function openFrom(): HTMLButtonElement {
+    fixture.destroy();
+    const opener = document.createElement('button');
+    document.body.append(opener);
+    opener.focus();
+    fixture = TestBed.createComponent(TaskDetail);
+    component = fixture.componentInstance;
+    renderTask(createTask());
+    return opener;
+  }
+
   function renderTask(task: TaskWithDetails): void {
     fixture.componentRef.setInput('task', task);
     fixture.detectChanges();

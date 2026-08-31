@@ -74,7 +74,7 @@
 
 .task-detail :is(button, label, input):is(:hover, :focus-visible) {
   outline: none;
-  background: var(--color-hover-tint);
+  background-color: var(--color-hover-tint);
 }
 
 .task-detail :is(h2, h3, p, dl) {

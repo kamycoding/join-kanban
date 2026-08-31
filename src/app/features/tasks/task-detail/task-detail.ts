@@ -1,9 +1,11 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   afterNextRender,
   computed,
+  inject,
   input,
   output,
   viewChild,
@@ -60,8 +62,18 @@ export class TaskDetail {
   private readonly dialog = viewChild.required<ElementRef<HTMLElement>>('dialog');
   private readonly closeButton = viewChild.required<ElementRef<HTMLButtonElement>>('closeButton');
 
+  private readonly previouslyFocused =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  private restoreFocusOnDestroy = true;
+
   constructor() {
     afterNextRender(() => this.closeButton().nativeElement.focus());
+
+    inject(DestroyRef).onDestroy(() => {
+      if (this.restoreFocusOnDestroy) {
+        this.restorePreviousFocus();
+      }
+    });
   }
 
   requestClose(): void {
@@ -69,11 +81,21 @@ export class TaskDetail {
   }
 
   requestEdit(): void {
+    this.restoreFocusOnDestroy = false;
     this.editRequested.emit(this.task());
   }
 
   requestDelete(): void {
+    this.restoreFocusOnDestroy = false;
     this.deleteRequested.emit(this.task());
+  }
+
+  private restorePreviousFocus(): void {
+    const target = this.previouslyFocused;
+
+    if (target && target.isConnected && typeof target.focus === 'function') {
+      target.focus();
+    }
   }
 
   onBackdropClick(event: MouseEvent): void {

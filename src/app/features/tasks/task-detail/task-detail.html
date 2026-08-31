@@ -1,0 +1,102 @@
+<div class="task-detail-backdrop" (click)="onBackdropClick($event)">
+  <section
+    #dialog
+    class="task-detail"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+  >
+    <header class="task-detail__header">
+      <span
+        class="task-detail__category"
+        [class.task-detail__category--user-story]="task().category === 'user_story'"
+        [class.task-detail__category--technical-task]="task().category === 'technical_task'"
+      >
+        {{ categoryLabel() }}
+      </span>
+
+      <button
+        #closeButton
+        class="task-detail__close"
+        type="button"
+        aria-label="Close task details"
+        (click)="requestClose()"
+      >
+        <img src="/img/icon-close.svg" alt="" aria-hidden="true" />
+      </button>
+    </header>
+
+    <h2 [id]="titleId" class="task-detail__title">{{ task().title }}</h2>
+    <p class="task-detail__description">{{ task().description }}</p>
+
+    <dl class="task-detail__facts">
+      <div class="task-detail__fact">
+        <dt>Due date:</dt>
+        <dd>{{ formattedDueDate() }}</dd>
+      </div>
+      <div class="task-detail__fact">
+        <dt>Priority:</dt>
+        <dd class="task-detail__priority">
+          <span>{{ priority().label }}</span>
+          <img [src]="priority().icon" alt="" aria-hidden="true" />
+        </dd>
+      </div>
+    </dl>
+
+    <section class="task-detail__section" [attr.aria-labelledby]="assignedToTitleId">
+      <h3 [id]="assignedToTitleId">Assigned To:</h3>
+      @if (task().assignees.length > 0) {
+        <ul class="task-detail__assignees">
+          @for (assignment of task().assignees; track assignment.contact_id) {
+            <li>
+              <span
+                class="task-detail__avatar"
+                [style.background-color]="assignment.contact.color"
+                aria-hidden="true"
+              >
+                {{ contactInitials(assignment) }}
+              </span>
+              <span class="task-detail__contact-name">{{ contactFullName(assignment) }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="task-detail__empty">No contacts assigned</p>
+      }
+    </section>
+
+    <section class="task-detail__section" [attr.aria-labelledby]="subtasksTitleId">
+      <h3 [id]="subtasksTitleId">Subtasks</h3>
+      @if (task().subtasks.length > 0) {
+        <ul class="task-detail__subtasks">
+          @for (subtask of task().subtasks; track subtask.id) {
+            <li>
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="subtask.is_completed"
+                  (change)="onSubtaskToggle(subtask.id, $event)"
+                />
+                <span>{{ subtask.title }}</span>
+              </label>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="task-detail__empty">No subtasks</p>
+      }
+    </section>
+
+    <footer class="task-detail__actions">
+      <button type="button" (click)="requestDelete()">
+        <img src="/img/icon-delete.svg" alt="" aria-hidden="true" />
+        <span>Delete</span>
+      </button>
+      <span class="task-detail__divider" aria-hidden="true"></span>
+      <button type="button" (click)="requestEdit()">
+        <img src="/img/icon-edit.svg" alt="" aria-hidden="true" />
+        <span>Edit</span>
+      </button>
+    </footer>
+  </section>
+</div>

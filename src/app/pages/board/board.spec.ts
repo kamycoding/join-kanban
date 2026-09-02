@@ -3,6 +3,7 @@ import { WritableSignal, signal } from '@angular/core';
 import { vi } from 'vitest';
 
 import { TaskStatus, TaskWithDetails } from '../../models/task';
+import { SubtaskService } from '../../services/subtask';
 import { TaskService } from '../../services/task';
 import { Board } from './board';
 
@@ -15,7 +16,10 @@ describe('Board', () => {
     loading: WritableSignal<boolean>;
     error: WritableSignal<string | null>;
     getTasks: ReturnType<typeof vi.fn>;
+    deleteTask: ReturnType<typeof vi.fn>;
+    applySubtaskChange: ReturnType<typeof vi.fn>;
   };
+  let subtaskService: { setSubtaskCompleted: ReturnType<typeof vi.fn> };
 
   function createTask(id: string, title: string, status: TaskStatus): TaskWithDetails {
     return {
@@ -42,10 +46,14 @@ describe('Board', () => {
       loading: signal(false),
       error: signal<string | null>(null),
       getTasks: vi.fn().mockResolvedValue(true),
+      deleteTask: vi.fn().mockResolvedValue(true),
+      applySubtaskChange: vi.fn(),
     };
+    subtaskService = { setSubtaskCompleted: vi.fn().mockResolvedValue(null) };
 
     await TestBed.configureTestingModule({ imports: [Board] })
       .overrideProvider(TaskService, { useValue: taskService })
+      .overrideProvider(SubtaskService, { useValue: subtaskService })
       .compileComponents();
 
     fixture = TestBed.createComponent(Board);

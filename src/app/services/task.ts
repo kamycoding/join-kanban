@@ -3,6 +3,7 @@ import { Service, inject, signal } from '@angular/core';
 import {
   NewTask,
   NewTaskWithDetails,
+  Subtask,
   Task,
   TaskChanges,
   TaskStatus,
@@ -209,6 +210,26 @@ export class TaskService {
     );
 
     return updatesById.get(id) ?? null;
+  }
+
+  /**
+   * Replaces a subtask inside the loaded tasks so the board reflects the change at once.
+   *
+   * @param subtask - The updated subtask as returned by the subtask service.
+   */
+  applySubtaskChange(subtask: Subtask): void {
+    this.tasksState.update((tasks) =>
+      tasks.map((task) =>
+        task.id === subtask.task_id
+          ? {
+              ...task,
+              subtasks: task.subtasks.map((existing) =>
+                existing.id === subtask.id ? subtask : existing,
+              ),
+            }
+          : task,
+      ),
+    );
   }
 
   private addTaskToState(task: TaskWithDetails): void {

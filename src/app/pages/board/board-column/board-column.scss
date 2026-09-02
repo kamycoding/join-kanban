@@ -69,28 +69,3 @@
   font-size: var(--font-size-body);
   text-align: center;
 }
-
-.board-task {
-  padding: var(--space-6);
-
-  border-radius: var(--radius-2xl);
-  background: var(--color-white);
-  box-shadow: var(--shadow-card);
-
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.board-task:hover {
-  box-shadow: var(--shadow-card-hover);
-}
-
-.board-task__title {
-  margin: 0;
-
-  color: var(--color-primary);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-bold);
-
-  overflow-wrap: anywhere;
-}

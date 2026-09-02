@@ -1,0 +1,108 @@
+<div class="subtask-input">
+  <input
+    type="text"
+    maxlength="101"
+    placeholder="Add new subtask"
+    [attr.aria-labelledby]="labelledBy()"
+    [attr.aria-describedby]="draftError() ? draftErrorId : null"
+    [attr.aria-invalid]="draftError() ? 'true' : null"
+    [value]="draft()"
+    [disabled]="disabled()"
+    (input)="onDraftInput($event)"
+    (keydown)="onDraftKeydown($event)"
+  />
+  <div class="subtask-input__actions">
+    @if (draft()) {
+      <button
+        type="button"
+        aria-label="Discard subtask"
+        [disabled]="disabled()"
+        (click)="clearDraft()"
+      >
+        <img src="/img/icon-close.svg" alt="" />
+      </button>
+      <span class="subtask-input__divider" aria-hidden="true"></span>
+      <button
+        type="button"
+        aria-label="Add subtask"
+        [disabled]="disabled() || !draft().trim()"
+        (click)="addSubtask()"
+      >
+        <img src="/img/icon-check.svg" alt="" />
+      </button>
+    } @else {
+      <button type="button" aria-label="Add subtask" disabled>
+        <span class="subtask-input__plus" aria-hidden="true">+</span>
+      </button>
+    }
+  </div>
+</div>
+@if (draftError()) {
+  <p [id]="draftErrorId" class="subtask-error" role="alert">{{ draftError() }}</p>
+}
+@if (subtasks().length) {
+  <ul class="subtask-list">
+    @for (subtask of subtasks(); track subtaskKey(subtask)) {
+      <li [class.subtask-list__item--editing]="editingKey() === subtaskKey(subtask)">
+        @if (editingKey() === subtaskKey(subtask)) {
+          <div class="subtask-list__edit-row">
+            <input
+              #editInput
+              type="text"
+              maxlength="101"
+              [value]="editDraft()"
+              [disabled]="disabled()"
+              [attr.aria-label]="'Edit subtask ' + subtask.title"
+              [attr.aria-describedby]="editError() ? editErrorId : null"
+              [attr.aria-invalid]="editError() ? 'true' : null"
+              (input)="onEditInput($event)"
+              (keydown)="onEditKeydown($event)"
+            />
+            <div class="subtask-list__edit-actions">
+              <button
+                type="button"
+                aria-label="Cancel subtask edit"
+                [disabled]="disabled()"
+                (click)="cancelEditing()"
+              >
+                <img src="/img/icon-close.svg" alt="" />
+              </button>
+              <button
+                type="button"
+                aria-label="Save subtask edit"
+                [disabled]="disabled()"
+                (click)="confirmEditing()"
+              >
+                <img src="/img/icon-check.svg" alt="" />
+              </button>
+            </div>
+          </div>
+          @if (editError()) {
+            <p [id]="editErrorId" class="subtask-error" role="alert">{{ editError() }}</p>
+          }
+        } @else {
+          <span class="subtask-list__title">{{ subtask.title }}</span>
+          <div class="subtask-list__item-actions">
+            <button
+              type="button"
+              [disabled]="disabled()"
+              [attr.aria-label]="'Edit subtask ' + subtask.title"
+              (click)="startEditing(subtask)"
+            >
+              <img class="subtask-list__edit-icon" src="/img/icon-edit.svg" alt="" />
+              <img class="subtask-list__edit-icon-hover" src="/img/icon-edit-hover.svg" alt="" />
+            </button>
+            <button
+              type="button"
+              [disabled]="disabled()"
+              [attr.aria-label]="'Delete subtask ' + subtask.title"
+              (click)="removeSubtask(subtask)"
+            >
+              <img src="/img/icon-delete.svg" alt="" />
+            </button>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+}

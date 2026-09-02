@@ -2,21 +2,21 @@
   <header class="board-column__head">
     <h2 class="board-column__heading">{{ heading() }}</h2>
 
-    <button
-      class="board-column__add"
-      type="button"
-      [attr.aria-label]="'Add task to ' + heading()"
-      (click)="addRequested.emit()"
-    >
-      <img src="/img/icon-add.svg" alt="" aria-hidden="true" />
-    </button>
+    @if (status() !== 'done') {
+      <button
+        class="board-column__add"
+        type="button"
+        [attr.aria-label]="'Add task to ' + heading()"
+        (click)="addRequested.emit()"
+      >
+        <img src="/img/icon-add.svg" alt="" aria-hidden="true" />
+      </button>
+    }
   </header>
 
   <div class="board-column__tasks">
     @for (task of tasks(); track task.id) {
-      <article class="board-task">
-        <h3 class="board-task__title">{{ task.title }}</h3>
-      </article>
+      <app-task-card [task]="task" (openDetail)="detailRequested.emit($event)" />
     } @empty {
       <p class="board-column__empty">No tasks {{ heading() }}</p>
     }

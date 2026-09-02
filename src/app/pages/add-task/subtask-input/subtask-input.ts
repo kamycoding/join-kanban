@@ -25,6 +25,11 @@ export class SubtaskInput {
     this.error.set(null);
   }
 
+  clearDraft(): void {
+    this.draft.set('');
+    this.error.set(null);
+  }
+
   onInput(event: Event): void {
     this.draft.set((event.target as HTMLInputElement).value);
     this.error.set(null);

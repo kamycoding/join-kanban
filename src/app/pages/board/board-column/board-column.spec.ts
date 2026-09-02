@@ -27,6 +27,7 @@ describe('BoardColumn', () => {
 
     fixture = TestBed.createComponent(BoardColumn);
     fixture.componentRef.setInput('heading', 'To do');
+    fixture.componentRef.setInput('status', 'todo');
     fixture.componentRef.setInput('tasks', []);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -47,11 +48,20 @@ describe('BoardColumn', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const cards = fixture.nativeElement.querySelectorAll('.board-task');
+    const cards = fixture.nativeElement.querySelectorAll('app-task-card');
 
     expect(cards.length).toBe(1);
     expect(cards[0].textContent).toContain('Write the board tests');
     expect(fixture.nativeElement.querySelector('.board-column__empty')).toBeNull();
+  });
+
+  it('hides the add button in the done column', async () => {
+    fixture.componentRef.setInput('heading', 'Done');
+    fixture.componentRef.setInput('status', 'done');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.board-column__add')).toBeNull();
   });
 
   it('emits addRequested when the plus button is clicked', () => {

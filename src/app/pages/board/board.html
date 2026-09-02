@@ -13,7 +13,21 @@
 
   <div class="board-columns">
     @for (column of columns; track column.status) {
-      <app-board-column [heading]="column.heading" [tasks]="tasksFor(column.status)" />
+      <app-board-column
+        [heading]="column.heading"
+        [status]="column.status"
+        [tasks]="tasksFor(column.status)"
+        (detailRequested)="openDetail($event)"
+      />
     }
   </div>
+
+  @if (selectedTask(); as task) {
+    <app-task-detail
+      [task]="task"
+      (closeRequested)="closeDetail()"
+      (deleteRequested)="deleteTask($event)"
+      (subtaskToggleRequested)="toggleSubtask($event)"
+    />
+  }
 </div>

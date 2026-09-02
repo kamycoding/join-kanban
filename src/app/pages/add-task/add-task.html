@@ -7,11 +7,19 @@
         <div class="task-form__field">
           <label for="task-title">Title<span>*</span></label>
           <input id="task-title" placeholder="Enter a title" [formField]="taskForm.title" />
-          @if (taskForm.title().touched() && taskForm.title().invalid()) {
-            @for (error of taskForm.title().errors(); track error) {
-              <p class="task-form__error" role="alert">{{ error.message }}</p>
+          <div class="task-form__message" aria-live="polite">
+            @if (taskForm.title().touched() && taskForm.title().invalid()) {
+              <p class="task-form__error task-form__error--reserved">
+                {{ taskForm.title().errors()[0].message }}
+              </p>
             }
-          }
+            <span
+              class="task-form__counter"
+              [class.task-form__counter--invalid]="formModel().title.length > 100"
+            >
+              {{ formModel().title.length }}/100
+            </span>
+          </div>
         </div>
 
         <div class="task-form__field">

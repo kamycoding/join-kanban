@@ -146,6 +146,10 @@ select:focus {
   overflow: hidden;
 }
 
+.task-form__message--error-only {
+  justify-content: flex-start;
+}
+
 .task-form__error--reserved {
   position: static;
   flex: 1;

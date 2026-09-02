@@ -19,4 +19,19 @@ describe('AddTask', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should count title characters and show an error above 100 characters', async () => {
+    component.formModel.update((value) => ({ ...value, title: 'a'.repeat(101) }));
+    component.taskForm.title().markAsTouched();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const message = fixture.nativeElement.querySelector('.task-form__message');
+    const counter = fixture.nativeElement.querySelector('.task-form__counter');
+
+    expect(component.taskForm.title().invalid()).toBe(true);
+    expect(message.textContent).toContain('Title must have 100 characters or fewer.');
+    expect(counter.textContent.trim()).toBe('101/100');
+    expect(counter.classList).toContain('task-form__counter--invalid');
+  });
 });

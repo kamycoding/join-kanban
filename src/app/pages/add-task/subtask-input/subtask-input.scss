@@ -7,12 +7,13 @@
 .subtask-input input {
   box-sizing: border-box;
   width: 100%;
-  min-height: 48px;
-  padding: 12px 48px 12px var(--space-4);
+  min-height: 50px;
+  padding: 12px 48px 12px var(--space-5);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   background: var(--color-white);
-  font: inherit;
+  font-family: var(--font-family);
+  font-size: var(--font-size-t6);
 }
 .subtask-input input:focus {
   border-color: var(--color-accent);

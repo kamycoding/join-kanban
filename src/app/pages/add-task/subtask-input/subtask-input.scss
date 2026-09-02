@@ -8,7 +8,7 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 50px;
-  padding: 12px 48px 12px var(--space-5);
+  padding: 12px 84px 12px var(--space-5);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   background: var(--color-white);
@@ -22,50 +22,72 @@
 .subtask-input input::placeholder {
   color: var(--color-icon);
 }
-.subtask-input > button {
+.subtask-input__actions {
   position: absolute;
   top: 50%;
   right: var(--space-3);
-  width: 30px;
-  height: 30px;
-  border: 0;
-  border-radius: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  color: var(--color-primary);
-  font-size: 24px;
-  cursor: pointer;
-}
-.subtask-input > button:hover:not(:disabled) {
-  background: var(--color-bg-hover);
-}
-.subtask-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: var(--space-2) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.subtask-list li {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-4);
+  border: 0;
+  transform: translateY(-50%);
+  background: transparent;
+}
+.subtask-input__actions button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.subtask-input__actions button:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+}
+.subtask-input__actions img {
+  width: 20px;
+  height: 20px;
+}
+.subtask-input__plus {
+  font-size: 24px;
+  line-height: 1;
+}
+.subtask-input__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-line);
+}
+.subtask-list {
+  margin: var(--space-2) 0 0;
+  padding-left: 32px;
+}
+.subtask-list li {
+  position: relative;
+  padding: var(--space-1) 40px var(--space-1) var(--space-1);
   border-radius: var(--radius-lg);
 }
 .subtask-list li:hover {
   background: var(--color-bg-hover);
 }
 .subtask-list button {
-  display: inline-grid;
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  display: none;
   place-items: center;
   width: 28px;
   height: 28px;
   border: 0;
   background: transparent;
   cursor: pointer;
+  transform: translateY(-50%);
+}
+.subtask-list li:hover button,
+.subtask-list button:focus-visible {
+  display: grid;
 }
 .subtask-list img {
   width: 20px;

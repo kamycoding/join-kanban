@@ -1,0 +1,56 @@
+<div class="subtask-input">
+  <input
+    type="text"
+    maxlength="101"
+    placeholder="Add new subtask"
+    [value]="draft()"
+    [disabled]="disabled()"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+  />
+  <div class="subtask-input__actions">
+    @if (draft()) {
+      <button
+        type="button"
+        aria-label="Discard subtask"
+        [disabled]="disabled()"
+        (click)="clearDraft()"
+      >
+        <img src="/img/icon-close.svg" alt="" />
+      </button>
+      <span class="subtask-input__divider" aria-hidden="true"></span>
+      <button
+        type="button"
+        aria-label="Add subtask"
+        [disabled]="disabled() || !draft().trim()"
+        (click)="addSubtask()"
+      >
+        <img src="/img/icon-check.svg" alt="" />
+      </button>
+    } @else {
+      <button type="button" aria-label="Add subtask" disabled>
+        <span class="subtask-input__plus" aria-hidden="true">+</span>
+      </button>
+    }
+  </div>
+</div>
+@if (error()) {
+  <p class="subtask-error" role="alert">{{ error() }}</p>
+}
+@if (subtasks().length) {
+  <ul class="subtask-list">
+    @for (subtask of subtasks(); track $index) {
+      <li>
+        <span class="subtask-list__title">{{ subtask }}</span
+        ><button
+          type="button"
+          [disabled]="disabled()"
+          aria-label="Delete subtask"
+          (click)="removeSubtask($index)"
+        >
+          <img src="/img/icon-delete.svg" alt="" />
+        </button>
+      </li>
+    }
+  </ul>
+}

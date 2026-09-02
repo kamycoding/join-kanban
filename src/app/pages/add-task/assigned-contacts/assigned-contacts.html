@@ -1,0 +1,57 @@
+<div class="contact-select">
+  <button
+    class="contact-select__trigger"
+    type="button"
+    [disabled]="disabled()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="listbox"
+    (click)="toggleDropdown()"
+  >
+    <span>{{
+      selectedIds().length
+        ? selectedIds().length + ' contact(s) selected'
+        : 'Select contacts to assign'
+    }}</span>
+    <span class="contact-select__arrow" aria-hidden="true"></span>
+  </button>
+
+  @if (open()) {
+    <div class="contact-select__menu" role="listbox" aria-multiselectable="true">
+      @if (contacts().length === 0) {
+        <p class="contact-select__empty">No contacts available</p>
+      }
+      @for (contact of contacts(); track contact.id) {
+        <button
+          type="button"
+          class="contact-select__option"
+          role="option"
+          [attr.aria-selected]="isSelected(contact.id)"
+          (click)="toggleContact(contact.id)"
+        >
+          <span class="contact-select__avatar" [style.background-color]="contact.color">{{
+            initials(contact)
+          }}</span>
+          <span>{{ name(contact) }}</span>
+          <span
+            class="contact-select__check"
+            [class.contact-select__check--selected]="isSelected(contact.id)"
+            aria-hidden="true"
+          ></span>
+        </button>
+      }
+    </div>
+  }
+</div>
+
+@if (selectedContacts().length) {
+  <div class="contact-select__selected" aria-label="Selected contacts">
+    @for (contact of selectedContacts(); track contact.id) {
+      <span
+        class="contact-select__avatar"
+        [style.background-color]="contact.color"
+        [title]="name(contact)"
+        >{{ initials(contact) }}</span
+      >
+    }
+  </div>
+}

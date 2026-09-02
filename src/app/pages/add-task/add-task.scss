@@ -1,0 +1,214 @@
+@use '../../../styles/breakpoints' as *;
+
+:host {
+  display: block;
+  min-height: 100%;
+  background: var(--color-bg-app);
+}
+.add-task-page {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 80px clamp(var(--space-7), 7vw, 96px) var(--space-9);
+}
+h1 {
+  margin: 0 0 var(--space-7);
+  color: var(--color-black);
+  font-size: var(--font-size-t2);
+}
+.task-form {
+  max-width: 960px;
+}
+.task-form__columns {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 1px minmax(280px, 1fr);
+  gap: 30px;
+}
+.task-form__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.task-form__divider {
+  background: var(--color-line);
+}
+.task-form__field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+label,
+legend {
+  color: var(--color-primary);
+  font-size: var(--font-size-body);
+}
+label span,
+.task-form__required span {
+  color: var(--color-error);
+}
+input,
+textarea,
+select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  color: var(--color-black);
+  font: inherit;
+  transition: border-color var(--transition);
+}
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-icon);
+  opacity: 1;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+.task-form__priority {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.task-form__priority-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.priority-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  box-shadow: 0 0 4px rgb(0 0 0 / 0.15);
+  color: var(--color-black);
+  font: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.priority-button img {
+  width: 20px;
+  height: 20px;
+}
+.priority-button:hover:not(:disabled) {
+  box-shadow: var(--shadow-button-state);
+}
+.priority-button--selected {
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+.priority-button--urgent.priority-button--selected {
+  background: var(--color-urgent);
+}
+.priority-button--medium.priority-button--selected {
+  background: var(--color-medium);
+}
+.priority-button--low.priority-button--selected {
+  background: var(--color-low);
+}
+.priority-button--selected img {
+  filter: brightness(0) invert(1);
+}
+.task-form__error {
+  position: absolute;
+  top: 100%;
+  margin: 2px 0 0;
+  color: var(--color-error);
+  font-size: var(--font-size-t7);
+}
+.task-form__service-error {
+  margin: var(--space-5) 0 0;
+  color: var(--color-error);
+}
+.task-form__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-top: 72px;
+}
+.task-form__required {
+  margin: 0;
+  font-size: var(--font-size-t7);
+}
+.task-form__actions {
+  display: flex;
+  gap: var(--space-4);
+}
+.add-task-page__toast {
+  position: fixed;
+  right: var(--space-7);
+  bottom: var(--space-7);
+  z-index: 10;
+}
+
+@media (max-width: $bp-tablet) {
+  .add-task-page {
+    padding: var(--space-7) var(--space-5) var(--space-9);
+  }
+  h1 {
+    font-size: var(--font-size-t5);
+  }
+  .task-form__columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .task-form__divider {
+    display: none;
+  }
+  .task-form__footer {
+    margin-top: var(--space-9);
+  }
+  .add-task-page__toast {
+    bottom: calc(var(--bottom-nav-height) + var(--space-4));
+  }
+}
+
+@media (max-width: $bp-mobile) {
+  .add-task-page {
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .task-form__priority-buttons {
+    gap: var(--space-2);
+  }
+  .priority-button {
+    gap: var(--space-1);
+    padding-inline: var(--space-1);
+    font-size: 14px;
+  }
+  .task-form__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .task-form__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .task-form__actions app-button {
+    display: grid;
+  }
+  .add-task-page__toast {
+    right: var(--space-4);
+    left: var(--space-4);
+  }
+  .add-task-page__toast app-toast {
+    width: 100%;
+  }
+}

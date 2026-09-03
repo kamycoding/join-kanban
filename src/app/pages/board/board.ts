@@ -86,6 +86,22 @@ export class Board implements OnInit {
   }
 
   /**
+   * Moves a task into another column and saves that through the task service.
+   * A task dropped back into its own column is ignored, and a rejected move is
+   * taken back by the service, which also fills the error message.
+   *
+   * @param task - The task that moves.
+   * @param status - The column the task should land in.
+   */
+  async moveTask(task: TaskWithDetails, status: TaskStatus): Promise<void> {
+    if (task.status === status) {
+      return;
+    }
+
+    await this.taskService.moveTask(task.id, status, this.tasksFor(status).length);
+  }
+
+  /**
    * Saves the new state of a subtask and shows it on the board right away.
    *
    * @param change - Id of the subtask and whether it is completed now.

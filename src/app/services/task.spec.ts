@@ -278,6 +278,56 @@ describe('TaskService', () => {
     expect(service.saving()).toBe(false);
   });
 
+  it('shows the move on the board before the server answers', async () => {
+    const firstTask = createTask();
+    const secondTask = {
+      ...createTask(),
+      id: 'task-2',
+      position: 1,
+      created_at: '2026-08-25T00:01:00.000Z',
+    };
+
+    const service = TestBed.inject(TaskService);
+    await loadTasks(service, [firstTask, secondTask]);
+
+    let answerServer!: (result: unknown) => void;
+    rpc.mockReturnValue(
+      new Promise((resolve) => {
+        answerServer = resolve;
+      }),
+    );
+
+    const move = service.moveTask('task-1', 'done', 0);
+
+    expect(service.tasks().map((task) => [task.id, task.status, task.position])).toEqual([
+      ['task-1', 'done', 0],
+      ['task-2', 'todo', 0],
+    ]);
+
+    answerServer({ data: [], error: null });
+    await move;
+  });
+
+  it('puts both columns back when the server rejects the move', async () => {
+    const firstTask = createTask();
+    const secondTask = {
+      ...createTask(),
+      id: 'task-2',
+      position: 1,
+      created_at: '2026-08-25T00:01:00.000Z',
+    };
+
+    const service = TestBed.inject(TaskService);
+    await loadTasks(service, [firstTask, secondTask]);
+    const tasksBeforeTheMove = service.tasks();
+    rpc.mockResolvedValue({ data: null, error: { message: 'Task could not be moved' } });
+
+    await expect(service.moveTask('task-1', 'done', 0)).resolves.toBeNull();
+    expect(service.tasks()).toEqual(tasksBeforeTheMove);
+    expect(service.error()).toBe('Task could not be moved');
+    expect(service.saving()).toBe(false);
+  });
+
   it('rejects an invalid board position before starting a Supabase request', async () => {
     const service = TestBed.inject(TaskService);
 

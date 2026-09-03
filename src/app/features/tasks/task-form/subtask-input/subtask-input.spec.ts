@@ -128,6 +128,30 @@ describe('SubtaskInput', () => {
     expect(component.editingKey()).toBeNull();
   });
 
+  it('keeps the Escape consumed for inline editing from reaching a parent handler', async () => {
+    const subtask = existingSubtask();
+    fixture.componentRef.setInput('subtasks', [subtask]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    button('Edit subtask Existing title').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const parentListener = vi.fn();
+    fixture.nativeElement.addEventListener('keydown', parentListener);
+    const editInput = fixture.nativeElement.querySelector(
+      'input[aria-label="Edit subtask Existing title"]',
+    ) as HTMLInputElement;
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+
+    editInput.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(parentListener).not.toHaveBeenCalled();
+    expect(component.editingKey()).toBeNull();
+  });
+
   it('deletes a subtask by stable identity', () => {
     const first = existingSubtask();
     const second = newSubtask();

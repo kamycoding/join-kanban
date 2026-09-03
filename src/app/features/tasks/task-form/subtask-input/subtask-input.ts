@@ -104,8 +104,15 @@ export class SubtaskInput {
   onEditKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter' && event.key !== 'Escape') return;
     event.preventDefault();
-    if (event.key === 'Enter') this.confirmEditing();
-    else this.cancelEditing();
+    if (event.key === 'Enter') {
+      this.confirmEditing();
+      return;
+    }
+
+    // The Escape is consumed here so it cannot bubble to TaskEdit's host
+    // listener, which would close the whole modal and discard unsaved edits.
+    event.stopPropagation();
+    this.cancelEditing();
   }
 
   removeSubtask(subtask: TaskFormSubtaskValue): void {

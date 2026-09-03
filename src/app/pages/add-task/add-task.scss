@@ -11,6 +11,21 @@
   min-height: 100%;
   padding: 112px clamp(var(--space-7), 8vw, 120px) var(--space-9);
 }
+
+/* Inside the board overlay the dialog carries ground, padding and heading. */
+:host(.add-task--in-overlay) {
+  min-height: 0;
+  background: none;
+}
+
+.add-task-page--in-overlay {
+  min-height: 0;
+  padding: 0;
+}
+
+.add-task-page--in-overlay .task-form {
+  width: 100%;
+}
 h1 {
   margin: 0 0 40px;
   color: var(--color-black);

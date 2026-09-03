@@ -17,6 +17,11 @@
 
       <img class="board-search__icon" src="/img/icon-search.svg" alt="" aria-hidden="true" />
     </div>
+
+    <button class="board-heading__add" type="button" (click)="openForm('todo')">
+      Add task
+      <img src="/img/icon-add.svg" alt="" aria-hidden="true" />
+    </button>
   </div>
 
   @if (error(); as message) {
@@ -35,11 +40,29 @@
         [tasks]="tasksFor(column.status)"
         [moveTargets]="moveTargetsFor(column.status)"
         [dragDisabled]="dragDisabled()"
+        (addRequested)="openForm(column.status)"
         (detailRequested)="openDetail($event)"
         (moveRequested)="moveTask($event)"
       />
     }
   </div>
+
+  @if (formStatus(); as status) {
+    <app-overlay heading="Add Task" (closeRequested)="closeForm()">
+      <app-add-task
+        [inOverlay]="true"
+        [status]="status"
+        (saved)="onTaskCreated()"
+        (cancelled)="closeForm()"
+      />
+    </app-overlay>
+  }
+
+  @if (createdToast()) {
+    <div class="board-page__toast">
+      <app-toast message="Task added to board" (dismissed)="createdToast.set(false)" />
+    </div>
+  }
 
   @if (selectedTask(); as task) {
     <app-task-detail

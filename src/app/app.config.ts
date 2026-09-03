@@ -4,7 +4,7 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
 import { GuestAutoLoginService } from './services/guest-auto-login';
@@ -12,7 +12,7 @@ import { GuestAutoLoginService } from './services/guest-auto-login';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
     provideAppInitializer(() => inject(GuestAutoLoginService).initialize()),
   ],
 };

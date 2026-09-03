@@ -1,5 +1,7 @@
-<main class="add-task-page">
-  <h1>Add Task</h1>
+<div class="add-task-page" [class.add-task-page--in-overlay]="inOverlay()">
+  @if (!inOverlay()) {
+    <h1>Add Task</h1>
+  }
 
   <form class="task-form" novalidate (submit)="onSubmit($event)">
     <div class="task-form__columns">
@@ -116,8 +118,8 @@
           size="action"
           iconSrc="/img/icon-cancel.svg"
           [disabled]="saving()"
-          (click)="clearForm()"
-          >Clear</app-button
+          (click)="inOverlay() ? cancelForm() : clearForm()"
+          >{{ inOverlay() ? 'Cancel' : 'Clear' }}</app-button
         >
         <app-button
           type="submit"
@@ -135,4 +137,4 @@
       <app-toast message="Task successfully created" (dismissed)="successToast.set(false)" />
     </div>
   }
-</main>
+</div>

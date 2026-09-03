@@ -1,11 +1,40 @@
 <article class="task-card" [class.task-card--without-subtasks]="totalSubtasks() === 0">
-  <span
-    class="task-card__category"
-    [class.task-card__category--user-story]="task().category === 'user_story'"
-    [class.task-card__category--technical-task]="task().category === 'technical_task'"
-  >
-    {{ categoryLabel() }}
-  </span>
+  <div class="task-card__top">
+    <span
+      class="task-card__category"
+      [class.task-card__category--user-story]="task().category === 'user_story'"
+      [class.task-card__category--technical-task]="task().category === 'technical_task'"
+    >
+      {{ categoryLabel() }}
+    </span>
+
+    @if (moveTargets().length > 0) {
+      <div class="task-card__move">
+        <button
+          class="task-card__move-button"
+          type="button"
+          [attr.aria-label]="'Move ' + task().title + ' to another column'"
+          [attr.aria-expanded]="menuOpen()"
+          (click)="toggleMenu($event)"
+        >
+          <img src="/img/icon-move.svg" alt="" aria-hidden="true" />
+        </button>
+
+        @if (menuOpen()) {
+          <div class="task-card__menu">
+            <p class="task-card__menu-title">Move to</p>
+
+            @for (target of moveTargets(); track target.status) {
+              <button class="task-card__menu-item" type="button" (click)="requestMove(target)">
+                <img [src]="arrowIcon(target)" alt="" aria-hidden="true" />
+                {{ target.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
 
   <div class="task-card__content">
     <h3 class="task-card__title">

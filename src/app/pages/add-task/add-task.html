@@ -1,13 +1,18 @@
-<main class="add-task-page">
-  <h1>Add Task</h1>
+<div class="add-task-page" [class.add-task-page--in-overlay]="inOverlay()">
+  @if (!inOverlay()) {
+    <h1>Add Task</h1>
+  }
 
   <app-task-form
+    mode="create"
+    [secondaryAction]="inOverlay() ? 'cancel' : 'clear'"
     [initialValue]="initialFormValue"
     [contacts]="contacts()"
     [busy]="saving()"
     [error]="persistenceError()"
     (submitted)="onSubmitted($event)"
     (cleared)="onCleared()"
+    (cancelled)="onCancelled()"
   />
 
   @if (successToast()) {
@@ -15,4 +20,4 @@
       <app-toast message="Task successfully created" (dismissed)="successToast.set(false)" />
     </div>
   }
-</main>
+</div>

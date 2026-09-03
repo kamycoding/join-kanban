@@ -3,26 +3,34 @@ import type {
   NewTaskSubtask,
   NewTaskWithDetails,
   TaskCategory,
+  TaskStatus,
 } from '../../../models/task';
 import type { TaskFormSubtaskValue, TaskFormValue } from './task-form-value';
 
-/** Maps a validated create-mode form value to the task aggregate create contract. */
-export function toNewTaskWithDetails(value: TaskFormValue): NewTaskWithDetails {
+/**
+ * Maps a validated create-mode form value to the task aggregate create contract.
+ * The status defaults to the To-do column; the board hands in the column its
+ * overlay was opened for.
+ */
+export function toNewTaskWithDetails(
+  value: TaskFormValue,
+  status: TaskStatus = 'todo',
+): NewTaskWithDetails {
   return {
-    task: toNewTask(value),
+    task: toNewTask(value, status),
     contactIds: [...new Set(value.contactIds)],
     subtasks: value.subtasks.map(toNewSubtask),
   };
 }
 
-function toNewTask(value: TaskFormValue): NewTask {
+function toNewTask(value: TaskFormValue, status: TaskStatus): NewTask {
   return {
     title: value.title.trim(),
     description: value.description.trim(),
     due_date: value.dueDate,
     priority: value.priority,
     category: requireTaskCategory(value.category),
-    status: 'todo',
+    status,
   };
 }
 

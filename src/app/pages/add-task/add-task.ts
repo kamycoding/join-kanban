@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, viewChild } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal, viewChild } from '@angular/core';
 
 import { TaskForm } from '../../features/tasks/task-form/task-form';
 import {
@@ -6,6 +6,7 @@ import {
   type TaskFormValue,
 } from '../../features/tasks/task-form/task-form-value';
 import { toNewTaskWithDetails } from '../../features/tasks/task-form/task-form-create-mapper';
+import type { Task, TaskStatus } from '../../models/task';
 import { ContactService } from '../../services/contact';
 import { TaskService } from '../../services/task';
 import { Toast } from '../../shared/components/toast/toast';
@@ -15,10 +16,28 @@ import { Toast } from '../../shared/components/toast/toast';
   imports: [TaskForm, Toast],
   templateUrl: './add-task.html',
   styleUrl: './add-task.scss',
+  host: {
+    '[class.add-task--in-overlay]': 'inOverlay()',
+  },
 })
 export class AddTask implements OnInit {
   private readonly contactService = inject(ContactService);
   private readonly taskService = inject(TaskService);
+
+  /**
+   * The column a new task lands in. The board hands it the column the user
+   * clicked; as a routed page it arrives from the `status` query parameter.
+   */
+  readonly status = input<TaskStatus>('todo');
+
+  /**
+   * Set by the board when the form runs inside its overlay. The overlay
+   * carries the heading, and the left button cancels instead of clearing.
+   */
+  readonly inOverlay = input(false);
+
+  readonly saved = output<Task>();
+  readonly cancelled = output<void>();
 
   readonly contacts = this.contactService.contacts;
   readonly saving = this.taskService.saving;
@@ -37,14 +56,32 @@ export class AddTask implements OnInit {
     this.persistenceError.set(null);
   }
 
+  /**
+   * Leaves the form without saving. Only reachable inside the overlay, where
+   * the secondary button reads "Cancel" instead of "Clear".
+   */
+  onCancelled(): void {
+    this.taskForm().reset();
+    this.cancelled.emit();
+  }
+
   async onSubmitted(value: TaskFormValue): Promise<void> {
     if (this.saving()) return;
 
-    const createdTask = await this.taskService.createTaskWithDetails(toNewTaskWithDetails(value));
+    const createdTask = await this.taskService.createTaskWithDetails(
+      toNewTaskWithDetails(value, this.status()),
+    );
     if (createdTask) {
       this.taskForm().reset();
-      this.successToast.set(true);
       this.persistenceError.set(null);
+
+      if (this.inOverlay()) {
+        this.successToast.set(false);
+        this.saved.emit(createdTask);
+        return;
+      }
+
+      this.successToast.set(true);
     } else {
       this.persistenceError.set(this.taskService.error());
     }

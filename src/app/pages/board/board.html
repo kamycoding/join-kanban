@@ -1,6 +1,22 @@
 <div class="board-page">
   <div class="board-heading">
     <h1>Board</h1>
+
+    <div class="board-search">
+      <label class="board-search__label" for="board-search-input">Find Task</label>
+
+      <input
+        class="board-search__input"
+        id="board-search-input"
+        type="search"
+        placeholder="Find Task"
+        autocomplete="off"
+        [value]="searchTerm()"
+        (input)="updateSearch($event)"
+      />
+
+      <img class="board-search__icon" src="/img/icon-search.svg" alt="" aria-hidden="true" />
+    </div>
   </div>
 
   @if (error(); as message) {
@@ -18,6 +34,7 @@
         [status]="column.status"
         [tasks]="tasksFor(column.status)"
         [moveTargets]="moveTargetsFor(column.status)"
+        [dragDisabled]="dragDisabled()"
         (detailRequested)="openDetail($event)"
         (moveRequested)="moveTask($event)"
       />

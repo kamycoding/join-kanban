@@ -126,6 +126,64 @@ describe('Board', () => {
     expect(taskService.moveTask).not.toHaveBeenCalled();
   });
 
+  it('keeps only the tasks whose title or description match the search', async () => {
+    tasks.set([
+      createTask('task-1', 'Plan the sprint', 'todo'),
+      { ...createTask('task-2', 'Ship the board', 'todo'), description: 'Plan the rollout' },
+      createTask('task-3', 'Check the layout', 'in_progress'),
+    ]);
+    await search('plan');
+
+    expect(component.tasksFor('todo').map((task) => task.id)).toEqual(['task-1', 'task-2']);
+    expect(component.tasksFor('in_progress')).toEqual([]);
+  });
+
+  it('ignores case and surrounding blanks in the search', async () => {
+    tasks.set([createTask('task-1', 'Plan the sprint', 'todo')]);
+    await search('  PLAN  ');
+
+    expect(component.tasksFor('todo').map((task) => task.id)).toEqual(['task-1']);
+  });
+
+  it('shows every task again once the search is emptied', async () => {
+    tasks.set([createTask('task-1', 'Plan the sprint', 'todo')]);
+    await search('nothing matches this');
+
+    expect(component.tasksFor('todo')).toEqual([]);
+
+    await search('');
+
+    expect(component.tasksFor('todo').map((task) => task.id)).toEqual(['task-1']);
+  });
+
+  it('appends to the end of the whole column, not of the filtered one', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([
+      task,
+      createTask('task-2', 'Ship the board', 'done'),
+      createTask('task-3', 'Check the layout', 'done'),
+    ]);
+    await search('plan');
+
+    expect(component.tasksFor('done')).toEqual([]);
+
+    await component.moveTask({ task, status: 'done' });
+
+    expect(taskService.moveTask).toHaveBeenCalledWith('task-1', 'done', 2);
+  });
+
+  it('turns dragging off while the board is filtered', async () => {
+    expect(component.dragDisabled()).toBe(false);
+
+    await search('plan');
+
+    expect(component.dragDisabled()).toBe(true);
+
+    await search('   ');
+
+    expect(component.dragDisabled()).toBe(false);
+  });
+
   it('offers only the neighbouring columns in the move menu', () => {
     const asPairs = (status: TaskStatus) =>
       component.moveTargetsFor(status).map((target) => [target.status, target.direction]);
@@ -157,4 +215,16 @@ describe('Board', () => {
 
     expect(alert?.textContent).toContain('Tasks could not be loaded.');
   });
+
+  /**
+   * Types into the real search field, so the template is part of the test
+   * instead of only the signal behind it.
+   */
+  async function search(term: string): Promise<void> {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('.board-search__input');
+    input.value = term;
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
 });

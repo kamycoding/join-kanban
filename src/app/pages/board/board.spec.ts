@@ -17,6 +17,7 @@ describe('Board', () => {
     error: WritableSignal<string | null>;
     getTasks: ReturnType<typeof vi.fn>;
     deleteTask: ReturnType<typeof vi.fn>;
+    moveTask: ReturnType<typeof vi.fn>;
     applySubtaskChange: ReturnType<typeof vi.fn>;
   };
   let subtaskService: { setSubtaskCompleted: ReturnType<typeof vi.fn> };
@@ -47,6 +48,7 @@ describe('Board', () => {
       error: signal<string | null>(null),
       getTasks: vi.fn().mockResolvedValue(true),
       deleteTask: vi.fn().mockResolvedValue(true),
+      moveTask: vi.fn().mockResolvedValue(null),
       applySubtaskChange: vi.fn(),
     };
     subtaskService = { setSubtaskCompleted: vi.fn().mockResolvedValue(null) };
@@ -89,6 +91,38 @@ describe('Board', () => {
     expect(component.tasksFor('in_progress').map((task) => task.id)).toEqual(['task-2', 'task-3']);
     expect(component.tasksFor('await_feedback')).toEqual([]);
     expect(component.tasksFor('done')).toEqual([]);
+  });
+
+  it('saves a status change through the task service, appended to the target column', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task, createTask('task-2', 'Ship the board', 'done')]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await component.moveTask(task, 'done');
+
+    expect(taskService.moveTask).toHaveBeenCalledWith('task-1', 'done', 1);
+  });
+
+  it('ignores a task that lands in the column it already is in', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await component.moveTask(task, 'todo');
+
+    expect(taskService.moveTask).not.toHaveBeenCalled();
+  });
+
+  it('shows the error message when a move fails', async () => {
+    taskService.error.set('Task could not be moved.');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const alert = fixture.nativeElement.querySelector('.board-page__error');
+
+    expect(alert?.textContent).toContain('Task could not be moved.');
   });
 
   it('shows the error message when loading fails', async () => {

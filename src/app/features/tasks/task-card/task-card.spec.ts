@@ -1,9 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 
-import type { Subtask, TaskWithDetails } from '../../../models/task';
+import type {
+  Subtask,
+  TaskMoveRequest,
+  TaskMoveTarget,
+  TaskWithDetails,
+} from '../../../models/task';
 import type { TaskAssigneeWithContact } from '../../../models/task-assignee';
 import { TaskCard } from './task-card';
+
+const MOVE_TARGETS: TaskMoveTarget[] = [
+  { status: 'todo', label: 'To do', direction: 'up' },
+  { status: 'await_feedback', label: 'Await feedback', direction: 'down' },
+];
 
 describe('TaskCard', () => {
   let component: TaskCard;
@@ -272,8 +282,57 @@ describe('TaskCard', () => {
     expect(progress.getAttribute('aria-label')).toBe('Subtask completion: 1 of 2 completed');
   });
 
-  function renderTask(task: TaskWithDetails): void {
+  it('hides the move button when the card has nowhere to go', () => {
+    renderTask(createTask());
+
+    expect(element('.task-card__move-button')).toBeNull();
+  });
+
+  it('opens the move menu and lists the targets it was handed', () => {
+    renderTask(createTask(), MOVE_TARGETS);
+
+    element<HTMLButtonElement>('.task-card__move-button').click();
+    fixture.detectChanges();
+
+    const items = fixture.nativeElement.querySelectorAll('.task-card__menu-item');
+
+    expect(component.menuOpen()).toBe(true);
+    expect(items.length).toBe(2);
+    expect(items[0].textContent).toContain('To do');
+    expect(items[1].textContent).toContain('Await feedback');
+    expect(element('.task-card__menu-title').textContent).toContain('Move to');
+  });
+
+  it('reports the chosen column and closes the menu', () => {
+    const task = createTask();
+    const moves: TaskMoveRequest[] = [];
+    renderTask(task, MOVE_TARGETS);
+    component.moveRequested.subscribe((request) => moves.push(request));
+
+    element<HTMLButtonElement>('.task-card__move-button').click();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelectorAll('.task-card__menu-item')[1].click();
+    fixture.detectChanges();
+
+    expect(moves).toEqual([{ task, status: 'await_feedback' }]);
+    expect(component.menuOpen()).toBe(false);
+    expect(element('.task-card__menu')).toBeNull();
+  });
+
+  it('closes the menu on a click somewhere else', () => {
+    renderTask(createTask(), MOVE_TARGETS);
+
+    element<HTMLButtonElement>('.task-card__move-button').click();
+    fixture.detectChanges();
+    document.body.click();
+    fixture.detectChanges();
+
+    expect(component.menuOpen()).toBe(false);
+  });
+
+  function renderTask(task: TaskWithDetails, moveTargets: TaskMoveTarget[] = []): void {
     fixture.componentRef.setInput('task', task);
+    fixture.componentRef.setInput('moveTargets', moveTargets);
     fixture.detectChanges();
   }
 

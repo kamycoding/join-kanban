@@ -1,7 +1,13 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormField, form, submit, validate } from '@angular/forms/signals';
 
-import { NewTaskWithDetails, TaskCategory, TaskPriority } from '../../models/task';
+import {
+  NewTaskWithDetails,
+  Task,
+  TaskCategory,
+  TaskPriority,
+  TaskStatus,
+} from '../../models/task';
 import { ContactService } from '../../services/contact';
 import { TaskService } from '../../services/task';
 import { Button } from '../../shared/components/button/button';
@@ -30,10 +36,28 @@ const INITIAL_FORM_VALUE: AddTaskFormValue = {
   imports: [AssignedContacts, Button, FormField, SubtaskInput, Toast],
   templateUrl: './add-task.html',
   styleUrl: './add-task.scss',
+  host: {
+    '[class.add-task--in-overlay]': 'inOverlay()',
+  },
 })
 export class AddTask implements OnInit {
   private readonly contactService = inject(ContactService);
   private readonly taskService = inject(TaskService);
+
+  /**
+   * The column a new task lands in. The board hands it the column the user
+   * clicked; as a routed page it arrives from the `status` query parameter.
+   */
+  readonly status = input<TaskStatus>('todo');
+
+  /**
+   * Set by the board when the form runs inside its overlay. The overlay
+   * carries the heading, and the left button cancels instead of clearing.
+   */
+  readonly inOverlay = input(false);
+
+  readonly saved = output<Task>();
+  readonly cancelled = output<void>();
 
   readonly contacts = this.contactService.contacts;
   readonly saving = this.taskService.saving;
@@ -78,11 +102,32 @@ export class AddTask implements OnInit {
       const createdTask = await this.taskService.createTaskWithDetails(
         this.toPayload(field().value()),
       );
-      if (createdTask) {
-        this.clearForm();
-        this.successToast.set(true);
+      if (!createdTask) {
+        return;
       }
+
+      this.clearForm();
+
+      if (this.inOverlay()) {
+        this.saved.emit(createdTask);
+        return;
+      }
+
+      this.successToast.set(true);
     });
+  }
+
+  /**
+   * Leaves the form without saving. Only reachable from the overlay, where
+   * the left button reads "Cancel" instead of "Clear".
+   */
+  cancelForm(): void {
+    if (this.saving()) {
+      return;
+    }
+
+    this.clearForm();
+    this.cancelled.emit();
   }
 
   private toPayload(value: AddTaskFormValue): NewTaskWithDetails {
@@ -93,7 +138,7 @@ export class AddTask implements OnInit {
         due_date: value.dueDate,
         priority: value.priority,
         category: value.category as TaskCategory,
-        status: 'todo',
+        status: this.status(),
       },
       contactIds: this.selectedContactIds(),
       subtasks: this.subtasks().map((title) => ({ title: title.trim() })),

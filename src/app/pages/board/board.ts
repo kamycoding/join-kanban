@@ -1,10 +1,14 @@
 import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { TaskDetail } from '../../features/tasks/task-detail/task-detail';
 import { TaskMoveRequest, TaskMoveTarget, TaskStatus, TaskWithDetails } from '../../models/task';
 import { SubtaskService } from '../../services/subtask';
 import { TaskService } from '../../services/task';
+import { Overlay } from '../../shared/components/overlay/overlay';
+import { Toast } from '../../shared/components/toast/toast';
+import { AddTask } from '../add-task/add-task';
 import { BoardColumn } from './board-column/board-column';
 
 interface BoardColumnDefinition {
@@ -53,21 +57,31 @@ function matchesSearch(task: TaskWithDetails, term: string): boolean {
   return task.title.toLowerCase().includes(term) || task.description.toLowerCase().includes(term);
 }
 
+/**
+ * Below this width the design has no overlay but a full Add-task page, so the
+ * plus buttons navigate there instead of opening the form in place. Mirrors
+ * `$bp-mobile` in `src/styles/_breakpoints.scss`.
+ */
+const OVERLAY_MIN_WIDTH = 768;
+
 @Component({
   selector: 'app-board',
-  imports: [BoardColumn, CdkDropListGroup, TaskDetail],
+  imports: [AddTask, BoardColumn, CdkDropListGroup, Overlay, TaskDetail, Toast],
   templateUrl: './board.html',
   styleUrl: './board.scss',
 })
 export class Board implements OnInit {
   private readonly taskService = inject(TaskService);
   private readonly subtaskService = inject(SubtaskService);
+  private readonly router = inject(Router);
 
   readonly columns = BOARD_COLUMNS;
   readonly loading = this.taskService.loading;
   readonly error = this.taskService.error;
   readonly searchTerm = signal('');
   readonly selectedTaskId = signal<string | null>(null);
+  readonly formStatus = signal<TaskStatus | null>(null);
+  readonly createdToast = signal(false);
 
   /**
    * While the board is filtered the columns no longer show every card, so a
@@ -141,6 +155,36 @@ export class Board implements OnInit {
     if (deleted) {
       this.closeDetail();
     }
+  }
+
+  /**
+   * Opens the task form for a column. On a narrow screen the design has no
+   * overlay, so the plus button leads to the Add-task page instead and carries
+   * the column along as a query parameter.
+   *
+   * @param status - The column whose plus button was used.
+   */
+  async openForm(status: TaskStatus): Promise<void> {
+    if (window.innerWidth < OVERLAY_MIN_WIDTH) {
+      await this.router.navigate(['/add-task'], { queryParams: { status } });
+      return;
+    }
+
+    this.createdToast.set(false);
+    this.formStatus.set(status);
+  }
+
+  closeForm(): void {
+    this.formStatus.set(null);
+  }
+
+  /**
+   * Closes the form once a task was created and confirms it, the way the
+   * design shows after adding from the board.
+   */
+  onTaskCreated(): void {
+    this.closeForm();
+    this.createdToast.set(true);
   }
 
   /**

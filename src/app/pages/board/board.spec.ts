@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { vi } from 'vitest';
 
 import { TaskStatus, TaskWithDetails } from '../../models/task';
+import { ContactService } from '../../services/contact';
 import { SubtaskService } from '../../services/subtask';
 import { TaskService } from '../../services/task';
 import { Board } from './board';
@@ -19,8 +21,12 @@ describe('Board', () => {
     deleteTask: ReturnType<typeof vi.fn>;
     moveTask: ReturnType<typeof vi.fn>;
     applySubtaskChange: ReturnType<typeof vi.fn>;
+    saving: WritableSignal<boolean>;
+    createTaskWithDetails: ReturnType<typeof vi.fn>;
   };
   let subtaskService: { setSubtaskCompleted: ReturnType<typeof vi.fn> };
+  let router: { navigate: ReturnType<typeof vi.fn> };
+  let windowWidth: number;
 
   function createTask(id: string, title: string, status: TaskStatus): TaskWithDetails {
     return {
@@ -50,12 +56,22 @@ describe('Board', () => {
       deleteTask: vi.fn().mockResolvedValue(true),
       moveTask: vi.fn().mockResolvedValue(null),
       applySubtaskChange: vi.fn(),
+      saving: signal(false),
+      createTaskWithDetails: vi.fn().mockResolvedValue(null),
     };
     subtaskService = { setSubtaskCompleted: vi.fn().mockResolvedValue(null) };
+    router = { navigate: vi.fn().mockResolvedValue(true) };
+
+    windowWidth = 1440;
+    vi.spyOn(window, 'innerWidth', 'get').mockImplementation(() => windowWidth);
 
     await TestBed.configureTestingModule({ imports: [Board] })
       .overrideProvider(TaskService, { useValue: taskService })
       .overrideProvider(SubtaskService, { useValue: subtaskService })
+      .overrideProvider(Router, { useValue: router })
+      .overrideProvider(ContactService, {
+        useValue: { contacts: signal([]), getContacts: vi.fn().mockResolvedValue(true) },
+      })
       .compileComponents();
 
     fixture = TestBed.createComponent(Board);
@@ -194,6 +210,67 @@ describe('Board', () => {
       ['await_feedback', 'down'],
     ]);
     expect(asPairs('done')).toEqual([['await_feedback', 'up']]);
+  });
+
+  it('opens the task form for the column that was clicked', async () => {
+    expect(fixture.nativeElement.querySelector('app-overlay')).toBeNull();
+
+    await component.openForm('await_feedback');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.formStatus()).toBe('await_feedback');
+    expect(fixture.nativeElement.querySelector('app-overlay app-add-task')).not.toBeNull();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('goes to the Add-task page instead of opening an overlay on a narrow screen', async () => {
+    windowWidth = 500;
+
+    await component.openForm('done');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(router.navigate).toHaveBeenCalledWith(['/add-task'], {
+      queryParams: { status: 'done' },
+    });
+    expect(component.formStatus()).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-overlay')).toBeNull();
+  });
+
+  it('opens the form from the Add-task button in the heading', async () => {
+    fixture.nativeElement.querySelector('.board-heading__add').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.formStatus()).toBe('todo');
+  });
+
+  it('closes the form and confirms once a task was created', async () => {
+    await component.openForm('todo');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onTaskCreated();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.formStatus()).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-overlay')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.board-page__toast')).not.toBeNull();
+  });
+
+  it('closes the form without a confirmation when it was cancelled', async () => {
+    await component.openForm('todo');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.closeForm();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.formStatus()).toBeNull();
+    expect(fixture.nativeElement.querySelector('.board-page__toast')).toBeNull();
   });
 
   it('shows the error message when a move fails', async () => {

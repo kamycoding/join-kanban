@@ -1,0 +1,92 @@
+@use '../../../../styles/breakpoints' as *;
+
+.overlay__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+
+  display: grid;
+  place-items: center;
+
+  padding: var(--space-6);
+
+  background: rgb(0 0 0 / 0.2);
+}
+
+.overlay__dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+
+  box-sizing: border-box;
+  width: min(1116px, 100%);
+  max-height: 100%;
+  padding: var(--space-9) var(--space-10);
+  overflow: auto;
+
+  border-radius: var(--radius-3xl);
+
+  background: var(--color-white);
+  box-shadow: var(--shadow-overlay);
+}
+
+.overlay__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.overlay__heading {
+  margin: 0;
+
+  color: var(--color-primary);
+  font-size: var(--font-size-t2);
+  font-weight: var(--font-weight-bold);
+}
+
+.overlay__close {
+  display: grid;
+  place-items: center;
+  flex: none;
+
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: none;
+
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.overlay__close:hover {
+  background: var(--color-hover-tint);
+}
+
+.overlay__body {
+  min-width: 0;
+}
+
+@media (max-width: $bp-tablet) {
+  .overlay__backdrop {
+    padding: var(--space-4);
+  }
+
+  .overlay__dialog {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .overlay__heading {
+    font-size: var(--font-size-t5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay__close {
+    transition: none;
+  }
+}

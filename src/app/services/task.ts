@@ -11,6 +11,23 @@ import {
 } from '../models/task';
 import { SupabaseService } from './supabase';
 
+/**
+ * Orders tasks the way the board shows them: by position inside a column,
+ * and by creation time when two tasks share a position.
+ */
+function byBoardOrder(taskA: Task, taskB: Task): number {
+  return taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at);
+}
+
+/**
+ * Renumbers a single column so its positions run 0, 1, 2, … without gaps.
+ *
+ * @param column - The tasks of one column in the order they should appear.
+ */
+function renumberColumn(column: TaskWithDetails[]): TaskWithDetails[] {
+  return column.map((task, index) => ({ ...task, position: index }));
+}
+
 @Service()
 export class TaskService {
   private readonly supabase = inject(SupabaseService).client;
@@ -144,10 +161,7 @@ export class TaskService {
             ? { ...updatedTask, subtasks: task.subtasks, assignees: task.assignees }
             : task,
         )
-        .sort(
-          (taskA, taskB) =>
-            taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
-        ),
+        .sort(byBoardOrder),
     );
 
     return updatedTask;
@@ -176,8 +190,11 @@ export class TaskService {
       return null;
     }
 
+    const previousTasks = this.tasksState();
+
     this.savingState.set(true);
     this.errorState.set(null);
+    this.applyMoveLocally(id, status, position);
 
     const { data, error } = await this.supabase.rpc('move_task', {
       p_task_id: id,
@@ -188,6 +205,7 @@ export class TaskService {
     this.savingState.set(false);
 
     if (error) {
+      this.tasksState.set(previousTasks);
       this.errorState.set(error.message);
       return null;
     }
@@ -203,10 +221,7 @@ export class TaskService {
             ? { ...updatedTask, subtasks: task.subtasks, assignees: task.assignees }
             : task;
         })
-        .sort(
-          (taskA, taskB) =>
-            taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
-        ),
+        .sort(byBoardOrder),
     );
 
     return updatesById.get(id) ?? null;
@@ -232,13 +247,46 @@ export class TaskService {
     );
   }
 
+  /**
+   * Mirrors what `move_task` does in the database, but only in the loaded tasks,
+   * so the board shows the move right away instead of after the round trip.
+   * The server answer overwrites this preview, and a failed move restores the
+   * tasks as they were before.
+   *
+   * @param id - Id of the task that moves.
+   * @param status - Column the task moves into.
+   * @param position - Requested slot in that column, clamped to its length.
+   */
+  private applyMoveLocally(id: string, status: TaskStatus, position: number): void {
+    this.tasksState.update((tasks) => {
+      const movedTask = tasks.find((task) => task.id === id);
+
+      if (!movedTask) {
+        return tasks;
+      }
+
+      const previousStatus = movedTask.status;
+      const targetColumn = tasks.filter((task) => task.status === status && task.id !== id);
+      targetColumn.splice(Math.min(position, targetColumn.length), 0, { ...movedTask, status });
+
+      const previousColumn =
+        previousStatus === status
+          ? []
+          : tasks.filter((task) => task.status === previousStatus && task.id !== id);
+      const untouched = tasks.filter(
+        (task) => task.status !== status && task.status !== previousStatus,
+      );
+
+      return [
+        ...untouched,
+        ...renumberColumn(targetColumn),
+        ...renumberColumn(previousColumn),
+      ].sort(byBoardOrder);
+    });
+  }
+
   private addTaskToState(task: TaskWithDetails): void {
-    this.tasksState.update((tasks) =>
-      [...tasks, task].sort(
-        (taskA, taskB) =>
-          taskA.position - taskB.position || taskA.created_at.localeCompare(taskB.created_at),
-      ),
-    );
+    this.tasksState.update((tasks) => [...tasks, task].sort(byBoardOrder));
   }
 
   private withEmptyDetails(task: Task): TaskWithDetails {

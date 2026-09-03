@@ -39,6 +39,13 @@ export class TaskForm {
   readonly busy = input(false);
   readonly error = input<string | null>(null);
 
+  /**
+   * Overrides which behavior the secondary button triggers. Without it the
+   * mode decides: create clears the form, edit cancels it. A create-mode
+   * host that only wants to leave the form (an overlay) passes `'cancel'`.
+   */
+  readonly secondaryAction = input<'clear' | 'cancel'>();
+
   readonly submitted = output<TaskFormValue>();
   readonly cancelled = output<void>();
   readonly cleared = output<void>();
@@ -64,7 +71,9 @@ export class TaskForm {
 
     return this.mode() === 'create' ? 'Create Task' : 'Save';
   });
-  readonly secondaryLabel = computed(() => (this.mode() === 'create' ? 'Clear' : 'Cancel'));
+  readonly secondaryLabel = computed(() =>
+    this.effectiveSecondaryAction() === 'cancel' ? 'Cancel' : 'Clear',
+  );
   readonly minimumDate = computed(() => {
     const originalDueDate = this.initialValue().dueDate;
 
@@ -75,6 +84,10 @@ export class TaskForm {
 
   private readonly allowedDueDate = computed(() =>
     this.mode() === 'edit' ? this.initialValue().dueDate || null : null,
+  );
+
+  private readonly effectiveSecondaryAction = computed(
+    () => this.secondaryAction() ?? (this.mode() === 'edit' ? 'cancel' : 'clear'),
   );
 
   private readonly instanceId = ++taskFormInstanceCounter;
@@ -130,11 +143,11 @@ export class TaskForm {
   onSecondaryAction(): void {
     if (this.busy()) return;
 
-    if (this.mode() === 'create') {
+    if (this.effectiveSecondaryAction() === 'cancel') {
+      this.cancelled.emit();
+    } else {
       this.reset();
       this.cleared.emit();
-    } else {
-      this.cancelled.emit();
     }
   }
 

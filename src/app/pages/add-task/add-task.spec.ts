@@ -84,6 +84,29 @@ describe('AddTask', () => {
     });
   });
 
+  it('creates the task in the column it was handed', async () => {
+    fixture.componentRef.setInput('status', 'await_feedback');
+    await fillRequiredFields();
+
+    await submit();
+
+    expect(taskService.createTaskWithDetails).toHaveBeenCalledWith(
+      expect.objectContaining({
+        task: expect.objectContaining({ status: 'await_feedback', title: 'Write the docs' }),
+      }),
+    );
+  });
+
+  it('defaults to the To-do column as a routed page', async () => {
+    await fillRequiredFields();
+
+    await submit();
+
+    expect(taskService.createTaskWithDetails).toHaveBeenCalledWith(
+      expect.objectContaining({ task: expect.objectContaining({ status: 'todo' }) }),
+    );
+  });
+
   it('resets TaskForm and shows success feedback only after successful creation', async () => {
     const reset = vi.spyOn(childTaskForm(), 'reset');
 
@@ -94,6 +117,53 @@ describe('AddTask', () => {
     expect(reset).toHaveBeenCalledOnce();
     expect(component.successToast()).toBe(true);
     expect(fixture.nativeElement.querySelector('app-toast')).toBeTruthy();
+  });
+
+  it('confirms in place on the page and reports upwards in the overlay', async () => {
+    const saves: Task[] = [];
+    component.saved.subscribe((task) => saves.push(task));
+    await fillRequiredFields();
+
+    await submit();
+
+    expect(component.successToast()).toBe(true);
+    expect(saves).toEqual([]);
+
+    fixture.componentRef.setInput('inOverlay', true);
+    await fillRequiredFields();
+    await submit();
+
+    expect(saves).toEqual([createTask()]);
+    expect(component.successToast()).toBe(false);
+  });
+
+  it('reads Cancel instead of Clear inside the overlay', async () => {
+    const label = () =>
+      fixture.nativeElement.querySelector('.task-form__actions app-button').textContent.trim();
+
+    expect(label()).toBe('Clear');
+
+    fixture.componentRef.setInput('inOverlay', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(label()).toBe('Cancel');
+  });
+
+  it('empties the form and reports back when cancelled', async () => {
+    let cancelled = 0;
+    component.cancelled.subscribe(() => (cancelled += 1));
+    fixture.componentRef.setInput('inOverlay', true);
+    await fillRequiredFields();
+    const taskForm = childTaskForm();
+
+    taskForm.onSecondaryAction();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(cancelled).toBe(1);
+    expect(taskForm.formModel()).toEqual(createEmptyTaskFormValue());
+    expect(taskService.createTaskWithDetails).not.toHaveBeenCalled();
   });
 
   it('preserves user data and does not show success after failed creation', async () => {
@@ -148,6 +218,28 @@ describe('AddTask', () => {
 
   function childTaskForm(): TaskForm {
     return fixture.debugElement.query(By.directive(TaskForm)).componentInstance as TaskForm;
+  }
+
+  /**
+   * Submits through the real TaskForm pipeline, so validation and the wiring
+   * between the reusable form and the container are part of the test.
+   */
+  async function submit(): Promise<void> {
+    await childTaskForm().onSubmit(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  async function fillRequiredFields(): Promise<void> {
+    const taskForm = childTaskForm();
+    taskForm.formModel.update((value) => ({
+      ...value,
+      title: 'Write the docs',
+      dueDate: taskForm.today,
+      category: 'user_story',
+    }));
+    fixture.detectChanges();
+    await fixture.whenStable();
   }
 });
 

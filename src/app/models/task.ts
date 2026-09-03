@@ -43,6 +43,26 @@ export interface TaskWithDetails extends Task {
   assignees: TaskAssigneeWithContact[];
 }
 
+/**
+ * One entry of the "Move to" menu on a task card. The board decides which
+ * columns a card may reach, the card only renders what it is handed.
+ */
+export interface TaskMoveTarget {
+  status: TaskStatus;
+  label: string;
+  direction: 'up' | 'down';
+}
+
+/**
+ * A request to put a task somewhere else, raised by dragging or by the menu.
+ * Without a position the board appends the task to the end of its new column.
+ */
+export interface TaskMoveRequest {
+  task: TaskWithDetails;
+  status: TaskStatus;
+  position?: number;
+}
+
 export type NewSubtask = Pick<Subtask, 'task_id' | 'title'> &
   Partial<Pick<Subtask, 'is_completed' | 'position'>>;
 

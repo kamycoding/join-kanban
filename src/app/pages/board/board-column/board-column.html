@@ -14,9 +14,22 @@
     }
   </header>
 
-  <div class="board-column__tasks">
+  <div
+    class="board-column__tasks"
+    cdkDropList
+    [cdkDropListData]="tasks()"
+    (cdkDropListDropped)="dropped($event)"
+  >
     @for (task of tasks(); track task.id) {
-      <app-task-card [task]="task" (openDetail)="detailRequested.emit($event)" />
+      <app-task-card
+        cdkDrag
+        [cdkDragData]="task"
+        [cdkDragDisabled]="dragDisabled()"
+        [task]="task"
+        [moveTargets]="moveTargets()"
+        (openDetail)="detailRequested.emit($event)"
+        (moveRequested)="moveRequested.emit($event)"
+      />
     } @empty {
       <p class="board-column__empty">No tasks {{ heading() }}</p>
     }

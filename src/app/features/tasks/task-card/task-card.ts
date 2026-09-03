@@ -1,6 +1,12 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 
-import type { TaskCategory, TaskPriority, TaskWithDetails } from '../../../models/task';
+import type {
+  TaskCategory,
+  TaskMoveRequest,
+  TaskMoveTarget,
+  TaskPriority,
+  TaskWithDetails,
+} from '../../../models/task';
 import type { TaskAssigneeWithContact } from '../../../models/task-assignee';
 
 const CATEGORY_LABELS: Record<TaskCategory, string> = {
@@ -20,15 +26,28 @@ const PRIORITY_ICONS: Record<TaskPriority, string> = {
   urgent: '/img/icon-priority-urgent.svg',
 };
 
+const ARROW_ICONS: Record<TaskMoveTarget['direction'], string> = {
+  up: '/img/icon-arrow-up.svg',
+  down: '/img/icon-arrow-down.svg',
+};
+
 @Component({
   selector: 'app-task-card',
   imports: [],
   templateUrl: './task-card.html',
   styleUrl: './task-card.scss',
+  host: {
+    '(document:click)': 'closeMenu()',
+    '(keydown.escape)': 'closeMenu()',
+  },
 })
 export class TaskCard {
   readonly task = input.required<TaskWithDetails>();
+  readonly moveTargets = input<readonly TaskMoveTarget[]>([]);
   readonly openDetail = output<TaskWithDetails>();
+  readonly moveRequested = output<TaskMoveRequest>();
+
+  readonly menuOpen = signal(false);
 
   readonly categoryLabel = computed(() => CATEGORY_LABELS[this.task().category]);
   readonly completedSubtasks = computed(
@@ -46,6 +65,35 @@ export class TaskCard {
 
   activate(): void {
     this.openDetail.emit(this.task());
+  }
+
+  /**
+   * Opens or closes the "Move to" menu. The click is kept inside the card so
+   * the document listener that closes the menu does not swallow it right away.
+   *
+   * @param event - The click on the move button.
+   */
+  toggleMenu(event: Event): void {
+    event.stopPropagation();
+    this.menuOpen.update((open) => !open);
+  }
+
+  closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
+  /**
+   * Asks the board to move this task, and closes the menu.
+   *
+   * @param target - The column the user picked.
+   */
+  requestMove(target: TaskMoveTarget): void {
+    this.closeMenu();
+    this.moveRequested.emit({ task: this.task(), status: target.status });
+  }
+
+  arrowIcon(target: TaskMoveTarget): string {
+    return ARROW_ICONS[target.direction];
   }
 
   contactInitials(assignment: TaskAssigneeWithContact): string {

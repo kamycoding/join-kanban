@@ -22,3 +22,24 @@ body {
   font-size: var(--font-size-body);
   line-height: var(--line-height);
 }
+
+/*
+ * The card that follows the pointer while dragging is moved to the body by the
+ * CDK, so component styles never reach it and it has to be styled here.
+ * Its `transform` belongs to the CDK, which uses it to position the card, so
+ * nothing here may set one.
+ */
+.cdk-drag-preview {
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cdk-drag-animating {
+    transition: none;
+  }
+}

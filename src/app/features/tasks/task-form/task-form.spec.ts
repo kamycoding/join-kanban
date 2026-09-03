@@ -73,6 +73,76 @@ describe('TaskForm', () => {
     await fixture.whenStable();
     expect(component.taskForm.dueDate().invalid()).toBe(true);
     expect(textOf(`#${component.dueDateErrorId}`)).toContain('Due date cannot be in the past.');
+    expect(input(component.dueDateInputId).getAttribute('min')).toBe(component.today);
+  });
+
+  it('accepts a due date of today or in the future', async () => {
+    component.formModel.update((value) => ({ ...value, dueDate: component.today }));
+    await fixture.whenStable();
+    expect(component.taskForm.dueDate().valid()).toBe(true);
+
+    component.formModel.update((value) => ({ ...value, dueDate: '2099-06-01' }));
+    await fixture.whenStable();
+    expect(component.taskForm.dueDate().valid()).toBe(true);
+  });
+
+  it('accepts an unchanged overdue due date in edit mode', async () => {
+    const overdue = { ...validValue(), dueDate: shiftDate(component.today, -13) };
+    fixture.componentRef.setInput('mode', 'edit');
+    fixture.componentRef.setInput('initialValue', overdue);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(input(component.dueDateInputId).getAttribute('min')).toBe(overdue.dueDate);
+
+    component.formModel.set(overdue);
+    await fixture.whenStable();
+    expect(component.taskForm.dueDate().valid()).toBe(true);
+  });
+
+  it('rejects a different past due date in edit mode', async () => {
+    const overdue = { ...validValue(), dueDate: shiftDate(component.today, -13) };
+    fixture.componentRef.setInput('mode', 'edit');
+    fixture.componentRef.setInput('initialValue', overdue);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.formModel.set({ ...overdue, dueDate: shiftDate(component.today, -8) });
+    component.taskForm.dueDate().markAsTouched();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.taskForm.dueDate().invalid()).toBe(true);
+    expect(textOf(`#${component.dueDateErrorId}`)).toContain('Due date cannot be in the past.');
+  });
+
+  it('accepts a future due date in edit mode', async () => {
+    const overdue = { ...validValue(), dueDate: shiftDate(component.today, -13) };
+    fixture.componentRef.setInput('mode', 'edit');
+    fixture.componentRef.setInput('initialValue', overdue);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.formModel.set({ ...overdue, dueDate: shiftDate(component.today, 10) });
+    await fixture.whenStable();
+    expect(component.taskForm.dueDate().valid()).toBe(true);
+  });
+
+  it('submits an overdue task when only another field changed', async () => {
+    const submitted = vi.fn();
+    component.submitted.subscribe(submitted);
+    const overdue = { ...validValue(), dueDate: shiftDate(component.today, -13) };
+    fixture.componentRef.setInput('mode', 'edit');
+    fixture.componentRef.setInput('initialValue', overdue);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.formModel.set({ ...overdue, title: 'Renamed overdue task' });
+    await component.onSubmit(new Event('submit', { cancelable: true }));
+
+    expect(submitted).toHaveBeenCalledTimes(1);
+    expect(submitted.mock.calls[0][0].dueDate).toBe(overdue.dueDate);
+    expect(submitted.mock.calls[0][0].title).toBe('Renamed overdue task');
   });
 
   it('requires a category', async () => {
@@ -332,6 +402,15 @@ function completeInitialValue(): TaskFormValue {
 function setInputValue(element: HTMLInputElement, value: string): void {
   element.value = value;
   element.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function shiftDate(isoDate: string, days: number): string {
+  const date = new Date(`${isoDate}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function createContact(): Contact {

@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 
 import { TaskDetail } from '../../features/tasks/task-detail/task-detail';
+import { TaskEdit } from '../../features/tasks/task-edit/task-edit';
 import { TaskStatus, TaskWithDetails } from '../../models/task';
 import { SubtaskService } from '../../services/subtask';
 import { TaskService } from '../../services/task';
@@ -20,7 +21,7 @@ const BOARD_COLUMNS: readonly BoardColumnDefinition[] = [
 
 @Component({
   selector: 'app-board',
-  imports: [BoardColumn, TaskDetail],
+  imports: [BoardColumn, TaskDetail, TaskEdit],
   templateUrl: './board.html',
   styleUrl: './board.scss',
 })
@@ -34,6 +35,10 @@ export class Board implements OnInit {
   readonly selectedTaskId = signal<string | null>(null);
   readonly selectedTask = computed(
     () => this.taskService.tasks().find((task) => task.id === this.selectedTaskId()) ?? null,
+  );
+  readonly editingTaskId = signal<string | null>(null);
+  readonly editingTask = computed(
+    () => this.taskService.tasks().find((task) => task.id === this.editingTaskId()) ?? null,
   );
 
   private readonly tasksByStatus = computed(() => {
@@ -70,6 +75,22 @@ export class Board implements OnInit {
    */
   closeDetail(): void {
     this.selectedTaskId.set(null);
+  }
+
+  /**
+   * Opens the edit overlay for the given task.
+   *
+   * @param task - The task to edit.
+   */
+  openEdit(task: TaskWithDetails): void {
+    this.editingTaskId.set(task.id);
+  }
+
+  /**
+   * Closes the edit overlay and returns to the detail overlay.
+   */
+  closeEdit(): void {
+    this.editingTaskId.set(null);
   }
 
   /**

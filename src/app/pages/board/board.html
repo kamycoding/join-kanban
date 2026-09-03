@@ -22,10 +22,13 @@
     }
   </div>
 
-  @if (selectedTask(); as task) {
+  @if (editingTask(); as task) {
+    <app-task-edit [task]="task" (saved)="closeEdit()" (cancelled)="closeEdit()" />
+  } @else if (selectedTask(); as task) {
     <app-task-detail
       [task]="task"
       (closeRequested)="closeDetail()"
+      (editRequested)="openEdit($event)"
       (deleteRequested)="deleteTask($event)"
       (subtaskToggleRequested)="toggleSubtask($event)"
     />

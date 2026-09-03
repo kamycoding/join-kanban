@@ -45,7 +45,7 @@
             #dueDateInput
             [id]="dueDateInputId"
             type="date"
-            [min]="today"
+            [min]="minimumDate()"
             [formField]="taskForm.dueDate"
             [attr.aria-describedby]="dueDateErrorId"
             [attr.aria-invalid]="taskForm.dueDate().touched() && taskForm.dueDate().invalid()"

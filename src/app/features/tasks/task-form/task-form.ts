@@ -49,7 +49,9 @@ export class TaskForm {
   readonly taskForm = form(this.formModel, (path) => {
     disabled(path, { when: () => this.busy() });
     validate(path.title, ({ value }) => validateTitle(value()));
-    validate(path.dueDate, ({ value }) => validateDueDate(value(), this.today));
+    validate(path.dueDate, ({ value }) =>
+      validateDueDate(value(), this.today, this.allowedDueDate()),
+    );
     validate(path.category, ({ value }) =>
       value() ? null : { kind: 'required', message: 'Category is required.' },
     );
@@ -63,6 +65,17 @@ export class TaskForm {
     return this.mode() === 'create' ? 'Create Task' : 'Save';
   });
   readonly secondaryLabel = computed(() => (this.mode() === 'create' ? 'Clear' : 'Cancel'));
+  readonly minimumDate = computed(() => {
+    const originalDueDate = this.initialValue().dueDate;
+
+    return this.mode() === 'edit' && originalDueDate && originalDueDate < this.today
+      ? originalDueDate
+      : this.today;
+  });
+
+  private readonly allowedDueDate = computed(() =>
+    this.mode() === 'edit' ? this.initialValue().dueDate || null : null,
+  );
 
   private readonly instanceId = ++taskFormInstanceCounter;
   readonly titleErrorId = `task-title-error-${this.instanceId}`;
@@ -168,8 +181,10 @@ function validateTitle(value: string): { kind: string; message: string } | null 
 function validateDueDate(
   value: string,
   minimumDate: string,
+  allowedPastDate: string | null,
 ): { kind: string; message: string } | null {
   if (!value) return { kind: 'required', message: 'Due date is required.' };
+  if (allowedPastDate !== null && value === allowedPastDate) return null;
   return value < minimumDate
     ? { kind: 'minimum', message: 'Due date cannot be in the past.' }
     : null;

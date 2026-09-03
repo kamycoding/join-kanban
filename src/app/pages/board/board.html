@@ -11,13 +11,15 @@
     <p class="board-page__loading">Loading tasks…</p>
   }
 
-  <div class="board-columns">
+  <div class="board-columns" cdkDropListGroup>
     @for (column of columns; track column.status) {
       <app-board-column
         [heading]="column.heading"
         [status]="column.status"
         [tasks]="tasksFor(column.status)"
+        [moveTargets]="moveTargetsFor(column.status)"
         (detailRequested)="openDetail($event)"
+        (moveRequested)="moveTask($event)"
       />
     }
   </div>

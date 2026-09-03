@@ -1,7 +1,8 @@
+import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 
 import { TaskDetail } from '../../features/tasks/task-detail/task-detail';
-import { TaskStatus, TaskWithDetails } from '../../models/task';
+import { TaskMoveRequest, TaskMoveTarget, TaskStatus, TaskWithDetails } from '../../models/task';
 import { SubtaskService } from '../../services/subtask';
 import { TaskService } from '../../services/task';
 import { BoardColumn } from './board-column/board-column';
@@ -18,9 +19,32 @@ const BOARD_COLUMNS: readonly BoardColumnDefinition[] = [
   { status: 'done', heading: 'Done' },
 ];
 
+/**
+ * The "Move to" menu offers the neighbouring columns only, one up and one
+ * down, which is what the design shows. The outer columns therefore have a
+ * single entry each.
+ */
+const MOVE_TARGETS: ReadonlyMap<TaskStatus, readonly TaskMoveTarget[]> = new Map(
+  BOARD_COLUMNS.map((column, index) => {
+    const previous = BOARD_COLUMNS[index - 1];
+    const next = BOARD_COLUMNS[index + 1];
+    const targets: TaskMoveTarget[] = [];
+
+    if (previous) {
+      targets.push({ status: previous.status, label: previous.heading, direction: 'up' });
+    }
+
+    if (next) {
+      targets.push({ status: next.status, label: next.heading, direction: 'down' });
+    }
+
+    return [column.status, targets];
+  }),
+);
+
 @Component({
   selector: 'app-board',
-  imports: [BoardColumn, TaskDetail],
+  imports: [BoardColumn, CdkDropListGroup, TaskDetail],
   templateUrl: './board.html',
   styleUrl: './board.scss',
 })
@@ -86,19 +110,32 @@ export class Board implements OnInit {
   }
 
   /**
-   * Moves a task into another column and saves that through the task service.
-   * A task dropped back into its own column is ignored, and a rejected move is
-   * taken back by the service, which also fills the error message.
+   * The columns a card in this column may be moved to, one up and one down.
    *
-   * @param task - The task that moves.
-   * @param status - The column the task should land in.
+   * @param status - The column the card currently sits in.
    */
-  async moveTask(task: TaskWithDetails, status: TaskStatus): Promise<void> {
-    if (task.status === status) {
+  moveTargetsFor(status: TaskStatus): readonly TaskMoveTarget[] {
+    return MOVE_TARGETS.get(status) ?? [];
+  }
+
+  /**
+   * Moves a task and saves that through the task service. Dragging carries a
+   * slot, the menu does not and appends to the end. A task that ends up where
+   * it already was is ignored, and a rejected move is taken back by the
+   * service, which also fills the error message.
+   *
+   * @param request - The task, the column it should land in, and its slot.
+   */
+  async moveTask(request: TaskMoveRequest): Promise<void> {
+    const { task, status } = request;
+    const position = request.position ?? this.tasksFor(status).length;
+    const currentIndex = this.tasksFor(task.status).findIndex((other) => other.id === task.id);
+
+    if (task.status === status && currentIndex === position) {
       return;
     }
 
-    await this.taskService.moveTask(task.id, status, this.tasksFor(status).length);
+    await this.taskService.moveTask(task.id, status, position);
   }
 
   /**

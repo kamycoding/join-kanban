@@ -42,6 +42,17 @@ const MOVE_TARGETS: ReadonlyMap<TaskStatus, readonly TaskMoveTarget[]> = new Map
   }),
 );
 
+/**
+ * Whether a task belongs in the result for a search term. Title and
+ * description count, and the term arrives trimmed and in lower case.
+ *
+ * @param task - The task to check.
+ * @param term - The lower case search term.
+ */
+function matchesSearch(task: TaskWithDetails, term: string): boolean {
+  return task.title.toLowerCase().includes(term) || task.description.toLowerCase().includes(term);
+}
+
 @Component({
   selector: 'app-board',
   imports: [BoardColumn, CdkDropListGroup, TaskDetail],
@@ -55,7 +66,16 @@ export class Board implements OnInit {
   readonly columns = BOARD_COLUMNS;
   readonly loading = this.taskService.loading;
   readonly error = this.taskService.error;
+  readonly searchTerm = signal('');
   readonly selectedTaskId = signal<string | null>(null);
+
+  /**
+   * While the board is filtered the columns no longer show every card, so a
+   * drop would report a slot counted among the visible ones only. Dragging is
+   * therefore off during a search; the "Move to" menu still works because it
+   * appends to the end of a column and needs no slot.
+   */
+  readonly dragDisabled = computed(() => this.searchTerm().trim().length > 0);
   readonly selectedTask = computed(
     () => this.taskService.tasks().find((task) => task.id === this.selectedTaskId()) ?? null,
   );
@@ -64,8 +84,13 @@ export class Board implements OnInit {
     const groups = new Map<TaskStatus, TaskWithDetails[]>(
       BOARD_COLUMNS.map((column) => [column.status, []]),
     );
+    const term = this.searchTerm().trim().toLowerCase();
 
     for (const task of this.taskService.tasks()) {
+      if (term && !matchesSearch(task, term)) {
+        continue;
+      }
+
       groups.get(task.status)?.push(task);
     }
 
@@ -74,6 +99,15 @@ export class Board implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.taskService.getTasks();
+  }
+
+  /**
+   * Keeps the search term in step with the input field.
+   *
+   * @param event - The input event of the search field.
+   */
+  updateSearch(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   tasksFor(status: TaskStatus): TaskWithDetails[] {
@@ -128,7 +162,12 @@ export class Board implements OnInit {
    */
   async moveTask(request: TaskMoveRequest): Promise<void> {
     const { task, status } = request;
-    const position = request.position ?? this.tasksFor(status).length;
+    // The menu appends to the end of the whole column, which is not the same
+    // as the end of what a search leaves visible. Dragging always carries its
+    // own slot and never runs while the board is filtered.
+    const position =
+      request.position ??
+      this.taskService.tasks().filter((other) => other.status === status).length;
     const currentIndex = this.tasksFor(task.status).findIndex((other) => other.id === task.id);
 
     if (task.status === status && currentIndex === position) {

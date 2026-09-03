@@ -65,6 +65,20 @@ describe('BoardColumn', () => {
     expect(fixture.nativeElement.querySelector('.board-column__add')).toBeNull();
   });
 
+  it('lets its cards be dragged unless it is told otherwise', async () => {
+    fixture.componentRef.setInput('tasks', [task]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('app-task-card.cdk-drag-disabled')).toBeNull();
+
+    fixture.componentRef.setInput('dragDisabled', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('app-task-card.cdk-drag-disabled')).not.toBeNull();
+  });
+
   it('turns a drop into a move request for its own column and slot', () => {
     const requests: TaskMoveRequest[] = [];
     fixture.componentInstance.moveRequested.subscribe((request) => requests.push(request));

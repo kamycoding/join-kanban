@@ -69,3 +69,23 @@
   font-size: var(--font-size-body);
   text-align: center;
 }
+
+/*
+ * The CDK clones the card to mark the gap it left behind, so the gap already
+ * has the right size. Hiding it keeps the space and shows nothing, which is
+ * as far as this file reaches: the card's own markup belongs to TaskCard and
+ * view encapsulation keeps a selector from here out of it.
+ */
+.board-column__tasks .cdk-drag-placeholder {
+  visibility: hidden;
+}
+
+.board-column__tasks.cdk-drop-list-dragging app-task-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-column__tasks.cdk-drop-list-dragging app-task-card:not(.cdk-drag-placeholder) {
+    transition: none;
+  }
+}

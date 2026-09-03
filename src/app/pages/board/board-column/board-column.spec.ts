@@ -1,6 +1,7 @@
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TaskWithDetails } from '../../../models/task';
+import { TaskMoveRequest, TaskWithDetails } from '../../../models/task';
 import { BoardColumn } from './board-column';
 
 describe('BoardColumn', () => {
@@ -62,6 +63,18 @@ describe('BoardColumn', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.querySelector('.board-column__add')).toBeNull();
+  });
+
+  it('turns a drop into a move request for its own column and slot', () => {
+    const requests: TaskMoveRequest[] = [];
+    fixture.componentInstance.moveRequested.subscribe((request) => requests.push(request));
+
+    fixture.componentInstance.dropped({
+      item: { data: task },
+      currentIndex: 2,
+    } as CdkDragDrop<TaskWithDetails[]>);
+
+    expect(requests).toEqual([{ task, status: 'todo', position: 2 }]);
   });
 
   it('emits addRequested when the plus button is clicked', () => {

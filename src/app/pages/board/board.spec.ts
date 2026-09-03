@@ -99,20 +99,43 @@ describe('Board', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    await component.moveTask(task, 'done');
+    await component.moveTask({ task, status: 'done' });
 
     expect(taskService.moveTask).toHaveBeenCalledWith('task-1', 'done', 1);
   });
 
-  it('ignores a task that lands in the column it already is in', async () => {
+  it('saves a drop inside the same column as a reorder', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task, createTask('task-2', 'Ship the board', 'todo')]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await component.moveTask({ task, status: 'todo', position: 1 });
+
+    expect(taskService.moveTask).toHaveBeenCalledWith('task-1', 'todo', 1);
+  });
+
+  it('ignores a task that lands on the slot it already sits in', async () => {
     const task = createTask('task-1', 'Plan the sprint', 'todo');
     tasks.set([task]);
     fixture.detectChanges();
     await fixture.whenStable();
 
-    await component.moveTask(task, 'todo');
+    await component.moveTask({ task, status: 'todo', position: 0 });
 
     expect(taskService.moveTask).not.toHaveBeenCalled();
+  });
+
+  it('offers only the neighbouring columns in the move menu', () => {
+    const asPairs = (status: TaskStatus) =>
+      component.moveTargetsFor(status).map((target) => [target.status, target.direction]);
+
+    expect(asPairs('todo')).toEqual([['in_progress', 'down']]);
+    expect(asPairs('in_progress')).toEqual([
+      ['todo', 'up'],
+      ['await_feedback', 'down'],
+    ]);
+    expect(asPairs('done')).toEqual([['await_feedback', 'up']]);
   });
 
   it('shows the error message when a move fails', async () => {

@@ -10,12 +10,77 @@
   background: var(--color-bg-app);
 }
 
+.board-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
 .board-heading h1 {
   margin: 0;
 
   color: var(--color-primary);
   font-size: var(--font-size-t2);
   font-weight: var(--font-weight-bold);
+}
+
+.board-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+
+  box-sizing: border-box;
+  width: 312px;
+  max-width: 100%;
+  padding: var(--space-3) var(--space-4);
+
+  border: 1px solid var(--color-text-secondary);
+  border-radius: var(--radius-lg);
+
+  background: var(--color-white);
+}
+
+.board-search:focus-within {
+  border-color: var(--color-accent);
+}
+
+/* The design labels the field by its placeholder only. */
+.board-search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.board-search__input {
+  flex: 1;
+  min-width: 0;
+
+  border: 0;
+
+  background: none;
+  color: var(--color-primary);
+
+  font-family: inherit;
+  font-size: var(--font-size-body);
+}
+
+.board-search__input:focus {
+  outline: none;
+}
+
+.board-search__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.board-search__icon {
+  flex: none;
+  padding-left: var(--space-4);
+  border-left: 1px solid var(--color-text-secondary);
 }
 
 .board-page__loading,
@@ -56,6 +121,11 @@
 @media (max-width: $bp-mobile) {
   .board-page {
     padding: var(--space-5) var(--space-4);
+  }
+
+  /* Below the heading, across the full width, as the mobile frame shows it. */
+  .board-search {
+    width: 100%;
   }
 
   .board-columns {

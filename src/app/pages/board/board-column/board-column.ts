@@ -15,6 +15,7 @@ export class BoardColumn {
   readonly status = input.required<TaskStatus>();
   readonly tasks = input.required<TaskWithDetails[]>();
   readonly moveTargets = input<readonly TaskMoveTarget[]>([]);
+  readonly dragDisabled = input(false);
 
   readonly addRequested = output<void>();
   readonly detailRequested = output<TaskWithDetails>();

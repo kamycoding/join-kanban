@@ -1,0 +1,165 @@
+<form class="task-form" novalidate (submit)="onSubmit($event)">
+  <fieldset class="task-form__fieldset" [disabled]="busy()">
+    <div class="task-form__columns">
+      <div class="task-form__column">
+        <div class="task-form__field">
+          <label [for]="titleInputId">Title<span>*</span></label>
+          <input
+            #titleInput
+            [id]="titleInputId"
+            placeholder="Enter a title"
+            [formField]="taskForm.title"
+            [attr.aria-describedby]="titleErrorId"
+            [attr.aria-invalid]="taskForm.title().touched() && taskForm.title().invalid()"
+          />
+          <div class="task-form__message">
+            <div [id]="titleErrorId" class="task-form__error-announcement" aria-live="polite">
+              @if (taskForm.title().touched() && taskForm.title().invalid()) {
+                <p class="task-form__error task-form__error--reserved">
+                  {{ taskForm.title().errors()[0].message }}
+                </p>
+              }
+            </div>
+            <span
+              class="task-form__counter"
+              [class.task-form__counter--invalid]="formModel().title.length > 100"
+            >
+              {{ formModel().title.length }}/100
+            </span>
+          </div>
+        </div>
+
+        <div class="task-form__field">
+          <label [for]="descriptionInputId">Description</label>
+          <textarea
+            [id]="descriptionInputId"
+            rows="4"
+            placeholder="Enter a Description"
+            [formField]="taskForm.description"
+          ></textarea>
+        </div>
+
+        <div class="task-form__field">
+          <label [for]="dueDateInputId">Due date<span>*</span></label>
+          <input
+            #dueDateInput
+            [id]="dueDateInputId"
+            type="date"
+            [min]="minimumDate()"
+            [formField]="taskForm.dueDate"
+            [attr.aria-describedby]="dueDateErrorId"
+            [attr.aria-invalid]="taskForm.dueDate().touched() && taskForm.dueDate().invalid()"
+          />
+          <div
+            [id]="dueDateErrorId"
+            class="task-form__message task-form__message--error-only"
+            aria-live="polite"
+          >
+            @if (taskForm.dueDate().touched() && taskForm.dueDate().invalid()) {
+              <p class="task-form__error task-form__error--reserved">
+                {{ taskForm.dueDate().errors()[0].message }}
+              </p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="task-form__divider" aria-hidden="true"></div>
+
+      <div class="task-form__column">
+        <fieldset class="task-form__priority">
+          <legend>Priority</legend>
+          <div class="task-form__priority-buttons">
+            @for (priority of priorities; track priority) {
+              <button
+                type="button"
+                class="priority-button priority-button--{{ priority }}"
+                [class.priority-button--selected]="formModel().priority === priority"
+                [attr.aria-pressed]="formModel().priority === priority"
+                [disabled]="busy()"
+                (click)="selectPriority(priority)"
+              >
+                {{ priority === 'urgent' ? 'Urgent' : priority === 'medium' ? 'Medium' : 'Low' }}
+                <img src="/img/icon-priority-{{ priority }}.svg" alt="" />
+              </button>
+            }
+          </div>
+        </fieldset>
+
+        <div class="task-form__field">
+          <label [id]="assignedContactsLabelId">Assigned to</label>
+          <app-assigned-contacts
+            [contacts]="contacts()"
+            [selectedIds]="formModel().contactIds"
+            [disabled]="busy()"
+            [labelledBy]="assignedContactsLabelId"
+            (selectionChange)="setContactIds($event)"
+          />
+        </div>
+
+        <div class="task-form__field">
+          <label [for]="categoryInputId">Category<span>*</span></label>
+          <select
+            #categoryInput
+            [id]="categoryInputId"
+            [formField]="taskForm.category"
+            [attr.aria-describedby]="categoryErrorId"
+            [attr.aria-invalid]="taskForm.category().touched() && taskForm.category().invalid()"
+          >
+            <option value="" disabled>Select task category</option>
+            <option value="user_story">User Story</option>
+            <option value="technical_task">Technical Task</option>
+          </select>
+          <div
+            [id]="categoryErrorId"
+            class="task-form__message task-form__message--error-only"
+            aria-live="polite"
+          >
+            @if (taskForm.category().touched() && taskForm.category().invalid()) {
+              <p class="task-form__error task-form__error--reserved">
+                {{ taskForm.category().errors()[0].message }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="task-form__field">
+          <label [id]="subtasksLabelId">Subtasks</label>
+          <app-subtask-input
+            [subtasks]="formModel().subtasks"
+            [disabled]="busy()"
+            [labelledBy]="subtasksLabelId"
+            (subtasksChange)="setSubtasks($event)"
+          />
+        </div>
+      </div>
+    </div>
+
+    @if (error(); as message) {
+      <p class="task-form__service-error" role="alert">{{ message }}</p>
+    }
+
+    <div class="task-form__footer">
+      <p class="task-form__required"><span>*</span>This field is required</p>
+      <div class="task-form__actions">
+        <app-button
+          variant="outline"
+          size="action"
+          iconSrc="/img/icon-cancel.svg"
+          [fullWidth]="true"
+          [disabled]="busy()"
+          (click)="onSecondaryAction()"
+          >{{ secondaryLabel() }}</app-button
+        >
+        <app-button
+          type="submit"
+          size="action"
+          iconSrc="/img/icon-check-white.svg"
+          [fullWidth]="true"
+          [disabled]="busy()"
+          >{{ submitLabel() }}</app-button
+        >
+      </div>
+    </div>
+  </fieldset>
+</form>

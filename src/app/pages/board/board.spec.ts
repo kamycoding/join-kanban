@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
 import { vi } from 'vitest';
 
-import { TaskStatus, TaskWithDetails } from '../../models/task';
+import { Subtask, TaskStatus, TaskWithDetails } from '../../models/task';
 import { SubtaskService } from '../../services/subtask';
 import { TaskService } from '../../services/task';
 import { Board } from './board';
@@ -215,6 +215,121 @@ describe('Board', () => {
 
     expect(alert?.textContent).toContain('Tasks could not be loaded.');
   });
+
+  it('opens the detail overlay for a task', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('app-task-detail')).toBeNull();
+
+    component.openDetail(task);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.selectedTask()).toEqual(task);
+    expect(fixture.nativeElement.querySelector('app-task-detail')).not.toBeNull();
+  });
+
+  it('closes the detail overlay', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task]);
+    component.openDetail(task);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.closeDetail();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.selectedTask()).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-task-detail')).toBeNull();
+  });
+
+  it('follows the task while the overlay is open', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task]);
+    component.openDetail(task);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    tasks.set([{ ...task, title: 'Plan the next sprint' }]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.selectedTask()?.title).toBe('Plan the next sprint');
+  });
+
+  it('closes the overlay when its task leaves the list', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task]);
+    component.openDetail(task);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    tasks.set([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.selectedTask()).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-task-detail')).toBeNull();
+  });
+
+  it('deletes a task and closes the overlay', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    tasks.set([task]);
+    component.openDetail(task);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await component.deleteTask(task);
+
+    expect(taskService.deleteTask).toHaveBeenCalledWith('task-1');
+    expect(component.selectedTaskId()).toBeNull();
+  });
+
+  it('keeps the overlay open when the task could not be deleted', async () => {
+    const task = createTask('task-1', 'Plan the sprint', 'todo');
+    taskService.deleteTask.mockResolvedValue(false);
+    tasks.set([task]);
+    component.openDetail(task);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    await component.deleteTask(task);
+
+    expect(component.selectedTaskId()).toBe('task-1');
+    expect(fixture.nativeElement.querySelector('app-task-detail')).not.toBeNull();
+  });
+
+  it('hands a saved subtask back to the task service', async () => {
+    const subtask = createSubtask('subtask-1', true);
+    subtaskService.setSubtaskCompleted.mockResolvedValue(subtask);
+
+    await component.toggleSubtask({ subtaskId: 'subtask-1', isCompleted: true });
+
+    expect(subtaskService.setSubtaskCompleted).toHaveBeenCalledWith('subtask-1', true);
+    expect(taskService.applySubtaskChange).toHaveBeenCalledWith(subtask);
+  });
+
+  it('leaves the tasks alone when the subtask could not be saved', async () => {
+    await component.toggleSubtask({ subtaskId: 'subtask-1', isCompleted: true });
+
+    expect(subtaskService.setSubtaskCompleted).toHaveBeenCalledWith('subtask-1', true);
+    expect(taskService.applySubtaskChange).not.toHaveBeenCalled();
+  });
+
+  function createSubtask(id: string, isCompleted: boolean): Subtask {
+    return {
+      id,
+      task_id: 'task-1',
+      title: 'Write the test',
+      is_completed: isCompleted,
+      position: 0,
+      created_at: '2026-08-26T00:00:00.000Z',
+    };
+  }
 
   /**
    * Types into the real search field, so the template is part of the test

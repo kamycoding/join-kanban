@@ -1,15 +1,19 @@
 :host {
   display: block;
+  min-width: 0;
 }
+
 .contact-select {
   position: relative;
 }
+
 .contact-select__trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   min-height: 50px;
   padding: 12px var(--space-5);
   border: 1px solid var(--color-line);
@@ -21,23 +25,32 @@
   text-align: left;
   cursor: pointer;
 }
+
 .contact-select__trigger:focus-visible {
   border-color: var(--color-accent);
   outline: none;
 }
+
+.contact-select__trigger > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .contact-select__arrow {
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
   border-right: 2px solid var(--color-primary);
   border-bottom: 2px solid var(--color-primary);
   transform: translateY(-2px) rotate(45deg);
 }
+
 .contact-select__menu {
   position: absolute;
   z-index: 5;
   top: calc(100% + var(--space-1));
-  left: 0;
   right: 0;
+  left: 0;
   max-height: 240px;
   padding: var(--space-2);
   overflow-y: auto;
@@ -45,11 +58,13 @@
   background: var(--color-white);
   box-shadow: var(--shadow-card);
 }
+
 .contact-select__option {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
+  min-width: 0;
   padding: var(--space-2);
   border: 0;
   border-radius: var(--radius-lg);
@@ -58,10 +73,17 @@
   text-align: left;
   cursor: pointer;
 }
+
 .contact-select__option:hover,
-.contact-select__option[aria-selected='true'] {
+.contact-select__option[aria-pressed='true'] {
   background: var(--color-bg-selected);
 }
+
+.contact-select__option > span:nth-child(2) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .contact-select__avatar {
   display: inline-flex;
   align-items: center;
@@ -75,22 +97,27 @@
   color: var(--color-white);
   font-size: var(--font-size-t7);
 }
+
 .contact-select__check {
   width: 18px;
   height: 18px;
+  flex: 0 0 18px;
   margin-left: auto;
   border: 2px solid var(--color-primary);
   border-radius: 3px;
 }
+
 .contact-select__check--selected {
   background: var(--color-primary) url('/img/icon-check-white.svg') center / 16px no-repeat;
 }
+
 .contact-select__selected {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
   margin-top: var(--space-2);
 }
+
 .contact-select__empty {
   margin: var(--space-2);
   color: var(--color-text-secondary);

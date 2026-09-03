@@ -1,11 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 
+import { TaskDetail } from '../../features/tasks/task-detail/task-detail';
+import { TaskEdit } from '../../features/tasks/task-edit/task-edit';
+import type { Contact } from '../../models/contact';
 import { TaskStatus, TaskWithDetails } from '../../models/task';
 import { ContactService } from '../../services/contact';
 import { SubtaskService } from '../../services/subtask';
+import { TaskAssigneeService } from '../../services/task-assignee';
 import { TaskService } from '../../services/task';
 import { Board } from './board';
 
@@ -23,8 +28,20 @@ describe('Board', () => {
     applySubtaskChange: ReturnType<typeof vi.fn>;
     saving: WritableSignal<boolean>;
     createTaskWithDetails: ReturnType<typeof vi.fn>;
+    updateTask: ReturnType<typeof vi.fn>;
   };
-  let subtaskService: { setSubtaskCompleted: ReturnType<typeof vi.fn> };
+  let subtaskService: {
+    error: WritableSignal<string | null>;
+    setSubtaskCompleted: ReturnType<typeof vi.fn>;
+    createSubtask: ReturnType<typeof vi.fn>;
+    updateSubtask: ReturnType<typeof vi.fn>;
+    deleteSubtask: ReturnType<typeof vi.fn>;
+  };
+  let taskAssigneeService: {
+    error: WritableSignal<string | null>;
+    assignContact: ReturnType<typeof vi.fn>;
+    removeContact: ReturnType<typeof vi.fn>;
+  };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let windowWidth: number;
 
@@ -58,8 +75,20 @@ describe('Board', () => {
       applySubtaskChange: vi.fn(),
       saving: signal(false),
       createTaskWithDetails: vi.fn().mockResolvedValue(null),
+      updateTask: vi.fn().mockResolvedValue(null),
     };
-    subtaskService = { setSubtaskCompleted: vi.fn().mockResolvedValue(null) };
+    subtaskService = {
+      error: signal<string | null>(null),
+      setSubtaskCompleted: vi.fn().mockResolvedValue(null),
+      createSubtask: vi.fn().mockResolvedValue(null),
+      updateSubtask: vi.fn().mockResolvedValue(null),
+      deleteSubtask: vi.fn().mockResolvedValue(false),
+    };
+    taskAssigneeService = {
+      error: signal<string | null>(null),
+      assignContact: vi.fn().mockResolvedValue(null),
+      removeContact: vi.fn().mockResolvedValue(false),
+    };
     router = { navigate: vi.fn().mockResolvedValue(true) };
 
     windowWidth = 1440;
@@ -68,9 +97,13 @@ describe('Board', () => {
     await TestBed.configureTestingModule({ imports: [Board] })
       .overrideProvider(TaskService, { useValue: taskService })
       .overrideProvider(SubtaskService, { useValue: subtaskService })
+      .overrideProvider(TaskAssigneeService, { useValue: taskAssigneeService })
       .overrideProvider(Router, { useValue: router })
       .overrideProvider(ContactService, {
-        useValue: { contacts: signal([]), getContacts: vi.fn().mockResolvedValue(true) },
+        useValue: {
+          contacts: signal<Contact[]>([]),
+          getContacts: vi.fn().mockResolvedValue(undefined),
+        },
       })
       .compileComponents();
 
@@ -293,6 +326,62 @@ describe('Board', () => {
     expect(alert?.textContent).toContain('Tasks could not be loaded.');
   });
 
+  it('opens the edit form from the task detail and hides the detail', async () => {
+    tasks.set([createTask('task-1', 'Plan the sprint', 'todo')]);
+    component.openDetail(tasks()[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(detailElement()).toBeTruthy();
+
+    detailElement().componentInstance.editRequested.emit(tasks()[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(detailElement()).toBeNull();
+    expect(editElement()).toBeTruthy();
+    expect(editElement().componentInstance.task().id).toBe('task-1');
+  });
+
+  it('returns to the task detail when the edit is cancelled', async () => {
+    tasks.set([createTask('task-1', 'Plan the sprint', 'todo')]);
+    component.openDetail(tasks()[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    detailElement().componentInstance.editRequested.emit(tasks()[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    editElement().componentInstance.cancelled.emit();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(editElement()).toBeNull();
+    expect(detailElement()).toBeTruthy();
+    expect(taskService.getTasks).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns to the updated task detail after a successful edit save', async () => {
+    tasks.set([createTask('task-1', 'Plan the sprint', 'todo')]);
+    component.openDetail(tasks()[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    detailElement().componentInstance.editRequested.emit(tasks()[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    tasks.set([createTask('task-1', 'Renamed sprint plan', 'todo')]);
+    editElement().componentInstance.saved.emit();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(editElement()).toBeNull();
+    const detail = detailElement();
+    expect(detail).toBeTruthy();
+    expect(
+      (detail!.nativeElement as HTMLElement).querySelector('.task-detail__title')?.textContent,
+    ).toContain('Renamed sprint plan');
+  });
+
   /**
    * Types into the real search field, so the template is part of the test
    * instead of only the signal behind it.
@@ -303,5 +392,13 @@ describe('Board', () => {
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     await fixture.whenStable();
+  }
+
+  function detailElement() {
+    return fixture.debugElement.query(By.directive(TaskDetail));
+  }
+
+  function editElement() {
+    return fixture.debugElement.query(By.directive(TaskEdit));
   }
 });

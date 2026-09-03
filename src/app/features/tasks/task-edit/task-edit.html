@@ -1,0 +1,21 @@
+<div class="task-edit-backdrop" (click)="onBackdropClick($event)">
+  <section
+    #panel
+    class="task-edit"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="task-edit-title"
+  >
+    <h2 id="task-edit-title" class="task-edit__title">Edit Task</h2>
+
+    <app-task-form
+      mode="edit"
+      [initialValue]="initialValue()"
+      [contacts]="contacts()"
+      [busy]="saving()"
+      [error]="persistenceError()"
+      (submitted)="onSave($event)"
+      (cancelled)="cancel()"
+    />
+  </section>
+</div>

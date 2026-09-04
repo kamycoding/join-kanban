@@ -31,6 +31,8 @@ const ARROW_ICONS: Record<TaskMoveTarget['direction'], string> = {
   down: '/img/icon-arrow-down.svg',
 };
 
+const MAX_VISIBLE_ASSIGNEES = 6;
+
 @Component({
   selector: 'app-task-card',
   imports: [],
@@ -62,6 +64,10 @@ export class TaskCard {
   readonly priorityLabel = computed(() => PRIORITY_LABELS[this.task().priority]);
   readonly priorityIcon = computed(() => PRIORITY_ICONS[this.task().priority]);
   readonly accessibleName = computed(() => `Open task details for ${this.task().title}.`);
+  readonly visibleAssignees = computed(() => this.task().assignees.slice(0, MAX_VISIBLE_ASSIGNEES));
+  readonly remainingAssigneeCount = computed(() =>
+    Math.max(0, this.task().assignees.length - MAX_VISIBLE_ASSIGNEES),
+  );
 
   activate(): void {
     this.openDetail.emit(this.task());

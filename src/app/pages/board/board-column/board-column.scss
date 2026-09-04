@@ -8,6 +8,20 @@
   min-width: 0;
 }
 
+/*
+ * In the single-column layout the column would stretch across the whole
+ * page while its cards stay at their design width of 252px, leaving the
+ * right two thirds empty. Holding the column to the width of its cards and
+ * centring it keeps heading, plus button and empty state lined up with them.
+ */
+@media (max-width: $bp-mobile) {
+  .board-column {
+    width: 100%;
+    max-width: 252px;
+    margin-inline: auto;
+  }
+}
+
 .board-column__head {
   display: flex;
   align-items: center;

@@ -74,8 +74,12 @@
 }
 
 .subtask-list {
+  box-sizing: border-box;
+  max-height: 180px;
   margin: var(--space-2) 0 0;
   padding-left: 32px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .subtask-list li {

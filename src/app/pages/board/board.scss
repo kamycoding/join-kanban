@@ -14,12 +14,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-5);
+
+  /*
+   * Column gap holds the search field and the Add-task button 32px apart.
+   * Row gap stays at 20px for the mobile layout, where the search field
+   * takes the full width and drops to its own line.
+   */
+  gap: var(--space-5) var(--space-7);
 }
 
 .board-heading h1 {
-  margin: 0;
+  /* Takes the free space, so the two controls keep their 32px and no more. */
+  margin: 0 auto 0 0;
 
   color: var(--color-primary);
   font-size: var(--font-size-t2);

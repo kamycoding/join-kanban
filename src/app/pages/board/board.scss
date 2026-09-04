@@ -31,7 +31,7 @@
 .board-heading__add {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-1);
 
   box-sizing: border-box;
   height: 48px;
@@ -51,6 +51,12 @@
   transition:
     background var(--transition),
     border-color var(--transition);
+}
+
+.board-heading__add img {
+  width: 32px;
+  height: 32px;
+  flex: none;
 }
 
 .board-heading__add:hover {

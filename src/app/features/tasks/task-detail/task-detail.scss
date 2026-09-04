@@ -133,9 +133,21 @@
 .task-detail__subtasks {
   display: grid;
   gap: var(--space-1);
+  box-sizing: border-box;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--space-2) 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   list-style: none;
+}
+
+.task-detail__assignees {
+  max-height: 232px;
+}
+
+.task-detail__subtasks {
+  max-height: 180px;
 }
 
 .task-detail__assignees li {

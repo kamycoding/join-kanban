@@ -364,7 +364,7 @@
   }
 }
 
-@media (hover: none) and (pointer: coarse) {
+@media (pointer: coarse) {
   .task-card__move {
     display: block;
   }

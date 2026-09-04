@@ -1,5 +1,3 @@
-@use '../../../../styles/breakpoints' as breakpoints;
-
 :host {
   display: block;
   width: min(100%, 252px);
@@ -56,7 +54,7 @@
 }
 
 .task-card__move {
-  /* Only the mobile layout shows the button; above it cards move by drag-and-drop. */
+  /* Touch-first devices reveal this as a precise alternative to drag-and-drop. */
   display: none;
   position: relative;
   flex: none;
@@ -331,6 +329,11 @@
   margin-right: calc(var(--space-2) * -1);
 }
 
+.task-card__avatar--remaining {
+  background: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+
 .task-card__avatar-name {
   position: absolute;
 
@@ -361,7 +364,7 @@
   }
 }
 
-@media (max-width: breakpoints.$bp-mobile) {
+@media (hover: none) and (pointer: coarse) {
   .task-card__move {
     display: block;
   }

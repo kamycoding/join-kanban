@@ -195,14 +195,27 @@ describe('TaskCard', () => {
     ).toEqual(['AS', 'BM', 'CN']);
   });
 
-  it('renders a large assignee collection without dropping contacts', () => {
-    const assignees = Array.from({ length: 12 }, (_, index) =>
+  it('shows six assignees and the number of remaining contacts', () => {
+    const assignees = Array.from({ length: 10 }, (_, index) =>
       createAssignee(`contact-${index}`, `First${index}`, `Last${index}`, '#462f8a'),
     );
     renderTask(createTask({ assignees }));
 
-    expect(fixture.nativeElement.querySelectorAll('.task-card__avatar')).toHaveLength(12);
-    expect(fixture.nativeElement.querySelectorAll('.task-card__avatar-name')).toHaveLength(12);
+    expect(fixture.nativeElement.querySelectorAll('.task-card__avatar-name')).toHaveLength(6);
+    expect(element<HTMLElement>('.task-card__avatar--remaining').textContent?.trim()).toBe('+4');
+    expect(element<HTMLElement>('.task-card__avatar--remaining').getAttribute('aria-label')).toBe(
+      '4 more assigned contacts',
+    );
+  });
+
+  it('does not show a remaining-contact counter for exactly six assignees', () => {
+    const assignees = Array.from({ length: 6 }, (_, index) =>
+      createAssignee(`contact-${index}`, `First${index}`, `Last${index}`, '#462f8a'),
+    );
+    renderTask(createTask({ assignees }));
+
+    expect(fixture.nativeElement.querySelectorAll('.task-card__avatar')).toHaveLength(6);
+    expect(fixture.nativeElement.querySelector('.task-card__avatar--remaining')).toBeNull();
   });
 
   it('builds initials when the first name is missing', () => {

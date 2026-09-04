@@ -73,10 +73,18 @@
   <footer class="task-card__footer">
     @if (task().assignees.length > 0) {
       <ul class="task-card__assignees" aria-label="Assigned contacts">
-        @for (assignment of task().assignees; track assignment.contact_id) {
+        @for (assignment of visibleAssignees(); track assignment.contact_id) {
           <li class="task-card__avatar" [style.background-color]="assignment.contact.color">
             <span aria-hidden="true">{{ contactInitials(assignment) }}</span>
             <span class="task-card__avatar-name">{{ contactFullName(assignment) }}</span>
+          </li>
+        }
+        @if (remainingAssigneeCount() > 0) {
+          <li
+            class="task-card__avatar task-card__avatar--remaining"
+            [attr.aria-label]="remainingAssigneeCount() + ' more assigned contacts'"
+          >
+            <span aria-hidden="true">+{{ remainingAssigneeCount() }}</span>
           </li>
         }
       </ul>

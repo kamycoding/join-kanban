@@ -80,11 +80,17 @@
   background: var(--color-bg-hover);
 }
 
+/*
+ * The card lifts every control to z-index 2 so it clears the invisible
+ * click surface of `.task-card__open::after`, which sits on 1 and covers
+ * the whole card. This menu is a div and misses that rule, so it says so
+ * itself - on 1 it would end up underneath and swallow every click.
+ */
 .task-card__menu {
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 1;
+  z-index: 3;
 
   display: flex;
   flex-direction: column;

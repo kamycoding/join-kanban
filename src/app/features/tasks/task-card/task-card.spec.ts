@@ -319,6 +319,18 @@ describe('TaskCard', () => {
     expect(element('.task-card__menu')).toBeNull();
   });
 
+  it('keeps the menu above the click surface that covers the whole card', () => {
+    renderTask(createTask(), MOVE_TARGETS);
+
+    element<HTMLButtonElement>('.task-card__move-button').click();
+    fixture.detectChanges();
+
+    const menu = element<HTMLElement>('.task-card__menu');
+    const menuLayer = Number(getComputedStyle(menu).zIndex);
+
+    expect(menuLayer).toBeGreaterThan(2);
+  });
+
   it('closes the menu on a click somewhere else', () => {
     renderTask(createTask(), MOVE_TARGETS);
 

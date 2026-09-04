@@ -83,6 +83,20 @@ describe('TaskDetail', () => {
     );
   });
 
+  it('uses a bounded scroll container for assigned contacts', () => {
+    renderTask(
+      createTask({
+        assignees: Array.from({ length: 6 }, (_, index) =>
+          createAssignee(`contact-${index}`, `Contact ${index}`, 'Example', '#ff7a00'),
+        ),
+      }),
+    );
+
+    const styles = getComputedStyle(element<HTMLElement>('.task-detail__assignees'));
+    expect(styles.maxHeight).toBe('232px');
+    expect(styles.overflowY).toBe('auto');
+  });
+
   it('extracts initials without splitting a Unicode code point', () => {
     renderTask(
       createTask({
@@ -108,6 +122,18 @@ describe('TaskDetail', () => {
     );
     expect(fixture.nativeElement.querySelectorAll('.task-detail__subtasks li')).toHaveLength(2);
     expect(element<HTMLElement>('.task-detail__subtasks').textContent).toContain('First subtask');
+  });
+
+  it('uses a bounded scroll container for subtasks', () => {
+    renderTask(
+      createTask({
+        subtasks: Array.from({ length: 8 }, (_, index) => createSubtask(`Subtask ${index}`, false)),
+      }),
+    );
+
+    const styles = getComputedStyle(element<HTMLElement>('.task-detail__subtasks'));
+    expect(styles.maxHeight).toBe('180px');
+    expect(styles.overflowY).toBe('auto');
   });
 
   it('renders a completed subtask as checked', () => {

@@ -80,7 +80,7 @@
                 (click)="selectPriority(priority)"
               >
                 {{ priority === 'urgent' ? 'Urgent' : priority === 'medium' ? 'Medium' : 'Low' }}
-                <img src="/img/icon-priority-{{ priority }}.svg" alt="" />
+                <img src="img/icon-priority-{{ priority }}.svg" alt="" />
               </button>
             }
           </div>
@@ -145,7 +145,7 @@
         <app-button
           variant="outline"
           size="action"
-          iconSrc="/img/icon-cancel.svg"
+          iconSrc="img/icon-cancel.svg"
           [fullWidth]="true"
           [disabled]="busy()"
           (click)="onSecondaryAction()"
@@ -154,7 +154,7 @@
         <app-button
           type="submit"
           size="action"
-          iconSrc="/img/icon-check-white.svg"
+          iconSrc="img/icon-check-white.svg"
           [fullWidth]="true"
           [disabled]="busy()"
           >{{ submitLabel() }}</app-button

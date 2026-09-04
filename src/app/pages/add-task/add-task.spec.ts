@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WritableSignal, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { vi } from 'vitest';
 
 import { TaskForm } from '../../features/tasks/task-form/task-form';
@@ -26,6 +27,7 @@ describe('AddTask', () => {
     error: typeof serviceError;
     createTaskWithDetails: ReturnType<typeof vi.fn>;
   };
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     contacts = signal<Contact[]>([createContact()]);
@@ -37,10 +39,12 @@ describe('AddTask', () => {
       error: serviceError,
       createTaskWithDetails: vi.fn().mockResolvedValue(createTask()),
     };
+    router = { navigate: vi.fn().mockResolvedValue(true) };
 
     await TestBed.configureTestingModule({ imports: [AddTask] })
       .overrideProvider(ContactService, { useValue: contactService })
       .overrideProvider(TaskService, { useValue: taskService })
+      .overrideProvider(Router, { useValue: router })
       .compileComponents();
 
     fixture = TestBed.createComponent(AddTask);
@@ -107,7 +111,7 @@ describe('AddTask', () => {
     );
   });
 
-  it('resets TaskForm and shows success feedback only after successful creation', async () => {
+  it('resets TaskForm and navigates to the board after successful page creation', async () => {
     const reset = vi.spyOn(childTaskForm(), 'reset');
 
     await component.onSubmitted(formValue());
@@ -117,9 +121,10 @@ describe('AddTask', () => {
     expect(reset).toHaveBeenCalledOnce();
     expect(component.successToast()).toBe(true);
     expect(fixture.nativeElement.querySelector('app-toast')).toBeTruthy();
+    expect(router.navigate).toHaveBeenCalledWith(['/board']);
   });
 
-  it('confirms in place on the page and reports upwards in the overlay', async () => {
+  it('navigates on the page and reports upwards without navigating in the overlay', async () => {
     const saves: Task[] = [];
     component.saved.subscribe((task) => saves.push(task));
     await fillRequiredFields();
@@ -128,13 +133,16 @@ describe('AddTask', () => {
 
     expect(component.successToast()).toBe(true);
     expect(saves).toEqual([]);
+    expect(router.navigate).toHaveBeenCalledOnce();
 
+    router.navigate.mockClear();
     fixture.componentRef.setInput('inOverlay', true);
     await fillRequiredFields();
     await submit();
 
     expect(saves).toEqual([createTask()]);
     expect(component.successToast()).toBe(false);
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('reads Cancel instead of Clear inside the overlay', async () => {
@@ -180,6 +188,7 @@ describe('AddTask', () => {
     expect(taskForm.formModel()).toMatchObject(formValue());
     expect(component.successToast()).toBe(false);
     expect(fixture.nativeElement.querySelector('app-toast')).toBeNull();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('shows the persistence error after a failed creation', async () => {

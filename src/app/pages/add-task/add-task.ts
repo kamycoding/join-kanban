@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, input, output, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { TaskForm } from '../../features/tasks/task-form/task-form';
 import {
@@ -23,6 +24,7 @@ import { Toast } from '../../shared/components/toast/toast';
 export class AddTask implements OnInit {
   private readonly contactService = inject(ContactService);
   private readonly taskService = inject(TaskService);
+  private readonly router = inject(Router);
 
   /**
    * The column a new task lands in. The board hands it the column the user
@@ -82,6 +84,7 @@ export class AddTask implements OnInit {
       }
 
       this.successToast.set(true);
+      await this.router.navigate(['/board']);
     } else {
       this.persistenceError.set(this.taskService.error());
     }

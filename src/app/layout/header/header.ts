@@ -1,5 +1,8 @@
 import { Component, ElementRef, HostListener, inject, input, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../services/auth';
+import { ContactService } from '../../services/contact';
+import { TaskService } from '../../services/task';
 
 @Component({
   selector: 'app-header',
@@ -10,9 +13,12 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 export class Header {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly contacts = inject(ContactService);
+  private readonly tasks = inject(TaskService);
 
   readonly heading = input('Kanban Project Management Tool');
-  readonly initials = input('SM');
+  readonly initials = this.auth.initials;
 
   readonly menuOpen = signal(false);
 
@@ -24,9 +30,18 @@ export class Header {
     this.menuOpen.set(false);
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
     this.closeMenu();
-    this.router.navigate(['/']);
+
+    const signedOut = await this.auth.signOut();
+
+    if (!signedOut) {
+      return;
+    }
+
+    this.tasks.clearState();
+    this.contacts.clearState();
+    await this.router.navigate(['/login']);
   }
 
   @HostListener('document:click', ['$event'])

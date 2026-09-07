@@ -201,7 +201,8 @@ describe('AuthService', () => {
     await service.ready;
 
     await expect(service.loadProfile()).resolves.toBe(false);
-
+    expect(service.displayName()).toBe('sofia');
+    expect(service.initials()).toBe('SO');
     expect(service.profile()).toBeNull();
     expect(service.error()).toBe('Profile could not be loaded');
   });
@@ -222,6 +223,54 @@ describe('AuthService', () => {
       password: 'password',
     });
     expect(service.session()).toBe(session);
+  });
+
+  it('uses the user metadata when no profile is available', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+    session.user.user_metadata = {
+      full_name: 'Sofia Mueller',
+    };
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: null,
+      error: {
+        message: 'Profile could not be loaded',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    expect(service.displayName()).toBe('Sofia Mueller');
+    expect(service.initials()).toBe('SM');
+  });
+
+  it('uses the guest fallback when no guest profile is available', async () => {
+    const session = createSession('guest-user', undefined, true);
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: null,
+      error: {
+        message: 'Profile could not be loaded',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    expect(service.isGuest()).toBe(true);
+    expect(service.displayName()).toBe('Guest');
+    expect(service.initials()).toBe('GU');
   });
 
   it('signs in anonymously as a guest', async () => {

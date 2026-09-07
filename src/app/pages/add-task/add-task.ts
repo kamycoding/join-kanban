@@ -1,4 +1,13 @@
-import { Component, OnInit, inject, input, output, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 
 import { TaskForm } from '../../features/tasks/task-form/task-form';
@@ -12,6 +21,8 @@ import { ContactService } from '../../services/contact';
 import { TaskService } from '../../services/task';
 import { Toast } from '../../shared/components/toast/toast';
 
+const BOARD_REDIRECT_DELAY_MS = 3000;
+
 @Component({
   selector: 'app-add-task',
   imports: [TaskForm, Toast],
@@ -21,7 +32,7 @@ import { Toast } from '../../shared/components/toast/toast';
     '[class.add-task--in-overlay]': 'inOverlay()',
   },
 })
-export class AddTask implements OnInit {
+export class AddTask implements OnInit, OnDestroy {
   private readonly contactService = inject(ContactService);
   private readonly taskService = inject(TaskService);
   private readonly router = inject(Router);
@@ -48,9 +59,16 @@ export class AddTask implements OnInit {
   readonly initialFormValue = createEmptyTaskFormValue();
 
   private readonly taskForm = viewChild.required(TaskForm);
+  private redirectTimer: ReturnType<typeof setTimeout> | null = null;
 
   async ngOnInit(): Promise<void> {
     await this.contactService.getContacts();
+  }
+
+  ngOnDestroy(): void {
+    if (this.redirectTimer !== null) {
+      clearTimeout(this.redirectTimer);
+    }
   }
 
   onCleared(): void {
@@ -84,9 +102,20 @@ export class AddTask implements OnInit {
       }
 
       this.successToast.set(true);
-      await this.router.navigate(['/board']);
+      this.scheduleBoardRedirect();
     } else {
       this.persistenceError.set(this.taskService.error());
     }
+  }
+
+  private scheduleBoardRedirect(): void {
+    if (this.redirectTimer !== null) {
+      clearTimeout(this.redirectTimer);
+    }
+
+    this.redirectTimer = setTimeout(() => {
+      this.redirectTimer = null;
+      void this.router.navigate(['/board']);
+    }, BOARD_REDIRECT_DELAY_MS);
   }
 }

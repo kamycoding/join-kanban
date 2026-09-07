@@ -1,6 +1,6 @@
 import { Component, OnDestroy, afterNextRender, input, output, signal } from '@angular/core';
 
-const VISIBLE_DURATION_MS = 1500;
+const DEFAULT_VISIBLE_DURATION_MS = 1500;
 type ToastPhase = 'entering' | 'visible' | 'exiting' | 'dismissed';
 
 @Component({
@@ -11,6 +11,7 @@ type ToastPhase = 'entering' | 'visible' | 'exiting' | 'dismissed';
 })
 export class Toast implements OnDestroy {
   readonly message = input.required<string>();
+  readonly visibleDuration = input(DEFAULT_VISIBLE_DURATION_MS);
   readonly dismissed = output<void>();
   readonly entered = signal(false);
   readonly exiting = signal(false);
@@ -54,7 +55,7 @@ export class Toast implements OnDestroy {
   }
 
   private scheduleExit(): void {
-    this.visibleTimer = setTimeout(() => this.startExit(), VISIBLE_DURATION_MS);
+    this.visibleTimer = setTimeout(() => this.startExit(), this.visibleDuration());
   }
 
   private startExit(): void {

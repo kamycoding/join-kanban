@@ -111,38 +111,56 @@ describe('AddTask', () => {
     );
   });
 
-  it('resets TaskForm and navigates to the board after successful page creation', async () => {
+  it('resets TaskForm and navigates to the board three seconds after page creation', async () => {
+    vi.useFakeTimers();
     const reset = vi.spyOn(childTaskForm(), 'reset');
 
-    await component.onSubmitted(formValue());
-    fixture.detectChanges();
-    await fixture.whenStable();
+    try {
+      await component.onSubmitted(formValue());
+      fixture.detectChanges();
 
-    expect(reset).toHaveBeenCalledOnce();
-    expect(component.successToast()).toBe(true);
-    expect(fixture.nativeElement.querySelector('app-toast')).toBeTruthy();
-    expect(router.navigate).toHaveBeenCalledWith(['/board']);
+      expect(reset).toHaveBeenCalledOnce();
+      expect(component.successToast()).toBe(true);
+      expect(fixture.nativeElement.querySelector('app-toast')).toBeTruthy();
+      expect(router.navigate).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(2999);
+      expect(router.navigate).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(router.navigate).toHaveBeenCalledWith(['/board']);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
   });
 
   it('navigates on the page and reports upwards without navigating in the overlay', async () => {
+    vi.useFakeTimers();
     const saves: Task[] = [];
     component.saved.subscribe((task) => saves.push(task));
-    await fillRequiredFields();
 
-    await submit();
+    try {
+      await component.onSubmitted(formValue());
 
-    expect(component.successToast()).toBe(true);
-    expect(saves).toEqual([]);
-    expect(router.navigate).toHaveBeenCalledOnce();
+      expect(component.successToast()).toBe(true);
+      expect(saves).toEqual([]);
+      expect(router.navigate).not.toHaveBeenCalled();
 
-    router.navigate.mockClear();
-    fixture.componentRef.setInput('inOverlay', true);
-    await fillRequiredFields();
-    await submit();
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(router.navigate).toHaveBeenCalledOnce();
 
-    expect(saves).toEqual([createTask()]);
-    expect(component.successToast()).toBe(false);
-    expect(router.navigate).not.toHaveBeenCalled();
+      router.navigate.mockClear();
+      fixture.componentRef.setInput('inOverlay', true);
+      await component.onSubmitted(formValue());
+
+      expect(saves).toEqual([createTask()]);
+      expect(component.successToast()).toBe(false);
+      expect(router.navigate).not.toHaveBeenCalled();
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
   });
 
   it('reads Cancel instead of Clear inside the overlay', async () => {

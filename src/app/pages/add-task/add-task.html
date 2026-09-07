@@ -17,11 +17,7 @@
 
   @if (successToast()) {
     <div class="add-task-page__toast">
-      <app-toast
-        message="Task successfully created"
-        [visibleDuration]="3000"
-        (dismissed)="successToast.set(false)"
-      />
+      <app-toast message="Task successfully created" (dismissed)="successToast.set(false)" />
     </div>
   }
 </div>

@@ -12,12 +12,17 @@ describe('AuthService', () => {
   const signInWithPassword = vi.fn();
   const signInAnonymously = vi.fn();
   const signOut = vi.fn();
+  const profileSingle = vi.fn();
+  const profileEq = vi.fn(() => ({ single: profileSingle }));
+  const profileSelect = vi.fn(() => ({ eq: profileEq }));
+  const from = vi.fn(() => ({ select: profileSelect }));
   const onAuthStateChange = vi.fn(() => ({
     data: { subscription: { unsubscribe } },
   }));
 
   const supabaseService = {
     client: {
+      from,
       auth: {
         getSession,
         getUser,
@@ -38,6 +43,10 @@ describe('AuthService', () => {
     signInWithPassword.mockReset();
     signInAnonymously.mockReset();
     signOut.mockReset();
+    from.mockClear();
+    profileSelect.mockClear();
+    profileEq.mockClear();
+    profileSingle.mockReset();
     onAuthStateChange.mockClear();
     getSession.mockResolvedValue({ data: { session: null }, error: null });
 
@@ -120,6 +129,72 @@ describe('AuthService', () => {
     expect(service.user()?.id).toBe('user-1');
     expect(service.isAuthenticated()).toBe(true);
     expect(service.loading()).toBe(false);
+  });
+
+  it('loads the profile of the authenticated user', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: {
+        id: 'user-1',
+        full_name: 'Sofia Mueller',
+        is_guest: false,
+        created_at: '2026-09-07T10:00:00.000Z',
+      },
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.loadProfile()).resolves.toBe(true);
+
+    expect(from).toHaveBeenCalledWith('profiles');
+    expect(profileSelect).toHaveBeenCalledWith('id, full_name, is_guest, created_at');
+    expect(profileEq).toHaveBeenCalledWith('id', 'user-1');
+    expect(service.profile()?.full_name).toBe('Sofia Mueller');
+    expect(service.displayName()).toBe('Sofia Mueller');
+    expect(service.initials()).toBe('SM');
+    expect(service.isGuest()).toBe(false);
+  });
+
+  it('does not request a profile without an authenticated user', async () => {
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.loadProfile()).resolves.toBe(false);
+
+    expect(from).not.toHaveBeenCalled();
+    expect(service.profile()).toBeNull();
+  });
+
+  it('exposes an error when the profile cannot be loaded', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: null,
+      error: {
+        message: 'Profile could not be loaded',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.loadProfile()).resolves.toBe(false);
+
+    expect(service.profile()).toBeNull();
+    expect(service.error()).toBe('Profile could not be loaded');
   });
 
   it('signs in with email and password', async () => {

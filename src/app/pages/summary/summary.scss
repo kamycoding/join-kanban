@@ -65,6 +65,30 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
   margin-top: 56px;
 }
 
+// The panel holds whatever the left column currently shows: the cards, or the
+// loading and error lines while there are none. It carries the width so those
+// states do not each have to repeat it.
+.summary__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  max-width: 560px;
+}
+
+.summary__loading,
+.summary__error {
+  margin: 0;
+
+  color: var(--color-icon);
+  font-size: var(--font-size-body);
+}
+
+.summary__error {
+  color: var(--color-error);
+}
+
 // The row height lives in a custom property because a hovered card has to be
 // able to outgrow its cell without pushing the other cards around. Mobile and
 // the three square cards override it further down.
@@ -74,9 +98,7 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
   display: grid;
   grid-auto-rows: var(--card-height);
   gap: $gap;
-  width: 100%;
   min-width: 0;
-  max-width: 560px;
 }
 
 // Flex and grid items refuse to shrink below their content unless min-width is
@@ -301,7 +323,7 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
     gap: 0;
   }
 
-  .summary__metrics {
+  .summary__panel {
     max-width: none;
   }
 }

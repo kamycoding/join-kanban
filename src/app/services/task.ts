@@ -41,6 +41,13 @@ export class TaskService {
   readonly saving = this.savingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
+  clearState(): void {
+    this.tasksState.set([]);
+    this.loadingState.set(false);
+    this.savingState.set(false);
+    this.errorState.set(null);
+  }
+
   async getTasks(): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);

@@ -1,1 +1,106 @@
-<p>summary works!</p>
+<section class="summary">
+  <header class="summary__headline">
+    <h1 class="summary__title">Join 360</h1>
+    <span class="summary__rule" aria-hidden="true"></span>
+    <p class="summary__subtitle">Key Metrics at a Glance</p>
+  </header>
+
+  <div class="summary__content">
+    <div class="summary__metrics">
+      <div class="summary__row summary__row--pair">
+        <a class="summary__card" routerLink="/board">
+          <span class="summary__icons">
+            <img
+              class="summary__icon"
+              src="/img/icon-summary-todo.svg"
+              alt=""
+              width="69"
+              height="69"
+            />
+            <img
+              class="summary__icon summary__icon--hover"
+              src="/img/icon-summary-todo-hover.svg"
+              alt=""
+              width="69"
+              height="69"
+            />
+          </span>
+          <span class="summary__figures">
+            <span class="summary__number">1</span>
+            <span class="summary__label">To-do</span>
+          </span>
+        </a>
+
+        <a class="summary__card" routerLink="/board">
+          <span class="summary__icons">
+            <img
+              class="summary__icon"
+              src="/img/icon-summary-done.svg"
+              alt=""
+              width="69"
+              height="69"
+            />
+            <img
+              class="summary__icon summary__icon--hover"
+              src="/img/icon-summary-done-hover.svg"
+              alt=""
+              width="69"
+              height="69"
+            />
+          </span>
+          <span class="summary__figures">
+            <span class="summary__number">1</span>
+            <span class="summary__label">Done</span>
+          </span>
+        </a>
+      </div>
+
+      <a class="summary__card summary__card--urgency" routerLink="/board">
+        <span class="summary__urgent">
+          <span class="summary__icons">
+            <img
+              class="summary__icon summary__icon--small"
+              src="/img/icon-summary-urgent.svg"
+              alt=""
+              width="60"
+              height="60"
+            />
+          </span>
+          <span class="summary__figures">
+            <span class="summary__number">1</span>
+            <span class="summary__label summary__label--small">Urgent</span>
+          </span>
+        </span>
+
+        <span class="summary__rule summary__rule--inside" aria-hidden="true"></span>
+
+        <span class="summary__deadline">
+          <span class="summary__date">October 16, 2022</span>
+          <span class="summary__label summary__label--small">Upcoming Deadline</span>
+        </span>
+      </a>
+
+      <div class="summary__row summary__row--trio">
+        <a class="summary__card summary__card--stacked" routerLink="/board">
+          <span class="summary__number">5</span>
+          <span class="summary__label">Tasks in Board</span>
+        </a>
+
+        <a class="summary__card summary__card--stacked" routerLink="/board">
+          <span class="summary__number">2</span>
+          <span class="summary__label">Tasks In Progress</span>
+        </a>
+
+        <a class="summary__card summary__card--stacked" routerLink="/board">
+          <span class="summary__number">2</span>
+          <span class="summary__label">Awaiting Feedback</span>
+        </a>
+      </div>
+    </div>
+
+    <p class="summary__greeting">
+      <span class="summary__greeting-time">Good morning,</span>
+      <span class="summary__greeting-name">Sofia Müller</span>
+    </p>
+  </div>
+</section>

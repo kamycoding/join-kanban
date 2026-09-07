@@ -49,6 +49,15 @@ describe('AuthService', () => {
     profileSingle.mockReset();
     onAuthStateChange.mockClear();
     getSession.mockResolvedValue({ data: { session: null }, error: null });
+    profileSingle.mockResolvedValue({
+      data: {
+        id: 'user-1',
+        full_name: 'Test User',
+        is_guest: false,
+        created_at: '2026-09-07T10:00:00.000Z',
+      },
+      error: null,
+    });
 
     TestBed.configureTestingModule({
       providers: [{ provide: SupabaseService, useValue: supabaseService }],
@@ -219,6 +228,15 @@ describe('AuthService', () => {
     const session = createSession('guest-user', undefined, true);
     signInAnonymously.mockResolvedValue({
       data: { session, user: session.user },
+      error: null,
+    });
+    profileSingle.mockResolvedValue({
+      data: {
+        id: 'guest-user',
+        full_name: 'Guest',
+        is_guest: true,
+        created_at: '2026-09-07T10:00:00.000Z',
+      },
       error: null,
     });
 

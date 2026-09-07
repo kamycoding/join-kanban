@@ -60,6 +60,11 @@ export class AuthService {
   constructor() {
     const { data } = this.supabase.auth.onAuthStateChange((_event, session) => {
       this.sessionState.set(session);
+
+      if (!session) {
+        this.profileState.set(null);
+      }
+
       this.loadingState.set(false);
     });
 
@@ -113,6 +118,13 @@ export class AuthService {
     }
 
     this.sessionState.set(data.session);
+
+    if (data.session) {
+      await this.loadProfile();
+    } else {
+      this.profileState.set(null);
+    }
+
     this.loadingState.set(false);
     return data.session !== null;
   }
@@ -130,6 +142,13 @@ export class AuthService {
     }
 
     this.sessionState.set(data.session);
+
+    if (data.session) {
+      await this.loadProfile();
+    } else {
+      this.profileState.set(null);
+    }
+
     this.loadingState.set(false);
     return data.session !== null;
   }
@@ -147,6 +166,7 @@ export class AuthService {
     }
 
     this.sessionState.set(null);
+    this.profileState.set(null);
     this.loadingState.set(false);
     return true;
   }
@@ -188,6 +208,7 @@ export class AuthService {
 
     await this.supabase.auth.signOut({ scope: 'local' });
     this.sessionState.set(null);
+    this.profileState.set(null);
     return false;
   }
 
@@ -205,6 +226,13 @@ export class AuthService {
     }
 
     this.sessionState.set(data.session);
+
+    if (data.session) {
+      await this.loadProfile();
+    } else {
+      this.profileState.set(null);
+    }
+
     this.loadingState.set(false);
   }
 }

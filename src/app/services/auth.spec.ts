@@ -8,6 +8,7 @@ describe('AuthService', () => {
   const unsubscribe = vi.fn();
   const getSession = vi.fn();
   const getUser = vi.fn();
+  const signUp = vi.fn();
   const signInWithPassword = vi.fn();
   const signInAnonymously = vi.fn();
   const signOut = vi.fn();
@@ -20,6 +21,7 @@ describe('AuthService', () => {
       auth: {
         getSession,
         getUser,
+        signUp,
         signInWithPassword,
         signInAnonymously,
         signOut,
@@ -32,6 +34,7 @@ describe('AuthService', () => {
     unsubscribe.mockReset();
     getSession.mockReset();
     getUser.mockReset();
+    signUp.mockReset();
     signInWithPassword.mockReset();
     signInAnonymously.mockReset();
     signOut.mockReset();
@@ -41,6 +44,69 @@ describe('AuthService', () => {
     TestBed.configureTestingModule({
       providers: [{ provide: SupabaseService, useValue: supabaseService }],
     });
+  });
+
+  it('signs up with the normalized name and email', async () => {
+    signUp.mockResolvedValue({
+      data: {
+        user: { id: 'user-1' },
+        session: null,
+      },
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(
+      service.signUp(' Sofia Mueller ', ' sofia@example.com ', 'password123'),
+    ).resolves.toBe(true);
+
+    expect(signUp).toHaveBeenCalledWith({
+      email: 'sofia@example.com',
+      password: 'password123',
+      options: {
+        data: {
+          full_name: 'Sofia Mueller',
+        },
+      },
+    });
+
+    expect(service.loading()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
+
+  it('rejects a sign-up without a name', async () => {
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('   ', 'sofia@example.com', 'password123')).resolves.toBe(false);
+
+    expect(signUp).not.toHaveBeenCalled();
+    expect(service.error()).toBe('Name is required.');
+    expect(service.loading()).toBe(false);
+  });
+
+  it('exposes sign-up errors returned by Supabase', async () => {
+    signUp.mockResolvedValue({
+      data: {
+        user: null,
+        session: null,
+      },
+      error: {
+        message: 'User already registered',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('Sofia Mueller', 'sofia@example.com', 'password123')).resolves.toBe(
+      false,
+    );
+
+    expect(service.error()).toBe('User already registered');
+    expect(service.loading()).toBe(false);
   });
 
   it('restores the existing browser session', async () => {

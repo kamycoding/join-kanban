@@ -1,0 +1,398 @@
+@use '../../../styles/breakpoints' as *;
+
+// ---------------------------------------------------------------------------
+// Summary page. Measurements come from the Figma frames "Summary user"
+// (45:2195, desktop) and "Summary user mobile" (332:1588), plus the component
+// sets on the design system page for the three card states. All read through
+// the API rather than guessed.
+//
+// A few spacings have no token because they appear nowhere else, so they stay
+// local to this page.
+// ---------------------------------------------------------------------------
+$gap: 28px; // between the metric rows on desktop
+$gap-mobile: 24px;
+$headline-gap: 30px; // title, rule, subtitle
+$card-gap: 18px; // icon to number inside a card
+$card-growth: 16px; // a hovered card gets this much wider and taller
+
+// The host is a grid item of .app-shell__content, so without min-width its
+// automatic minimum size is the content width and the page bursts its column.
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 100%;
+  padding: 110px 96px 96px;
+
+  background-color: var(--color-bg-app);
+}
+
+// -- Headline ---------------------------------------------------------------
+.summary__headline {
+  display: flex;
+  align-items: center;
+  gap: $headline-gap;
+}
+
+.summary__title {
+  margin: 0;
+
+  color: var(--color-black);
+  font-size: var(--font-size-t1);
+  font-weight: var(--font-weight-bold);
+}
+
+.summary__subtitle {
+  margin: 0;
+
+  color: var(--color-primary);
+  font-size: var(--font-size-t5);
+}
+
+// Upright on desktop, laid flat under the subtitle on mobile.
+.summary__rule {
+  flex: none;
+  width: 3px;
+  height: 59px;
+
+  background-color: var(--color-accent);
+}
+
+// -- Layout -----------------------------------------------------------------
+.summary__content {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  margin-top: 56px;
+}
+
+// The row height lives in a custom property because a hovered card has to be
+// able to outgrow its cell without pushing the other cards around. Mobile and
+// the three square cards override it further down.
+.summary__metrics {
+  --card-height: 168px;
+
+  display: grid;
+  grid-auto-rows: var(--card-height);
+  gap: $gap;
+  width: 100%;
+  min-width: 0;
+  max-width: 560px;
+}
+
+// Flex and grid items refuse to shrink below their content unless min-width is
+// zeroed out, which on a 320px screen pushes the whole block past the edge.
+.summary__row {
+  display: grid;
+  grid-auto-rows: var(--card-height);
+  gap: $gap;
+  min-width: 0;
+}
+
+.summary__row--pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary__row--trio {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+// -- Card -------------------------------------------------------------------
+// Every card links to the board. On hover Figma turns it dark and grows the
+// area by 16px in both directions while the icon and the text keep their size,
+// so this must not be a transform.
+.summary__card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $card-gap;
+  min-width: 0;
+  height: 100%;
+
+  border-radius: var(--radius-3xl);
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-overlay);
+
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+
+  transition:
+    width var(--transition),
+    height var(--transition),
+    margin var(--transition),
+    background-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.summary__card:hover {
+  z-index: 1;
+  width: calc(100% + #{$card-growth});
+  height: calc(100% + #{$card-growth});
+  margin: calc(#{$card-growth} / -2);
+
+  background-color: var(--color-primary);
+  box-shadow: var(--shadow-button-state);
+}
+
+.summary__card:hover .summary__number,
+.summary__card:hover .summary__label,
+.summary__card:hover .summary__date {
+  color: var(--color-white);
+}
+
+// Pressed: back to the original size, keeping the raised shadow.
+.summary__card:active {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+
+  background-color: var(--color-bg-pressed);
+  box-shadow: var(--shadow-button-state);
+}
+
+.summary__card:active .summary__number,
+.summary__card:active .summary__date {
+  color: var(--color-black);
+}
+
+.summary__card:active .summary__label {
+  color: var(--color-primary);
+}
+
+.summary__card:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+// -- Icons ------------------------------------------------------------------
+// Both variants are in the DOM so neither has to load on first hover.
+.summary__icons {
+  display: flex;
+  flex: none;
+}
+
+.summary__icon {
+  width: 69px;
+  height: 69px;
+}
+
+.summary__icon--small {
+  width: 60px;
+  height: 60px;
+}
+
+.summary__icon--hover {
+  display: none;
+}
+
+.summary__card:hover .summary__icon {
+  display: none;
+}
+
+.summary__card:hover .summary__icon--hover {
+  display: block;
+}
+
+// The urgent circle stays orange in every state, so it has no second variant
+// and must survive the rule above. Order matters here.
+.summary__card:hover .summary__icon--small,
+.summary__card:active .summary__icon {
+  display: block;
+}
+
+.summary__card:active .summary__icon--hover {
+  display: none;
+}
+
+// -- Figures ----------------------------------------------------------------
+.summary__figures {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.summary__number {
+  color: var(--color-black);
+  font-size: var(--font-size-metric);
+  font-weight: var(--font-weight-semibold);
+}
+
+.summary__label {
+  color: var(--color-primary);
+  font-size: var(--font-size-t6);
+}
+
+.summary__label--small {
+  font-size: var(--font-size-body);
+}
+
+.summary__date {
+  color: var(--color-primary);
+  font-size: var(--font-size-action);
+  font-weight: var(--font-weight-bold);
+}
+
+.summary__card--stacked {
+  flex-direction: column;
+  gap: 0;
+}
+
+.summary__card--urgency {
+  gap: 61px;
+}
+
+.summary__urgent {
+  display: flex;
+  align-items: center;
+  gap: $card-gap;
+}
+
+.summary__deadline {
+  display: flex;
+  flex-direction: column;
+
+  text-align: left;
+}
+
+.summary__rule--inside {
+  width: 3px;
+  height: 102px;
+
+  background-color: var(--color-divider);
+}
+
+// -- Greeting ---------------------------------------------------------------
+.summary__greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+}
+
+.summary__greeting-time {
+  color: var(--color-primary);
+  font-size: var(--font-size-t2);
+  font-weight: var(--font-weight-medium);
+}
+
+// Figma paints the name #124658, the same value as the primary hover blue.
+.summary__greeting-name {
+  color: var(--color-primary-hover);
+  font-size: var(--font-size-metric);
+  font-weight: var(--font-weight-bold);
+}
+
+// ---------------------------------------------------------------------------
+// Below the tablet breakpoint the sidebar has already moved to the bottom and
+// the second column no longer fits. The mobile design has no greeting at all,
+// it lives on its own greeting screen.
+// ---------------------------------------------------------------------------
+@media (max-width: $bp-tablet) {
+  :host {
+    padding: 64px 40px 40px;
+  }
+
+  .summary__greeting {
+    display: none;
+  }
+
+  .summary__content {
+    gap: 0;
+  }
+
+  .summary__metrics {
+    max-width: none;
+  }
+}
+
+@media (max-width: $bp-mobile) {
+  :host {
+    padding: 32px 16px 24px;
+  }
+
+  .summary__headline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .summary__title {
+    font-size: var(--font-size-t2);
+  }
+
+  .summary__subtitle {
+    font-size: var(--font-size-t6);
+  }
+
+  .summary__rule {
+    width: 90px;
+    height: 3px;
+  }
+
+  .summary__content {
+    margin-top: 32px;
+  }
+
+  .summary__metrics {
+    --card-height: 110px;
+
+    gap: $gap-mobile;
+  }
+
+  .summary__row {
+    gap: $gap-mobile;
+  }
+
+  .summary__row--trio {
+    --card-height: 116px;
+  }
+
+  .summary__card {
+    border-radius: var(--radius-menu);
+  }
+
+  // Figma spaces this 20px on a 428px screen. At 320px the content needs
+  // 301px of the 288px available, so the gap has to give way.
+  .summary__card--urgency {
+    gap: 12px;
+  }
+
+  .summary__icon,
+  .summary__icon--small {
+    width: 40px;
+    height: 40px;
+  }
+
+  .summary__number {
+    font-size: var(--font-size-t2);
+  }
+
+  .summary__label,
+  .summary__date {
+    font-size: var(--font-size-body);
+  }
+
+  .summary__rule--inside {
+    width: 3px;
+    height: 75px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Some people get motion sick from movement on screen and switch it off in
+// their operating system. The colour change stays, the growing stops.
+// ---------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  .summary__card {
+    transition:
+      background-color var(--transition),
+      box-shadow var(--transition);
+  }
+
+  .summary__card:hover {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+}

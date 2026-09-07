@@ -23,6 +23,27 @@ describe('ContactService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('clears all user-specific contact state', () => {
+    service.contacts.set([
+      {
+        id: 'contact-1',
+        created_at: '2026-09-07T10:00:00.000Z',
+        first_name: 'Sofia',
+        last_name: 'Mueller',
+        email: 'sofia@example.com',
+        phone: '+49 151 1234567',
+        color: '#29abe2',
+        updated_at: '2026-09-07T10:00:00.000Z',
+      },
+    ]);
+
+    expect(service.contacts()).toHaveLength(1);
+
+    service.clearState();
+
+    expect(service.contacts()).toEqual([]);
+  });
+
   it('rejects invalid create and update input before starting a Supabase write', async () => {
     await expect(service.createContact('A', 'test@test.a', '12345')).resolves.toBeNull();
     await expect(service.updateContact('1', 'A', 'test@test.a', '12345')).resolves.toBeNull();

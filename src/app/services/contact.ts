@@ -9,6 +9,10 @@ export class ContactService {
 
   readonly contacts = signal<Contact[]>([]);
 
+  clearState(): void {
+    this.contacts.set([]);
+  }
+
   async getContacts(): Promise<void> {
     const { data, error } = await this.supabase
       .from('contacts')

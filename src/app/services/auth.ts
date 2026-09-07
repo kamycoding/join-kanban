@@ -29,6 +29,39 @@ export class AuthService {
     this.ready = this.restoreSession();
   }
 
+  async signUp(name: string, email: string, password: string): Promise<boolean> {
+    this.loadingState.set(true);
+    this.errorState.set(null);
+
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim();
+
+    if (!normalizedName) {
+      this.errorState.set('Name is required.');
+      this.loadingState.set(false);
+      return false;
+    }
+
+    const { error } = await this.supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: {
+          full_name: normalizedName,
+        },
+      },
+    });
+
+    if (error) {
+      this.errorState.set(error.message);
+      this.loadingState.set(false);
+      return false;
+    }
+
+    this.loadingState.set(false);
+    return true;
+  }
+
   async signInWithPassword(email: string, password: string): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);

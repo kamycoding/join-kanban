@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
 import { TaskPriority, TaskStatus, TaskWithDetails } from '../../models/task';
+import { AuthService } from '../../services/auth';
 import { TaskService } from '../../services/task';
 import { Summary } from './summary';
 
@@ -17,6 +18,8 @@ describe('Summary', () => {
     error: WritableSignal<string | null>;
     getTasks: ReturnType<typeof vi.fn>;
   };
+  let isGuest: WritableSignal<boolean>;
+  let user: WritableSignal<{ user_metadata: Record<string, unknown> } | null>;
 
   function createTask(
     id: string,
@@ -48,6 +51,21 @@ describe('Summary', () => {
     );
   }
 
+  /** The greeting under the metrics, its two lines joined by a space. */
+  function greetingText(fixtureToRead = fixture): string {
+    return [...fixtureToRead.nativeElement.querySelectorAll('.summary__greeting span')]
+      .map((line: HTMLElement) => line.textContent?.trim() ?? '')
+      .join(' ');
+  }
+
+  /** A second component, built after the clock was moved. */
+  function renderAgain(): ComponentFixture<Summary> {
+    const later = TestBed.createComponent(Summary);
+    later.detectChanges();
+
+    return later;
+  }
+
   /** The line above "Upcoming Deadline" on the urgency card. */
   function deadlineText(): string {
     return fixture.nativeElement.querySelector('.summary__date').textContent?.trim() ?? '';
@@ -65,6 +83,8 @@ describe('Summary', () => {
     vi.setSystemTime(new Date(2026, 8, 8, 9, 0, 0));
 
     tasks = signal<TaskWithDetails[]>([]);
+    isGuest = signal(true);
+    user = signal<{ user_metadata: Record<string, unknown> } | null>(null);
     taskService = {
       tasks,
       loading: signal(false),
@@ -74,7 +94,10 @@ describe('Summary', () => {
 
     await TestBed.configureTestingModule({
       imports: [Summary],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: { isGuest, user } as unknown as AuthService },
+      ],
     })
       .overrideProvider(TaskService, { useValue: taskService })
       .compileComponents();
@@ -200,5 +223,44 @@ describe('Summary', () => {
     );
 
     expect(deadlineText()).toBe('October 16, 2026');
+  });
+
+  it('greets a guest without a name', () => {
+    expect(greetingText()).toBe('Good morning!');
+  });
+
+  it('greets a signed-in user by name', async () => {
+    isGuest.set(false);
+    user.set({ user_metadata: { name: 'Sofia Müller' } });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(greetingText()).toBe('Good morning, Sofia Müller');
+  });
+
+  it('falls back to the other name keys a profile may carry', async () => {
+    isGuest.set(false);
+    user.set({ user_metadata: { name: '  ', full_name: 'Björn Daigger' } });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(greetingText()).toBe('Good morning, Björn Daigger');
+  });
+
+  it('drops the name when the profile carries none', async () => {
+    isGuest.set(false);
+    user.set({ user_metadata: {} });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(greetingText()).toBe('Good morning!');
+  });
+
+  it('greets by the time of day', () => {
+    vi.setSystemTime(new Date(2026, 8, 8, 13, 0, 0));
+    expect(greetingText(renderAgain())).toBe('Good afternoon!');
+
+    vi.setSystemTime(new Date(2026, 8, 8, 19, 0, 0));
+    expect(greetingText(renderAgain())).toBe('Good evening!');
   });
 });

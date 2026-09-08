@@ -22,13 +22,14 @@ describe('Summary', () => {
     id: string,
     status: TaskStatus,
     priority: TaskPriority = 'medium',
+    due_date = '2026-09-01',
   ): TaskWithDetails {
     return {
       id,
       owner_id: 'owner-1',
       title: 'A task',
       description: '',
-      due_date: '2026-09-01',
+      due_date,
       priority,
       category: 'user_story',
       status,
@@ -47,7 +48,22 @@ describe('Summary', () => {
     );
   }
 
+  /** The line above "Upcoming Deadline" on the urgency card. */
+  function deadlineText(): string {
+    return fixture.nativeElement.querySelector('.summary__date').textContent?.trim() ?? '';
+  }
+
+  async function withTasks(...list: TaskWithDetails[]): Promise<void> {
+    tasks.set(list);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
   beforeEach(async () => {
+    // Only Date is faked; faking timers as well would stall whenStable().
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 8, 8, 9, 0, 0));
+
     tasks = signal<TaskWithDetails[]>([]);
     taskService = {
       tasks,
@@ -67,6 +83,10 @@ describe('Summary', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should create', () => {
@@ -147,5 +167,38 @@ describe('Summary', () => {
 
     expect(alert.getAttribute('role')).toBe('alert');
     expect(alert.textContent).toContain('Tasks could not be loaded');
+  });
+
+  it('says so while no task is due', () => {
+    expect(deadlineText()).toBe('No upcoming deadline');
+  });
+
+  it('ignores due dates that have passed', async () => {
+    await withTasks(createTask('1', 'todo', 'medium', '2026-09-07'));
+
+    expect(deadlineText()).toBe('No upcoming deadline');
+  });
+
+  it('ignores tasks that are done', async () => {
+    await withTasks(createTask('1', 'done', 'medium', '2026-10-16'));
+
+    expect(deadlineText()).toBe('No upcoming deadline');
+  });
+
+  it('counts a task due today as upcoming', async () => {
+    await withTasks(createTask('1', 'todo', 'medium', '2026-09-08'));
+
+    expect(deadlineText()).toBe('September 8, 2026');
+  });
+
+  it('shows the earliest date still ahead', async () => {
+    await withTasks(
+      createTask('1', 'todo', 'medium', '2026-11-02'),
+      createTask('2', 'in_progress', 'medium', '2026-10-16'),
+      createTask('3', 'await_feedback', 'medium', '2026-08-01'),
+      createTask('4', 'done', 'medium', '2026-09-09'),
+    );
+
+    expect(deadlineText()).toBe('October 16, 2026');
   });
 });

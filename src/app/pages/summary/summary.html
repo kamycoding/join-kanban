@@ -113,8 +113,12 @@
     </div>
 
     <p class="summary__greeting">
-      <span class="summary__greeting-time">Good morning,</span>
-      <span class="summary__greeting-name">Sofia Müller</span>
+      @if (userName(); as name) {
+        <span class="summary__greeting-time">{{ greeting }},</span>
+        <span class="summary__greeting-name">{{ name }}</span>
+      } @else {
+        <span class="summary__greeting-time">{{ greeting }}!</span>
+      }
     </p>
   </div>
 </section>

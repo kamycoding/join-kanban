@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TASK_STATUSES, TaskStatus } from '../../models/task';
+import { AuthService } from '../../services/auth';
 import { TaskService } from '../../services/task';
 
 /**
@@ -34,6 +35,23 @@ function formatDay(day: string): string {
   return dayFormat.format(new Date(year, month - 1, date));
 }
 
+/** The keys a profile name could arrive under, in the order they are tried. */
+const NAME_KEYS = ['name', 'full_name', 'display_name'] as const;
+
+/**
+ * Figma only draws "Good morning". Noon and six in the evening are the usual
+ * borders for the other two.
+ */
+function greetingFor(now: Date): string {
+  const hour = now.getHours();
+
+  if (hour < 12) {
+    return 'Good morning';
+  }
+
+  return hour < 18 ? 'Good afternoon' : 'Good evening';
+}
+
 @Component({
   selector: 'app-summary',
   imports: [RouterLink],
@@ -42,6 +60,7 @@ function formatDay(day: string): string {
 })
 export class Summary implements OnInit {
   private readonly taskService = inject(TaskService);
+  private readonly auth = inject(AuthService);
 
   readonly loading = this.taskService.loading;
   readonly error = this.taskService.error;
@@ -95,6 +114,31 @@ export class Summary implements OnInit {
     const day = this.nextDeadline();
 
     return day === null ? null : formatDay(day);
+  });
+
+  /** Read once when the page opens; nobody watches the summary past midnight. */
+  readonly greeting = greetingFor(new Date());
+
+  /**
+   * The name of the signed-in profile, null for a guest and for a profile that
+   * carries no name yet. Figma greets both the same way, without a name.
+   */
+  readonly userName = computed(() => {
+    if (this.auth.isGuest()) {
+      return null;
+    }
+
+    const metadata = this.auth.user()?.user_metadata ?? {};
+
+    for (const key of NAME_KEYS) {
+      const value: unknown = metadata[key];
+
+      if (typeof value === 'string' && value.trim() !== '') {
+        return value.trim();
+      }
+    }
+
+    return null;
   });
 
   async ngOnInit(): Promise<void> {

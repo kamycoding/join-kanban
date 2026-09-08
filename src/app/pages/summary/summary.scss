@@ -255,6 +255,12 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
   font-weight: var(--font-weight-bold);
 }
 
+// Without a date the card carries a sentence, and the headline size would
+// break it onto three lines on a narrow screen.
+.summary__date--empty {
+  font-size: var(--font-size-body);
+}
+
 .summary__card--stacked {
   flex-direction: column;
   gap: 0;

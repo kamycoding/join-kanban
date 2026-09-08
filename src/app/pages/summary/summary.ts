@@ -2,7 +2,55 @@ import { Component, OnInit, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TASK_STATUSES, TaskStatus } from '../../models/task';
+import { AuthService } from '../../services/auth';
 import { TaskService } from '../../services/task';
+
+/**
+ * The local calendar day as YYYY-MM-DD. Due dates carry that same shape, so
+ * comparing them as plain text keeps time zones out of the question: a date
+ * turned into a Date object would be midnight UTC and could fall a day back.
+ */
+function localDay(date: Date): string {
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/** October 16, 2026 - the wording the design puts on the urgency card. */
+const dayFormat = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+/**
+ * Reads a due date without going through the DatePipe: the pipe pulls
+ * Angular's date formatting into the initial bundle and pushes it past its
+ * budget. Building the Date from the three parts keeps it on the local day.
+ */
+function formatDay(day: string): string {
+  const [year, month, date] = day.split('-').map(Number);
+
+  return dayFormat.format(new Date(year, month - 1, date));
+}
+
+/** The keys a profile name could arrive under, in the order they are tried. */
+const NAME_KEYS = ['name', 'full_name', 'display_name'] as const;
+
+/**
+ * Figma only draws "Good morning". Noon and six in the evening are the usual
+ * borders for the other two.
+ */
+function greetingFor(now: Date): string {
+  const hour = now.getHours();
+
+  if (hour < 12) {
+    return 'Good morning';
+  }
+
+  return hour < 18 ? 'Good afternoon' : 'Good evening';
+}
 
 @Component({
   selector: 'app-summary',
@@ -12,6 +60,7 @@ import { TaskService } from '../../services/task';
 })
 export class Summary implements OnInit {
   private readonly taskService = inject(TaskService);
+  private readonly auth = inject(AuthService);
 
   readonly loading = this.taskService.loading;
   readonly error = this.taskService.error;
@@ -41,6 +90,56 @@ export class Summary implements OnInit {
   readonly urgentCount = computed(
     () => this.taskService.tasks().filter((task) => task.priority === 'urgent').length,
   );
+
+  /**
+   * The earliest due date still ahead of the board, or null when nothing is
+   * due. A task in Done has been dealt with and no longer sets a deadline,
+   * and a task due today still counts as upcoming.
+   */
+  readonly nextDeadline = computed(() => {
+    const today = localDay(new Date());
+
+    return this.taskService
+      .tasks()
+      .filter((task) => task.status !== 'done' && task.due_date >= today)
+      .reduce<string | null>(
+        (earliest, task) =>
+          earliest === null || task.due_date < earliest ? task.due_date : earliest,
+        null,
+      );
+  });
+
+  /** The deadline as the card shows it, null while nothing is due. */
+  readonly nextDeadlineLabel = computed(() => {
+    const day = this.nextDeadline();
+
+    return day === null ? null : formatDay(day);
+  });
+
+  /** Read once when the page opens; nobody watches the summary past midnight. */
+  readonly greeting = greetingFor(new Date());
+
+  /**
+   * The name of the signed-in profile, null for a guest and for a profile that
+   * carries no name yet. Figma greets both the same way, without a name.
+   */
+  readonly userName = computed(() => {
+    if (this.auth.isGuest()) {
+      return null;
+    }
+
+    const metadata = this.auth.user()?.user_metadata ?? {};
+
+    for (const key of NAME_KEYS) {
+      const value: unknown = metadata[key];
+
+      if (typeof value === 'string' && value.trim() !== '') {
+        return value.trim();
+      }
+    }
+
+    return null;
+  });
 
   async ngOnInit(): Promise<void> {
     await this.taskService.getTasks();

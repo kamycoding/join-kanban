@@ -94,6 +94,70 @@ describe('AuthService', () => {
     expect(service.error()).toBeNull();
   });
 
+  it('signs out when sign-up creates an authenticated session', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    signUp.mockResolvedValue({
+      data: {
+        user: session.user,
+        session,
+      },
+      error: null,
+    });
+
+    signOut.mockResolvedValue({
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('Sofia Mueller', 'sofia@example.com', 'password123')).resolves.toBe(
+      true,
+    );
+
+    expect(signOut).toHaveBeenCalledWith({
+      scope: 'local',
+    });
+    expect(service.session()).toBeNull();
+    expect(service.profile()).toBeNull();
+    expect(service.loading()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
+
+  it('exposes an error when automatic logout after sign-up fails', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    signUp.mockResolvedValue({
+      data: {
+        user: session.user,
+        session,
+      },
+      error: null,
+    });
+
+    signOut.mockResolvedValue({
+      error: {
+        message: 'Logout failed',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('Sofia Mueller', 'sofia@example.com', 'password123')).resolves.toBe(
+      false,
+    );
+
+    expect(signOut).toHaveBeenCalledWith({
+      scope: 'local',
+    });
+    expect(service.error()).toBe(
+      'Account created, but automatic logout failed. Please log out manually.',
+    );
+    expect(service.loading()).toBe(false);
+  });
+
   it('rejects a sign-up without a name', async () => {
     const service = TestBed.inject(AuthService);
     await service.ready;

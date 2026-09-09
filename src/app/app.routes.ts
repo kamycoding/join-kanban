@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
-import { authGuard } from './guards/auth-guard';
+import { authGuard } from './guards/auth.guard';
+import { guestOnlyGuard } from './guards/guest-only.guard';
 
 /**
  * Two groups: the standalone entry pages, and everything that renders inside
@@ -9,11 +10,23 @@ import { authGuard } from './guards/auth-guard';
 export const routes: Routes = [
   {
     path: 'login',
+    canActivate: [guestOnlyGuard],
     loadComponent: () => import('./pages/login/login').then((module) => module.Login),
   },
   {
     path: 'sign-up',
+    canActivate: [guestOnlyGuard],
     loadComponent: () => import('./pages/sign-up/sign-up').then((module) => module.SignUp),
+  },
+  {
+    path: 'legal-notice',
+    loadComponent: () =>
+      import('./pages/legal-notice/legal-notice').then((module) => module.LegalNotice),
+  },
+  {
+    path: 'privacy-policy',
+    loadComponent: () =>
+      import('./pages/privacy-policy/privacy-policy').then((module) => module.PrivacyPolicy),
   },
   {
     path: '',
@@ -45,16 +58,6 @@ export const routes: Routes = [
       {
         path: 'help',
         loadComponent: () => import('./pages/help/help').then((module) => module.Help),
-      },
-      {
-        path: 'legal-notice',
-        loadComponent: () =>
-          import('./pages/legal-notice/legal-notice').then((module) => module.LegalNotice),
-      },
-      {
-        path: 'privacy-policy',
-        loadComponent: () =>
-          import('./pages/privacy-policy/privacy-policy').then((module) => module.PrivacyPolicy),
       },
     ],
   },

@@ -20,6 +20,7 @@
   --color-text-secondary: #686868;
   --color-bg-app: #f6f7f8;
   --color-bg-hover: #eeeeee;
+  --color-bg-pressed: #f9f9f9; // summary card while it is being clicked
   --color-bg-selected: #edf2fa;
   --color-hover-tint: rgb(12 46 98 / 0.12); // fill behind round icon buttons on hover
   --color-line: #d1d1d1; // input border
@@ -72,9 +73,11 @@
   --font-size-body: 16px;
   --font-size-action: 21px;
   --font-size-t7: 12px;
+  --font-size-metric: 64px; // the big number on a summary card
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600; // summary metrics
   --font-weight-bold: 700;
 
   // -- Radii -----------------------------------------------------------------

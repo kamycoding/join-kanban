@@ -1,0 +1,168 @@
+<div class="sign-up-page">
+  <img class="logo" src="/img/join-logo-dark.svg" alt="Join" width="100" height="122" />
+  <section class="sign-up-card" aria-labelledby="sign-up-heading">
+    <a class="back-button" routerLink="/login" aria-label="Back to login">
+      <img src="/img/sign-up/arrow-left.svg" alt="" width="32" height="32" />
+    </a>
+    <h1 id="sign-up-heading">Sign up</h1>
+    <form novalidate (submit)="onSubmit($event)">
+      <div class="fields">
+        @let nameError = errorFor('name');
+        <div class="field-group">
+          <label class="visually-hidden" for="sign-up-name">Name</label>
+          <div class="field">
+            <input
+              id="sign-up-name"
+              type="text"
+              autocomplete="name"
+              placeholder="Name"
+              [formField]="signUpForm.name"
+              [attr.aria-invalid]="nameError ? 'true' : null"
+              [attr.aria-describedby]="nameError ? 'sign-up-name-error' : null"
+            />
+            <img class="field-icon" src="/img/icon-person.svg" alt="" width="24" height="24" />
+          </div>
+          <div class="field-message">
+            @if (nameError) {
+              <p class="field-error" id="sign-up-name-error" aria-live="polite">{{ nameError }}</p>
+            }
+          </div>
+        </div>
+        @let emailError = errorFor('email');
+        <div class="field-group">
+          <label class="visually-hidden" for="sign-up-email">Email</label>
+          <div class="field">
+            <input
+              id="sign-up-email"
+              type="email"
+              autocomplete="email"
+              placeholder="Email"
+              [formField]="signUpForm.email"
+              [attr.aria-invalid]="emailError ? 'true' : null"
+              [attr.aria-describedby]="emailError ? 'sign-up-email-error' : null"
+            />
+            <img class="field-icon" src="/img/icon-mail.svg" alt="" width="24" height="24" />
+          </div>
+          <div class="field-message">
+            @if (emailError) {
+              <p class="field-error" id="sign-up-email-error" aria-live="polite">
+                {{ emailError }}
+              </p>
+            }
+          </div>
+        </div>
+        @let passwordError = errorFor('password');
+        <div class="field-group">
+          <label class="visually-hidden" for="sign-up-password">Password</label>
+          <div class="field">
+            <input
+              id="sign-up-password"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              autocomplete="new-password"
+              placeholder="Password"
+              [formField]="signUpForm.password"
+              [attr.aria-invalid]="passwordError ? 'true' : null"
+              [attr.aria-describedby]="passwordError ? 'sign-up-password-error' : null"
+            />
+            <button
+              class="visibility-button"
+              type="button"
+              [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+              (click)="passwordVisible.set(!passwordVisible())"
+            >
+              <img
+                [src]="
+                  passwordVisible() ? '/img/icon-visibility-off.svg' : '/img/icon-visibility.svg'
+                "
+                alt=""
+                width="24"
+                height="24"
+              />
+            </button>
+          </div>
+          <div class="field-message">
+            @if (passwordError) {
+              <p class="field-error" id="sign-up-password-error" aria-live="polite">
+                {{ passwordError }}
+              </p>
+            }
+          </div>
+        </div>
+        @let confirmPasswordError = errorFor('confirmPassword');
+        <div class="field-group">
+          <label class="visually-hidden" for="sign-up-confirmPassword">Confirm Password</label>
+          <div class="field">
+            <input
+              id="sign-up-confirmPassword"
+              [type]="confirmPasswordVisible() ? 'text' : 'password'"
+              autocomplete="new-password"
+              placeholder="Confirm Password"
+              [formField]="signUpForm.confirmPassword"
+              [attr.aria-invalid]="confirmPasswordError ? 'true' : null"
+              [attr.aria-describedby]="
+                confirmPasswordError ? 'sign-up-confirmPassword-error' : null
+              "
+            />
+            <button
+              class="visibility-button"
+              type="button"
+              [attr.aria-label]="
+                confirmPasswordVisible() ? 'Hide confirm password' : 'Show confirm password'
+              "
+              (click)="confirmPasswordVisible.set(!confirmPasswordVisible())"
+            >
+              <img
+                [src]="
+                  confirmPasswordVisible()
+                    ? '/img/icon-visibility-off.svg'
+                    : '/img/icon-visibility.svg'
+                "
+                alt=""
+                width="24"
+                height="24"
+              />
+            </button>
+          </div>
+          <div class="field-message">
+            @if (confirmPasswordError) {
+              <p class="field-error" id="sign-up-confirmPassword-error" aria-live="polite">
+                {{ confirmPasswordError }}
+              </p>
+            }
+          </div>
+        </div>
+      </div>
+      @let privacyError = errorFor('acceptPrivacy');
+      <div class="privacy-group">
+        <div class="privacy-row">
+          <input
+            id="privacy-consent"
+            type="checkbox"
+            [formField]="signUpForm.acceptPrivacy"
+            aria-labelledby="privacy-label privacy-link"
+            [attr.aria-invalid]="privacyError ? 'true' : null"
+            [attr.aria-describedby]="privacyError ? 'privacy-error' : null"
+          />
+          <label id="privacy-label" for="privacy-consent">I accept the</label>
+          <a id="privacy-link" routerLink="/privacy-policy">Privacy policy</a>
+        </div>
+        <div class="field-message">
+          @if (privacyError) {
+            <p class="field-error" id="privacy-error" aria-live="polite">{{ privacyError }}</p>
+          }
+        </div>
+      </div>
+      <app-button
+        class="submit-button"
+        size="large"
+        type="submit"
+        [disabled]="signUpForm().invalid()"
+        >Sign up</app-button
+      >
+    </form>
+  </section>
+  <footer>
+    <a routerLink="/privacy-policy">Privacy Policy</a>
+    <a routerLink="/legal-notice">Legal notice</a>
+  </footer>
+</div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -8,6 +8,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './sidebar.scss',
 })
 export class Sidebar {
+  readonly external = input(false);
   readonly links = [
     { path: '/summary', label: 'Summary', icon: 'icon-summary' },
     { path: '/add-task', label: 'Add Task', icon: 'icon-add-task' },

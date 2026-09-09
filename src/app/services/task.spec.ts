@@ -308,6 +308,23 @@ describe('TaskService', () => {
     await move;
   });
 
+  it('clears all user-specific task state', async () => {
+    const service = TestBed.inject(TaskService);
+
+    await loadTasks(service, [createTask()]);
+    await service.moveTask('task-1', 'done', -1);
+
+    expect(service.tasks()).toHaveLength(1);
+    expect(service.error()).toBe('Task position must be a non-negative integer.');
+
+    service.clearState();
+
+    expect(service.tasks()).toEqual([]);
+    expect(service.loading()).toBe(false);
+    expect(service.saving()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
+
   it('puts both columns back when the server rejects the move', async () => {
     const firstTask = createTask();
     const secondTask = {

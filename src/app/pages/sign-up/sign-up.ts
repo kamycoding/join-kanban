@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormField, email, form, minLength, required, validate } from '@angular/forms/signals';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth';
 import { Button } from '../../shared/components/button/button';
 
 @Component({
@@ -10,6 +11,8 @@ import { Button } from '../../shared/components/button/button';
   styleUrl: './sign-up.scss',
 })
 export class SignUp {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   readonly formModel = signal({
     name: '',
     email: '',
@@ -37,6 +40,8 @@ export class SignUp {
 
   readonly passwordVisible = signal(false);
   readonly confirmPasswordVisible = signal(false);
+  readonly submitting = signal(false);
+  readonly signUpError = signal<string | null>(null);
 
   errorFor(field: keyof ReturnType<typeof this.formModel>): string | null {
     const state = this.signUpForm[field]();
@@ -45,8 +50,26 @@ export class SignUp {
     return (errors.find((error) => error.kind === 'required') ?? errors[0])?.message ?? null;
   }
 
-  onSubmit(event: Event): void {
+  async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
     this.signUpForm().markAsTouched();
+
+    if (this.signUpForm().invalid() || this.submitting()) {
+      return;
+    }
+
+    this.submitting.set(true);
+    this.signUpError.set(null);
+
+    const { name, email: address, password } = this.formModel();
+    const registered = await this.auth.signUp(name, address, password);
+
+    if (registered) {
+      await this.router.navigate(['/login']);
+      return;
+    }
+
+    this.signUpError.set(this.auth.error() ?? 'Sign up failed. Please try again.');
+    this.submitting.set(false);
   }
 }

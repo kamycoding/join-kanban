@@ -85,7 +85,7 @@ export class AuthService {
       return false;
     }
 
-    const { error } = await this.supabase.auth.signUp({
+    const { data, error } = await this.supabase.auth.signUp({
       email: normalizedEmail,
       password,
       options: {
@@ -99,6 +99,23 @@ export class AuthService {
       this.errorState.set(error.message);
       this.loadingState.set(false);
       return false;
+    }
+
+    if (data.session) {
+      const { error: signOutError } = await this.supabase.auth.signOut({
+        scope: 'local',
+      });
+
+      if (signOutError) {
+        this.errorState.set(
+          'Account created, but automatic logout failed. Please log out manually.',
+        );
+        this.loadingState.set(false);
+        return false;
+      }
+
+      this.sessionState.set(null);
+      this.profileState.set(null);
     }
 
     this.loadingState.set(false);

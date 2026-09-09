@@ -152,13 +152,22 @@
           }
         </div>
       </div>
+      @if (signUpError(); as error) {
+        <p class="field-error" role="alert">{{ error }}</p>
+      }
+
       <app-button
         class="submit-button"
         size="large"
         type="submit"
-        [disabled]="signUpForm().invalid()"
-        >Sign up</app-button
+        [disabled]="signUpForm().invalid() || submitting()"
       >
+        @if (submitting()) {
+          Signing up...
+        } @else {
+          Sign up
+        }
+      </app-button>
     </form>
   </section>
   <footer>

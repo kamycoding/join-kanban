@@ -1,19 +1,31 @@
-<nav>
+<nav [class.sidebar--external]="external()">
   <div class="sidebar__logo">
     <img src="img/join-logo.svg" alt="Join" />
   </div>
 
   <div class="sidebar__nav">
-    @for (link of links; track link.path) {
+    @if (external()) {
       <a
         class="sidebar__link"
-        [routerLink]="link.path"
+        routerLink="/login"
         routerLinkActive="active"
         ariaCurrentWhenActive="page"
       >
-        <span class="sidebar__icon" [style.--icon]="'url(img/' + link.icon + '.svg)'"></span>
-        {{ link.label }}
+        <span class="sidebar__icon" [style.--icon]="'url(img/icon-login.svg)'"></span>
+        Log In
       </a>
+    } @else {
+      @for (link of links; track link.path) {
+        <a
+          class="sidebar__link"
+          [routerLink]="link.path"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+        >
+          <span class="sidebar__icon" [style.--icon]="'url(img/' + link.icon + '.svg)'"></span>
+          {{ link.label }}
+        </a>
+      }
     }
   </div>
 

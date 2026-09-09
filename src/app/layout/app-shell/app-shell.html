@@ -1,9 +1,17 @@
-<app-sidebar />
+@if (auth.isAuthenticated()) {
+  <div class="app-shell__authenticated">
+    <app-sidebar />
 
-<div class="app-shell__main">
-  <app-header />
+    <div class="app-shell__main">
+      <app-header />
 
-  <main class="app-shell__content">
+      <main class="app-shell__content">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+} @else {
+  <main class="app-shell__public-content">
     <router-outlet />
   </main>
-</div>
+}

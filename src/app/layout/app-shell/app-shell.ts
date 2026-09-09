@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
+import { AuthService } from '../../services/auth';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 
@@ -14,4 +14,6 @@ import { Sidebar } from '../sidebar/sidebar';
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })
-export class AppShell {}
+export class AppShell {
+  readonly auth = inject(AuthService);
+}

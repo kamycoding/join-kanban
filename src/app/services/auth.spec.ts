@@ -8,18 +8,25 @@ describe('AuthService', () => {
   const unsubscribe = vi.fn();
   const getSession = vi.fn();
   const getUser = vi.fn();
+  const signUp = vi.fn();
   const signInWithPassword = vi.fn();
   const signInAnonymously = vi.fn();
   const signOut = vi.fn();
+  const profileSingle = vi.fn();
+  const profileEq = vi.fn(() => ({ single: profileSingle }));
+  const profileSelect = vi.fn(() => ({ eq: profileEq }));
+  const from = vi.fn(() => ({ select: profileSelect }));
   const onAuthStateChange = vi.fn(() => ({
     data: { subscription: { unsubscribe } },
   }));
 
   const supabaseService = {
     client: {
+      from,
       auth: {
         getSession,
         getUser,
+        signUp,
         signInWithPassword,
         signInAnonymously,
         signOut,
@@ -32,15 +39,156 @@ describe('AuthService', () => {
     unsubscribe.mockReset();
     getSession.mockReset();
     getUser.mockReset();
+    signUp.mockReset();
     signInWithPassword.mockReset();
     signInAnonymously.mockReset();
     signOut.mockReset();
+    from.mockClear();
+    profileSelect.mockClear();
+    profileEq.mockClear();
+    profileSingle.mockReset();
     onAuthStateChange.mockClear();
     getSession.mockResolvedValue({ data: { session: null }, error: null });
+    profileSingle.mockResolvedValue({
+      data: {
+        id: 'user-1',
+        full_name: 'Test User',
+        is_guest: false,
+        created_at: '2026-09-07T10:00:00.000Z',
+      },
+      error: null,
+    });
 
     TestBed.configureTestingModule({
       providers: [{ provide: SupabaseService, useValue: supabaseService }],
     });
+  });
+
+  it('signs up with the normalized name and email', async () => {
+    signUp.mockResolvedValue({
+      data: {
+        user: { id: 'user-1' },
+        session: null,
+      },
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(
+      service.signUp(' Sofia Mueller ', ' sofia@example.com ', 'password123'),
+    ).resolves.toBe(true);
+
+    expect(signUp).toHaveBeenCalledWith({
+      email: 'sofia@example.com',
+      password: 'password123',
+      options: {
+        data: {
+          full_name: 'Sofia Mueller',
+        },
+      },
+    });
+
+    expect(service.loading()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
+
+  it('signs out when sign-up creates an authenticated session', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    signUp.mockResolvedValue({
+      data: {
+        user: session.user,
+        session,
+      },
+      error: null,
+    });
+
+    signOut.mockResolvedValue({
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('Sofia Mueller', 'sofia@example.com', 'password123')).resolves.toBe(
+      true,
+    );
+
+    expect(signOut).toHaveBeenCalledWith({
+      scope: 'local',
+    });
+    expect(service.session()).toBeNull();
+    expect(service.profile()).toBeNull();
+    expect(service.loading()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
+
+  it('exposes an error when automatic logout after sign-up fails', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    signUp.mockResolvedValue({
+      data: {
+        user: session.user,
+        session,
+      },
+      error: null,
+    });
+
+    signOut.mockResolvedValue({
+      error: {
+        message: 'Logout failed',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('Sofia Mueller', 'sofia@example.com', 'password123')).resolves.toBe(
+      false,
+    );
+
+    expect(signOut).toHaveBeenCalledWith({
+      scope: 'local',
+    });
+    expect(service.error()).toBe(
+      'Account created, but automatic logout failed. Please log out manually.',
+    );
+    expect(service.loading()).toBe(false);
+  });
+
+  it('rejects a sign-up without a name', async () => {
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('   ', 'sofia@example.com', 'password123')).resolves.toBe(false);
+
+    expect(signUp).not.toHaveBeenCalled();
+    expect(service.error()).toBe('Name is required.');
+    expect(service.loading()).toBe(false);
+  });
+
+  it('exposes sign-up errors returned by Supabase', async () => {
+    signUp.mockResolvedValue({
+      data: {
+        user: null,
+        session: null,
+      },
+      error: {
+        message: 'User already registered',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.signUp('Sofia Mueller', 'sofia@example.com', 'password123')).resolves.toBe(
+      false,
+    );
+
+    expect(service.error()).toBe('User already registered');
+    expect(service.loading()).toBe(false);
   });
 
   it('restores the existing browser session', async () => {
@@ -54,6 +202,73 @@ describe('AuthService', () => {
     expect(service.user()?.id).toBe('user-1');
     expect(service.isAuthenticated()).toBe(true);
     expect(service.loading()).toBe(false);
+  });
+
+  it('loads the profile of the authenticated user', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: {
+        id: 'user-1',
+        full_name: 'Sofia Mueller',
+        is_guest: false,
+        created_at: '2026-09-07T10:00:00.000Z',
+      },
+      error: null,
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.loadProfile()).resolves.toBe(true);
+
+    expect(from).toHaveBeenCalledWith('profiles');
+    expect(profileSelect).toHaveBeenCalledWith('id, full_name, is_guest, created_at');
+    expect(profileEq).toHaveBeenCalledWith('id', 'user-1');
+    expect(service.profile()?.full_name).toBe('Sofia Mueller');
+    expect(service.displayName()).toBe('Sofia Mueller');
+    expect(service.initials()).toBe('SM');
+    expect(service.isGuest()).toBe(false);
+  });
+
+  it('does not request a profile without an authenticated user', async () => {
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.loadProfile()).resolves.toBe(false);
+
+    expect(from).not.toHaveBeenCalled();
+    expect(service.profile()).toBeNull();
+  });
+
+  it('exposes an error when the profile cannot be loaded', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: null,
+      error: {
+        message: 'Profile could not be loaded',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    await expect(service.loadProfile()).resolves.toBe(false);
+    expect(service.displayName()).toBe('sofia');
+    expect(service.initials()).toBe('SO');
+    expect(service.profile()).toBeNull();
+    expect(service.error()).toBe('Profile could not be loaded');
   });
 
   it('signs in with email and password', async () => {
@@ -74,10 +289,67 @@ describe('AuthService', () => {
     expect(service.session()).toBe(session);
   });
 
+  it('uses the user metadata when no profile is available', async () => {
+    const session = createSession('user-1', 'sofia@example.com');
+    session.user.user_metadata = {
+      full_name: 'Sofia Mueller',
+    };
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: null,
+      error: {
+        message: 'Profile could not be loaded',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    expect(service.displayName()).toBe('Sofia Mueller');
+    expect(service.initials()).toBe('SM');
+  });
+
+  it('uses the guest fallback when no guest profile is available', async () => {
+    const session = createSession('guest-user', undefined, true);
+
+    getSession.mockResolvedValue({
+      data: { session },
+      error: null,
+    });
+
+    profileSingle.mockResolvedValue({
+      data: null,
+      error: {
+        message: 'Profile could not be loaded',
+      },
+    });
+
+    const service = TestBed.inject(AuthService);
+    await service.ready;
+
+    expect(service.isGuest()).toBe(true);
+    expect(service.displayName()).toBe('Guest');
+    expect(service.initials()).toBe('GU');
+  });
+
   it('signs in anonymously as a guest', async () => {
     const session = createSession('guest-user', undefined, true);
     signInAnonymously.mockResolvedValue({
       data: { session, user: session.user },
+      error: null,
+    });
+    profileSingle.mockResolvedValue({
+      data: {
+        id: 'guest-user',
+        full_name: 'Guest',
+        is_guest: true,
+        created_at: '2026-09-07T10:00:00.000Z',
+      },
       error: null,
     });
 

@@ -1,16 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { SignUp } from './sign-up';
+import { AuthService } from '../../services/auth';
+
+class AuthServiceStub {
+  signUp = vi.fn(async () => true);
+  error = () => this.errorMessage;
+  errorMessage: string | null = null;
+}
 
 describe('SignUp', () => {
+  let auth: AuthServiceStub;
   let fixture: ComponentFixture<SignUp>;
   let component: SignUp;
   let page: HTMLElement;
 
   beforeEach(async () => {
+    auth = new AuthServiceStub();
     await TestBed.configureTestingModule({
       imports: [SignUp],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), { provide: AuthService, useValue: auth }],
     }).compileComponents();
     fixture = TestBed.createComponent(SignUp);
     component = fixture.componentInstance;
@@ -224,16 +233,34 @@ describe('SignUp', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it('leaves a valid submit local without navigation or a success state', async () => {
+  it('registers valid form data and navigates to login', async () => {
     setValidForm();
-    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
-    const before = { ...component.formModel() };
-    const event = new Event('submit', { cancelable: true, bubbles: true });
-    page.querySelector('form')!.dispatchEvent(event);
-    await fixture.whenStable();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    const event = new Event('submit', { cancelable: true });
+
+    await component.onSubmit(event);
+
     expect(event.defaultPrevented).toBe(true);
-    expect(component.formModel()).toEqual(before);
-    expect(page.querySelector('.field-error')).toBeNull();
+    expect(auth.signUp).toHaveBeenCalledWith('Anna Weber', 'anna@example.org', 'Password123');
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+    expect(component.signUpError()).toBeNull();
+  });
+
+  it('shows the backend error and unlocks the form when registration fails', async () => {
+    auth.signUp.mockResolvedValue(false);
+    auth.errorMessage = 'User already registered';
+    setValidForm();
+
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    await component.onSubmit(new Event('submit', { cancelable: true }));
+    fixture.detectChanges();
+
     expect(navigate).not.toHaveBeenCalled();
+    expect(component.signUpError()).toBe('User already registered');
+    expect(component.submitting()).toBe(false);
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain('User already registered');
+    expect(submitButton().disabled).toBe(false);
   });
 });

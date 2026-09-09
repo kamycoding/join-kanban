@@ -1,0 +1,104 @@
+<div class="login-page" [class.login-page--intro]="introPending()">
+  <img class="logo" src="/img/join-logo-dark.svg" alt="Join" width="100" height="122" />
+
+  <p class="sign-up-prompt">
+    <span>Not a Join user?</span>
+    <a class="sign-up-link" routerLink="/sign-up">Sign up</a>
+  </p>
+
+  <section class="login-card" aria-labelledby="login-heading">
+    <h1 id="login-heading">Log in</h1>
+
+    <form novalidate (submit)="onSubmit($event)">
+      <div class="fields">
+        @let emailError = errorFor('email');
+        <div class="field-group">
+          <label class="visually-hidden" for="login-email">Email</label>
+          <div class="field">
+            <input
+              id="login-email"
+              type="email"
+              autocomplete="email"
+              placeholder="Email"
+              [formField]="loginForm.email"
+              [attr.aria-invalid]="emailError ? 'true' : null"
+              [attr.aria-describedby]="emailError ? 'login-email-error' : null"
+            />
+            <img class="field-icon" src="/img/icon-mail.svg" alt="" width="24" height="24" />
+          </div>
+          <div class="field-message">
+            @if (emailError) {
+              <p class="field-error" id="login-email-error" aria-live="polite">{{ emailError }}</p>
+            }
+          </div>
+        </div>
+
+        @let passwordError = errorFor('password');
+        <div class="field-group">
+          <label class="visually-hidden" for="login-password">Password</label>
+          <div class="field">
+            <input
+              id="login-password"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="Password"
+              [formField]="loginForm.password"
+              [attr.aria-invalid]="passwordError ? 'true' : null"
+              [attr.aria-describedby]="passwordError ? 'login-password-error' : null"
+            />
+            <button
+              class="visibility-button"
+              type="button"
+              [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+              (click)="passwordVisible.set(!passwordVisible())"
+            >
+              <img
+                [src]="
+                  passwordVisible() ? '/img/icon-visibility-off.svg' : '/img/icon-visibility.svg'
+                "
+                alt=""
+                width="24"
+                height="24"
+              />
+            </button>
+          </div>
+          <div class="field-message">
+            @if (passwordError) {
+              <p class="field-error" id="login-password-error" aria-live="polite">
+                {{ passwordError }}
+              </p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Reserves its row so the buttons do not jump when a request fails. -->
+      <div class="sign-in-message">
+        @if (signInError()) {
+          <p class="field-error" role="alert">{{ signInError() }}</p>
+        }
+      </div>
+
+      <div class="actions">
+        <app-button size="large" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Logging in…' : 'Log in' }}
+        </app-button>
+
+        <app-button
+          variant="outline"
+          size="large"
+          type="button"
+          [disabled]="submitting()"
+          (click)="onGuestLogin()"
+        >
+          Guest Log in
+        </app-button>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    <a routerLink="/privacy-policy">Privacy Policy</a>
+    <a routerLink="/legal-notice">Legal notice</a>
+  </footer>
+</div>

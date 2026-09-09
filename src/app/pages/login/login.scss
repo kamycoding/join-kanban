@@ -1,0 +1,366 @@
+@use '../../../styles/breakpoints' as *;
+
+:host {
+  --login-card-padding-block: var(--space-9);
+  --login-card-padding-inline: calc(var(--space-10) + var(--space-6));
+  --login-page-padding-top: var(--space-4);
+  --login-page-padding-bottom: var(--space-4);
+  --login-footer-offset: var(--space-6);
+  --login-message-height: calc(var(--font-size-t7) * var(--line-height));
+  --login-heading-gap: var(--space-7);
+  --login-field-gap: var(--space-6);
+  --login-section-gap: var(--space-8);
+
+  // The logo is positioned from these on every breakpoint, so the intro
+  // animation can land on exactly the spot the static logo occupies.
+  --login-logo-top: calc(var(--login-page-padding-top) + var(--space-9));
+  --login-logo-left: calc(var(--space-4) + var(--space-10));
+  --login-logo-width: 100px;
+
+  // Keeps the card clear of the absolutely positioned logo on short screens.
+  --login-content-offset: calc(var(--login-logo-top) + 122px);
+
+  display: block;
+  min-width: 0;
+  color: var(--color-black);
+}
+
+.login-page {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(min-content, 1fr) auto;
+  row-gap: var(--space-5);
+  justify-items: center;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding: var(--login-page-padding-top) var(--space-4) var(--login-page-padding-bottom);
+  background: var(--color-bg-app);
+}
+
+.logo {
+  position: absolute;
+  top: var(--login-logo-top);
+  left: var(--login-logo-left);
+  width: var(--login-logo-width);
+  height: auto;
+}
+
+.sign-up-prompt {
+  position: absolute;
+  top: var(--login-logo-top);
+  right: var(--space-10);
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin: 0;
+  color: var(--color-black);
+  font-size: var(--font-size-t6);
+}
+
+// Mirrors the primary button without pulling the whole component in for a link.
+.sign-up-link {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  transition:
+    background-color var(--transition),
+    box-shadow var(--transition);
+
+  &:hover {
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-button-state);
+    text-decoration: none;
+  }
+}
+
+.login-card {
+  position: relative;
+  align-self: center;
+  justify-self: center;
+  box-sizing: border-box;
+  width: min(600px, 100%);
+  margin-top: var(--login-content-offset);
+  padding: var(--login-card-padding-block) var(--login-card-padding-inline);
+  border-radius: var(--radius-3xl);
+  background: var(--color-white);
+  box-shadow: var(--shadow-card-hover);
+}
+
+footer {
+  align-self: end;
+  justify-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-bottom: var(--login-footer-offset);
+
+  a {
+    padding: var(--space-2);
+    color: var(--color-text-secondary);
+  }
+}
+
+h1 {
+  margin: 0 0 var(--login-heading-gap);
+  text-align: center;
+  font-size: var(--font-size-t1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height);
+
+  &::after {
+    display: block;
+    width: 150px;
+    max-width: 100%;
+    height: 3px;
+    margin: var(--space-4) auto 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    content: '';
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--login-field-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.field-group {
+  display: grid;
+  grid-template-rows: auto minmax(var(--login-message-height), auto);
+  row-gap: var(--space-1);
+  min-width: 0;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  min-width: 0;
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 50px;
+    padding-block: var(--space-2);
+    padding-inline: var(--space-5) var(--space-10);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+    color: var(--color-black);
+    font: inherit;
+    font-size: var(--font-size-t6);
+    transition: border-color var(--transition);
+
+    &::placeholder {
+      color: var(--color-text-secondary);
+      opacity: 1;
+    }
+
+    &:focus {
+      border-color: var(--color-accent);
+      outline: none;
+    }
+
+    &[aria-invalid='true'] {
+      border-color: var(--color-error);
+    }
+  }
+}
+
+.field-icon,
+.visibility-button {
+  position: absolute;
+  top: 50%;
+  right: var(--space-5);
+  width: var(--space-6);
+  height: var(--space-6);
+  transform: translateY(-50%);
+}
+
+.visibility-button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.field-message,
+.sign-in-message {
+  min-width: 0;
+}
+
+// Holds a row open so a failed sign-in does not shift the buttons downwards.
+.sign-in-message {
+  display: grid;
+  align-content: center;
+  min-height: var(--login-message-height);
+  margin-top: var(--space-3);
+  text-align: center;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-t7);
+  line-height: var(--line-height);
+  overflow-wrap: anywhere;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--login-section-gap);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+// ---------------------------------------------------------------------------
+// Intro animation
+// The logo starts centred and enlarged, travels to its resting spot in the top
+// left, and the rest of the page fades in behind it. Only the first paint of a
+// page load carries the modifier class, so navigating back does not replay it.
+// ---------------------------------------------------------------------------
+@keyframes login-logo-intro {
+  0%,
+  20% {
+    top: 50%;
+    left: 50%;
+    width: calc(var(--login-logo-width) * 2.6);
+    transform: translate(-50%, -50%);
+  }
+
+  100% {
+    top: var(--login-logo-top);
+    left: var(--login-logo-left);
+    width: var(--login-logo-width);
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes login-content-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.login-page--intro {
+  .logo {
+    animation: login-logo-intro 900ms ease-in-out both;
+  }
+
+  .sign-up-prompt,
+  .login-card,
+  footer {
+    animation: login-content-in 300ms ease-out 800ms both;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tablet and below: the logo shrinks and moves in, so the card follows it.
+// ---------------------------------------------------------------------------
+@media (max-width: $bp-tablet) {
+  :host {
+    --login-logo-left: calc(var(--space-4) + var(--space-5));
+    --login-logo-width: 64px;
+    --login-content-offset: calc(var(--login-logo-top) + 78px);
+  }
+
+  .sign-up-prompt {
+    right: var(--space-5);
+    font-size: var(--font-size-body);
+  }
+}
+
+@media (max-width: $bp-mobile) {
+  :host {
+    --login-card-padding-block: var(--space-7);
+    --login-card-padding-inline: var(--space-4);
+    --login-heading-gap: var(--space-6);
+    --login-footer-offset: var(--space-2);
+    --login-logo-top: calc(var(--login-page-padding-top) + var(--space-5));
+    --login-logo-width: 56px;
+    --login-content-offset: calc(var(--login-logo-top) + 68px);
+  }
+
+  h1 {
+    font-size: var(--font-size-t2);
+
+    &::after {
+      width: calc(var(--space-10) + var(--space-6));
+    }
+  }
+
+  .actions app-button {
+    flex: 1 1 auto;
+  }
+}
+
+// Full spacing needs the height below; compact instead of overflowing.
+@media (max-height: 800px) {
+  :host {
+    --login-field-gap: var(--space-3);
+    --login-section-gap: var(--space-4);
+  }
+}
+
+// The checklist asks for motion to be optional: show the finished state at once.
+@media (prefers-reduced-motion: reduce) {
+  .login-page--intro {
+    .logo,
+    .sign-up-prompt,
+    .login-card,
+    footer {
+      animation: none;
+    }
+  }
+}

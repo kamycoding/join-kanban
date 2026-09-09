@@ -19,6 +19,7 @@ export class Header {
   private readonly tasks = inject(TaskService);
 
   readonly heading = input('Kanban Project Management Tool');
+  readonly external = input(false);
   readonly initials = this.auth.initials;
 
   readonly menuOpen = signal(false);

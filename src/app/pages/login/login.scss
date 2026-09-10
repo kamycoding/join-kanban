@@ -46,6 +46,10 @@
   height: auto;
 }
 
+.logo--intro {
+  display: none;
+}
+
 .sign-up-prompt {
   position: absolute;
   top: var(--login-logo-top);
@@ -293,6 +297,39 @@ a:focus-visible {
   }
 }
 
+@keyframes login-mobile-background {
+  0%,
+  70% {
+    background: var(--color-primary);
+  }
+
+  100% {
+    background: var(--color-bg-app);
+  }
+}
+
+@keyframes login-logo-intro-light {
+  0%,
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes login-logo-intro-dark {
+  0%,
+  80% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
 .login-page--intro {
   .logo {
     animation: login-logo-intro 900ms ease-in-out both;
@@ -343,6 +380,23 @@ a:focus-visible {
   .actions app-button {
     flex: 1 1 auto;
   }
+
+  .login-page--intro {
+    animation: login-mobile-background 900ms ease-in-out both;
+
+    .logo--dark {
+      animation:
+        login-logo-intro 900ms ease-in-out both,
+        login-logo-intro-dark 900ms ease-in-out both;
+    }
+
+    .logo--intro {
+      display: block;
+      animation:
+        login-logo-intro 900ms ease-in-out both,
+        login-logo-intro-light 900ms ease-in-out both;
+    }
+  }
 }
 
 // Full spacing needs the height below; compact instead of overflowing.
@@ -361,6 +415,10 @@ a:focus-visible {
     .login-card,
     footer {
       animation: none;
+    }
+
+    .logo--intro {
+      display: none;
     }
   }
 }

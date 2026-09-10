@@ -6,6 +6,12 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_wneSRSKtk-Tg8TmwtheD5w_nX9Cj4ue
 
 export type SupabaseClientFactory = (url: string, publishableKey: string) => SupabaseClient;
 
+/**
+ * Builds supabase client.
+ *
+ * @param factory - The factory used to create the client.
+ * @returns The resulting value.
+ */
 export function buildSupabaseClient(factory: SupabaseClientFactory = createClient): SupabaseClient {
   return factory(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 }

@@ -66,6 +66,9 @@ export class TaskDetail {
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
   private restoreFocusOnDestroy = true;
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     afterNextRender(() => this.closeButton().nativeElement.focus());
 
@@ -76,20 +79,32 @@ export class TaskDetail {
     });
   }
 
+  /**
+   * Requests close.
+   */
   requestClose(): void {
     this.closeRequested.emit();
   }
 
+  /**
+   * Requests edit.
+   */
   requestEdit(): void {
     this.restoreFocusOnDestroy = false;
     this.editRequested.emit(this.task());
   }
 
+  /**
+   * Requests delete.
+   */
   requestDelete(): void {
     this.restoreFocusOnDestroy = false;
     this.deleteRequested.emit(this.task());
   }
 
+  /**
+   * Restores previous focus.
+   */
   private restorePreviousFocus(): void {
     const target = this.previouslyFocused;
 
@@ -98,24 +113,47 @@ export class TaskDetail {
     }
   }
 
+  /**
+   * Handles a click on the overlay backdrop.
+   *
+   * @param event - The event to handle.
+   */
   onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.requestClose();
     }
   }
 
+  /**
+   * Handles subtask toggle.
+   *
+   * @param subtaskId - The identifier of the affected subtask.
+   * @param event - The event to handle.
+   */
   onSubtaskToggle(subtaskId: string, event: Event): void {
     const checkbox = event.currentTarget as HTMLInputElement;
 
     this.subtaskToggleRequested.emit({ subtaskId, isCompleted: checkbox.checked });
   }
 
+  /**
+   * Returns an assigned contact's display initials.
+   *
+   * @param assignment - The contact assignment to process.
+   * @returns The resulting string.
+   */
   contactInitials(assignment: TaskAssigneeWithContact): string {
     const { first_name, last_name } = assignment.contact;
 
     return `${this.firstCharacter(first_name)}${this.firstCharacter(last_name)}`.toUpperCase();
   }
 
+  /**
+   * Returns an assigned contact's full name.
+   *
+   * @param assignment - The contact assignment to process.
+   * @returns The resulting string.
+   */
   contactFullName(assignment: TaskAssigneeWithContact): string {
     const { first_name, last_name } = assignment.contact;
     const fullName = `${first_name.trim()} ${last_name.trim()}`.trim();
@@ -123,6 +161,11 @@ export class TaskDetail {
     return fullName || 'Unnamed contact';
   }
 
+  /**
+   * Handles keyboard input at document level.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('document:keydown', ['$event'])
   onDocumentKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
@@ -136,6 +179,11 @@ export class TaskDetail {
     }
   }
 
+  /**
+   * Keeps document focus inside the active dialog.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('document:focusin', ['$event'])
   onDocumentFocus(event: FocusEvent): void {
     const dialog = this.dialog().nativeElement;
@@ -145,6 +193,11 @@ export class TaskDetail {
     }
   }
 
+  /**
+   * Keeps focus within tab focus.
+   *
+   * @param event - The event to handle.
+   */
   private containTabFocus(event: KeyboardEvent): void {
     const focusable = Array.from(
       this.dialog().nativeElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
@@ -170,10 +223,21 @@ export class TaskDetail {
     }
   }
 
+  /**
+   * Determines whether focus is currently inside the dialog.
+   *
+   * @returns Whether the requested condition is met.
+   */
   private isFocusInsideDialog(): boolean {
     return this.dialog().nativeElement.contains(document.activeElement);
   }
 
+  /**
+   * Formats date.
+   *
+   * @param value - The value to process.
+   * @returns The resulting string.
+   */
   private formatDate(value: string): string {
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
 
@@ -191,6 +255,14 @@ export class TaskDetail {
       : value;
   }
 
+  /**
+   * Determines whether the supplied parts form a valid calendar date.
+   *
+   * @param year - The year to check.
+   * @param month - The month to check.
+   * @param day - The day to check.
+   * @returns Whether the requested condition is met.
+   */
   private isValidCalendarDate(year: number, month: number, day: number): boolean {
     const daysPerMonth = [
       31,
@@ -210,10 +282,22 @@ export class TaskDetail {
     return month >= 1 && month <= 12 && day >= 1 && day <= daysPerMonth[month - 1];
   }
 
+  /**
+   * Determines whether a year is a leap year.
+   *
+   * @param year - The year to check.
+   * @returns Whether the requested condition is met.
+   */
   private isLeapYear(year: number): boolean {
     return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
   }
 
+  /**
+   * Returns the first character of a value in uppercase.
+   *
+   * @param value - The value to process.
+   * @returns The resulting string.
+   */
   private firstCharacter(value: string): string {
     return Array.from(value.trim())[0] ?? '';
   }

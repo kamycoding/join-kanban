@@ -116,6 +116,9 @@ export class Board implements OnInit {
     return groups;
   });
 
+  /**
+   * Initializes the component state and loads its required data.
+   */
   async ngOnInit(): Promise<void> {
     await this.taskService.getTasks();
   }
@@ -129,6 +132,12 @@ export class Board implements OnInit {
     this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
+  /**
+   * Returns the tasks assigned to a board status.
+   *
+   * @param status - The task status to use.
+   * @returns The resulting collection.
+   */
   tasksFor(status: TaskStatus): TaskWithDetails[] {
     return this.tasksByStatus().get(status) ?? [];
   }
@@ -195,6 +204,9 @@ export class Board implements OnInit {
     this.formStatus.set(status);
   }
 
+  /**
+   * Closes form.
+   */
   closeForm(): void {
     this.formStatus.set(null);
   }

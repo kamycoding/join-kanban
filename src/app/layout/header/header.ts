@@ -24,14 +24,23 @@ export class Header {
 
   readonly menuOpen = signal(false);
 
+  /**
+   * Toggles menu.
+   */
   toggleMenu(): void {
     this.menuOpen.update((open) => !open);
   }
 
+  /**
+   * Closes menu.
+   */
   closeMenu(): void {
     this.menuOpen.set(false);
   }
 
+  /**
+   * Performs the logout operation.
+   */
   async logout(): Promise<void> {
     this.closeMenu();
 
@@ -46,6 +55,11 @@ export class Header {
     await this.router.navigate(['/login']);
   }
 
+  /**
+   * Handles document clicks that occur outside the component.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
     if (!this.menuOpen()) {
@@ -59,6 +73,9 @@ export class Header {
     this.closeMenu();
   }
 
+  /**
+   * Handles the Escape key action.
+   */
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     this.closeMenu();

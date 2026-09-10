@@ -38,6 +38,13 @@ export function toTaskEditPlan(value: TaskFormValue, original: TaskWithDetails):
   };
 }
 
+/**
+ * Converts data to task changes.
+ *
+ * @param value - The value to process.
+ * @param original - The original task data.
+ * @returns The resulting value.
+ */
 function toTaskChanges(value: TaskFormValue, original: TaskWithDetails): TaskChanges {
   const changes: TaskChanges = {};
   const title = value.title.trim();
@@ -54,12 +61,26 @@ function toTaskChanges(value: TaskFormValue, original: TaskWithDetails): TaskCha
   return changes;
 }
 
+/**
+ * Converts data to added contact ids.
+ *
+ * @param contactIds - The identifiers of the affected contacts.
+ * @param original - The original task data.
+ * @returns The resulting collection.
+ */
 function toAddedContactIds(contactIds: string[], original: TaskWithDetails): string[] {
   const originalIds = new Set(original.assignees.map((assignee) => assignee.contact_id));
 
   return [...new Set(contactIds)].filter((contactId) => !originalIds.has(contactId));
 }
 
+/**
+ * Converts data to removed contact ids.
+ *
+ * @param contactIds - The identifiers of the affected contacts.
+ * @param original - The original task data.
+ * @returns The resulting collection.
+ */
 function toRemovedContactIds(contactIds: string[], original: TaskWithDetails): string[] {
   const submittedIds = new Set(contactIds);
 
@@ -68,6 +89,13 @@ function toRemovedContactIds(contactIds: string[], original: TaskWithDetails): s
     .filter((contactId) => !submittedIds.has(contactId));
 }
 
+/**
+ * Converts data to subtask plan.
+ *
+ * @param subtasks - The subtasks to process.
+ * @param original - The original task data.
+ * @returns The resulting value.
+ */
 function toSubtaskPlan(
   subtasks: TaskFormSubtaskValue[],
   original: TaskWithDetails,
@@ -81,6 +109,13 @@ function toSubtaskPlan(
   };
 }
 
+/**
+ * Converts data to subtask creations.
+ *
+ * @param subtasks - The subtasks to process.
+ * @param original - The original task data.
+ * @returns The resulting value.
+ */
 function toSubtaskCreations(
   subtasks: TaskFormSubtaskValue[],
   original: TaskWithDetails,
@@ -93,6 +128,13 @@ function toSubtaskCreations(
     .map((subtask, index) => ({ title: subtask.title.trim(), position: firstPosition + index }));
 }
 
+/**
+ * Converts data to subtask updates.
+ *
+ * @param subtasks - The subtasks to process.
+ * @param originalById - The original by id value to use.
+ * @returns The resulting value.
+ */
 function toSubtaskUpdates(
   subtasks: TaskFormSubtaskValue[],
   originalById: Map<string, TaskWithDetails['subtasks'][number]>,
@@ -113,6 +155,13 @@ function toSubtaskUpdates(
   return updates;
 }
 
+/**
+ * Converts data to subtask deletions.
+ *
+ * @param subtasks - The subtasks to process.
+ * @param original - The original task data.
+ * @returns The resulting value.
+ */
 function toSubtaskDeletions(
   subtasks: TaskFormSubtaskValue[],
   original: TaskWithDetails,

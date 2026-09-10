@@ -17,7 +17,13 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
 
 // The host is a grid item of .app-shell__content, so without min-width its
 // automatic minimum size is the content width and the page bursts its column.
+//
+// The project has no global border-box reset, so `min-height: 100%` would put
+// the 206px of padding on top of the full container height and the shell would
+// scroll on every screen, however little the page holds. Figma has no
+// scrollbar here.
 :host {
+  box-sizing: border-box;
   display: block;
   min-width: 0;
   min-height: 100%;
@@ -353,7 +359,12 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
     font-size: var(--font-size-t6);
   }
 
-  .summary__rule {
+  // Figma puts the rule under the subtitle here, while on desktop it stands
+  // upright between title and subtitle. The markup keeps the desktop order,
+  // so the mobile one is made with `order`. Scoped to the headline: the rule
+  // inside the urgency card is a flex child too and must not move.
+  .summary__headline .summary__rule {
+    order: 1;
     width: 90px;
     height: 3px;
   }

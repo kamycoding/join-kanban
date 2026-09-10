@@ -8,10 +8,9 @@
   <div class="summary__content">
     <div class="summary__panel">
       @if (error(); as message) {
+        <!-- Six zeros next to a failure would claim an empty board. -->
         <p class="summary__error" role="alert">{{ message }}</p>
-      }
-
-      @if (loading()) {
+      } @else if (loading()) {
         <p class="summary__loading">Loading metrics…</p>
       } @else {
         <div class="summary__metrics">

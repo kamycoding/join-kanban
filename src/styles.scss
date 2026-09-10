@@ -23,6 +23,68 @@ body {
   line-height: var(--line-height);
 }
 
+// Login keyframes live globally so Angular's production style encapsulation
+// does not rename their declarations without also updating every reference.
+@keyframes login-logo-intro {
+  0%,
+  20% {
+    top: 50%;
+    left: 50%;
+    width: calc(var(--login-logo-width) * 2.6);
+    transform: translate(-50%, -50%);
+  }
+
+  100% {
+    top: var(--login-logo-top);
+    left: var(--login-logo-left);
+    width: var(--login-logo-width);
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes login-content-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes login-mobile-background {
+  0%,
+  70% {
+    background: var(--color-primary);
+  }
+
+  100% {
+    background: var(--color-bg-app);
+  }
+}
+
+@keyframes login-logo-intro-light {
+  0%,
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes login-logo-intro-dark {
+  0%,
+  80% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
 /*
  * The card that follows the pointer while dragging is moved to the body by the
  * CDK, so component styles never reach it and it has to be styled here.

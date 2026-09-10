@@ -43,10 +43,19 @@ export class Login {
 
   readonly introPending = signal(!introPlayed);
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     introPlayed = true;
   }
 
+  /**
+   * Returns the validation error for the requested form field.
+   *
+   * @param field - The form field to inspect.
+   * @returns The resulting value, or `null` when unavailable.
+   */
   errorFor(field: keyof ReturnType<typeof this.formModel>): string | null {
     const state = this.loginForm[field]();
     if (!state.touched()) return null;
@@ -54,6 +63,11 @@ export class Login {
     return (errors.find((error) => error.kind === 'required') ?? errors[0])?.message ?? null;
   }
 
+  /**
+   * Handles submission of the current form.
+   *
+   * @param event - The event to handle.
+   */
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
     this.loginForm().markAsTouched();
@@ -66,6 +80,9 @@ export class Login {
     await this.attempt(() => this.auth.signInWithPassword(address, password));
   }
 
+  /**
+   * Handles guest login.
+   */
   async onGuestLogin(): Promise<void> {
     if (this.submitting()) {
       return;

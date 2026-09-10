@@ -11,6 +11,11 @@ export class ContactDialogHero {
   readonly state = input.required<ContactDialogState>();
   readonly close = output<void>();
 
+  /**
+   * Returns the contact's display initials.
+   *
+   * @returns The resulting string.
+   */
   get initials(): string {
     const state = this.state();
 

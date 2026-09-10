@@ -140,6 +140,9 @@ export class Summary implements OnInit {
     return typeof signUpName === 'string' && signUpName.trim() !== '' ? signUpName.trim() : null;
   });
 
+  /**
+   * Initializes the component state and loads its required data.
+   */
   async ngOnInit(): Promise<void> {
     await this.taskService.getTasks();
   }

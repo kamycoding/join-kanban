@@ -69,6 +69,9 @@ export class TaskCard {
     Math.max(0, this.task().assignees.length - MAX_VISIBLE_ASSIGNEES),
   );
 
+  /**
+   * Performs the activate operation.
+   */
   activate(): void {
     this.openDetail.emit(this.task());
   }
@@ -84,6 +87,9 @@ export class TaskCard {
     this.menuOpen.update((open) => !open);
   }
 
+  /**
+   * Closes menu.
+   */
   closeMenu(): void {
     this.menuOpen.set(false);
   }
@@ -98,16 +104,34 @@ export class TaskCard {
     this.moveRequested.emit({ task: this.task(), status: target.status });
   }
 
+  /**
+   * Performs the arrow icon operation.
+   *
+   * @param target - The target to process.
+   * @returns The resulting string.
+   */
   arrowIcon(target: TaskMoveTarget): string {
     return ARROW_ICONS[target.direction];
   }
 
+  /**
+   * Returns an assigned contact's display initials.
+   *
+   * @param assignment - The contact assignment to process.
+   * @returns The resulting string.
+   */
   contactInitials(assignment: TaskAssigneeWithContact): string {
     const { first_name, last_name } = assignment.contact;
 
     return `${this.firstCharacter(first_name)}${this.firstCharacter(last_name)}`.toUpperCase();
   }
 
+  /**
+   * Returns an assigned contact's full name.
+   *
+   * @param assignment - The contact assignment to process.
+   * @returns The resulting string.
+   */
   contactFullName(assignment: TaskAssigneeWithContact): string {
     const { first_name, last_name } = assignment.contact;
     const fullName = `${first_name.trim()} ${last_name.trim()}`.trim();
@@ -115,6 +139,12 @@ export class TaskCard {
     return fullName || 'Unnamed contact';
   }
 
+  /**
+   * Returns the first character of a value in uppercase.
+   *
+   * @param value - The value to process.
+   * @returns The resulting string.
+   */
   private firstCharacter(value: string): string {
     return Array.from(value.trim())[0] ?? '';
   }

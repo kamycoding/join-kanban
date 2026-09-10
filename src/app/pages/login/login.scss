@@ -245,6 +245,7 @@ form {
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-4);
+  width: 100%;
   margin-top: var(--login-section-gap);
 }
 
@@ -377,8 +378,15 @@ a:focus-visible {
     }
   }
 
+  .actions {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
   .actions app-button {
-    flex: 1 1 auto;
+    flex: none;
+    width: min(180px, 100%);
   }
 
   .login-page--intro {

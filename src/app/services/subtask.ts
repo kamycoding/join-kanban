@@ -16,6 +16,12 @@ export class SubtaskService {
   readonly saving = this.savingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
+  /**
+   * Retrieves subtasks.
+   *
+   * @param taskId - The identifier of the affected task.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async getSubtasks(taskId: string): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -43,6 +49,12 @@ export class SubtaskService {
     return true;
   }
 
+  /**
+   * Creates subtask.
+   *
+   * @param newSubtask - The new subtask value to use.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async createSubtask(newSubtask: NewSubtask): Promise<Subtask | null> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -70,6 +82,13 @@ export class SubtaskService {
     return createdSubtask;
   }
 
+  /**
+   * Updates subtask.
+   *
+   * @param id - The identifier of the affected record.
+   * @param changes - The changes to apply.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async updateSubtask(id: string, changes: SubtaskChanges): Promise<Subtask | null> {
     if (
       changes.position !== undefined &&
@@ -103,10 +122,23 @@ export class SubtaskService {
     return updatedSubtask;
   }
 
+  /**
+   * Sets subtask completed.
+   *
+   * @param id - The identifier of the affected record.
+   * @param isCompleted - The is completed value to use.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   setSubtaskCompleted(id: string, isCompleted: boolean): Promise<Subtask | null> {
     return this.updateSubtask(id, { is_completed: isCompleted });
   }
 
+  /**
+   * Removes subtask.
+   *
+   * @param id - The identifier of the affected record.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async deleteSubtask(id: string): Promise<boolean> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -129,6 +161,12 @@ export class SubtaskService {
     return true;
   }
 
+  /**
+   * Performs the next subtask position operation.
+   *
+   * @param taskId - The identifier of the affected task.
+   * @returns The resulting number.
+   */
   private nextSubtaskPosition(taskId: string): number {
     const positions = this.subtasksState()
       .filter((subtask) => subtask.task_id === taskId)
@@ -137,6 +175,12 @@ export class SubtaskService {
     return positions.length === 0 ? 0 : Math.max(...positions) + 1;
   }
 
+  /**
+   * Performs the sort subtasks operation.
+   *
+   * @param subtasks - The subtasks to process.
+   * @returns The resulting collection.
+   */
   private sortSubtasks(subtasks: Subtask[]): Subtask[] {
     return subtasks.sort(
       (subtaskA, subtaskB) =>

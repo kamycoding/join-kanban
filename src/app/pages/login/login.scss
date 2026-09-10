@@ -22,6 +22,7 @@
 
   display: block;
   min-width: 0;
+  background: var(--color-bg-app);
   color: var(--color-black);
 }
 
@@ -32,7 +33,10 @@
   row-gap: var(--space-5);
   justify-items: center;
   box-sizing: border-box;
+  width: 100%;
+  max-width: 90rem;
   min-height: 100dvh;
+  margin-inline: auto;
   overflow-x: hidden;
   padding: var(--login-page-padding-top) var(--space-4) var(--login-page-padding-bottom);
   background: var(--color-bg-app);
@@ -44,6 +48,10 @@
   left: var(--login-logo-left);
   width: var(--login-logo-width);
   height: auto;
+}
+
+.logo--intro {
+  display: none;
 }
 
 .sign-up-prompt {
@@ -241,6 +249,7 @@ form {
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-4);
+  width: 100%;
   margin-top: var(--login-section-gap);
 }
 
@@ -293,6 +302,39 @@ a:focus-visible {
   }
 }
 
+@keyframes login-mobile-background {
+  0%,
+  70% {
+    background: var(--color-primary);
+  }
+
+  100% {
+    background: var(--color-bg-app);
+  }
+}
+
+@keyframes login-logo-intro-light {
+  0%,
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes login-logo-intro-dark {
+  0%,
+  80% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
 .login-page--intro {
   .logo {
     animation: login-logo-intro 900ms ease-in-out both;
@@ -326,10 +368,36 @@ a:focus-visible {
     --login-card-padding-block: var(--space-7);
     --login-card-padding-inline: var(--space-4);
     --login-heading-gap: var(--space-6);
-    --login-footer-offset: var(--space-2);
+    --login-footer-offset: 0;
     --login-logo-top: calc(var(--login-page-padding-top) + var(--space-5));
     --login-logo-width: 56px;
     --login-content-offset: calc(var(--login-logo-top) + 68px);
+  }
+
+  .login-page {
+    grid-template-rows: minmax(min-content, 1fr) auto auto;
+  }
+
+  .login-card {
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .sign-up-prompt {
+    position: static;
+    grid-row: 2;
+    gap: var(--space-2);
+    font-size: 1.125rem;
+    white-space: nowrap;
+  }
+
+  footer {
+    grid-row: 3;
+  }
+
+  .sign-up-link {
+    padding: 0.875rem 1.375rem;
+    font-size: 1.125rem;
   }
 
   h1 {
@@ -340,8 +408,32 @@ a:focus-visible {
     }
   }
 
+  .actions {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
   .actions app-button {
-    flex: 1 1 auto;
+    flex: none;
+    width: min(11.25rem, 100%);
+  }
+
+  .login-page--intro {
+    animation: login-mobile-background 900ms ease-in-out both;
+
+    .logo--dark {
+      animation:
+        login-logo-intro 900ms ease-in-out both,
+        login-logo-intro-dark 900ms ease-in-out both;
+    }
+
+    .logo--intro {
+      display: block;
+      animation:
+        login-logo-intro 900ms ease-in-out both,
+        login-logo-intro-light 900ms ease-in-out both;
+    }
   }
 }
 
@@ -361,6 +453,10 @@ a:focus-visible {
     .login-card,
     footer {
       animation: none;
+    }
+
+    .logo--intro {
+      display: none;
     }
   }
 }

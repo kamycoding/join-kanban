@@ -41,6 +41,9 @@ export class TaskService {
   readonly saving = this.savingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
+  /**
+   * Resets the service state to its initial values.
+   */
   clearState(): void {
     this.tasksState.set([]);
     this.loadingState.set(false);
@@ -48,6 +51,11 @@ export class TaskService {
     this.errorState.set(null);
   }
 
+  /**
+   * Retrieves tasks.
+   *
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async getTasks(): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -82,6 +90,12 @@ export class TaskService {
     return true;
   }
 
+  /**
+   * Creates task.
+   *
+   * @param newTask - The new task value to use.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async createTask(newTask: NewTask): Promise<Task | null> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -101,6 +115,12 @@ export class TaskService {
     return createdTask;
   }
 
+  /**
+   * Creates task with details.
+   *
+   * @param details - The details to process.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async createTaskWithDetails(details: NewTaskWithDetails): Promise<Task | null> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -142,6 +162,13 @@ export class TaskService {
     return createdTask;
   }
 
+  /**
+   * Updates task.
+   *
+   * @param id - The identifier of the affected record.
+   * @param changes - The changes to apply.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async updateTask(id: string, changes: TaskChanges): Promise<Task | null> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -174,6 +201,12 @@ export class TaskService {
     return updatedTask;
   }
 
+  /**
+   * Removes task.
+   *
+   * @param id - The identifier of the affected record.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async deleteTask(id: string): Promise<boolean> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -191,6 +224,14 @@ export class TaskService {
     return true;
   }
 
+  /**
+   * Moves task.
+   *
+   * @param id - The identifier of the affected record.
+   * @param status - The task status to use.
+   * @param position - The target position to use.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async moveTask(id: string, status: TaskStatus, position: number): Promise<Task | null> {
     if (!Number.isInteger(position) || position < 0) {
       this.errorState.set('Task position must be a non-negative integer.');
@@ -292,14 +333,31 @@ export class TaskService {
     });
   }
 
+  /**
+   * Adds task to state.
+   *
+   * @param task - The task to process.
+   */
   private addTaskToState(task: TaskWithDetails): void {
     this.tasksState.update((tasks) => [...tasks, task].sort(byBoardOrder));
   }
 
+  /**
+   * Performs the with empty details operation.
+   *
+   * @param task - The task to process.
+   * @returns The resulting value.
+   */
   private withEmptyDetails(task: Task): TaskWithDetails {
     return { ...task, subtasks: [], assignees: [] };
   }
 
+  /**
+   * Normalizes task details.
+   *
+   * @param task - The task to process.
+   * @returns The resulting value.
+   */
   private normalizeTaskDetails(task: TaskWithDetails): TaskWithDetails {
     return {
       ...task,
@@ -314,6 +372,12 @@ export class TaskService {
     };
   }
 
+  /**
+   * Performs the next task position operation.
+   *
+   * @param status - The task status to use.
+   * @returns The resulting number.
+   */
   private nextTaskPosition(status: TaskStatus): number {
     const positions = this.tasksState()
       .filter((task) => task.status === status)

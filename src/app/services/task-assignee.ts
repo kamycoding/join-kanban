@@ -23,6 +23,12 @@ export class TaskAssigneeService {
   readonly saving = this.savingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
+  /**
+   * Retrieves assignees.
+   *
+   * @param taskId - The identifier of the affected task.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async getAssignees(taskId: string): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -47,6 +53,13 @@ export class TaskAssigneeService {
     return true;
   }
 
+  /**
+   * Assigns contact.
+   *
+   * @param taskId - The identifier of the affected task.
+   * @param contactId - The identifier of the affected contact.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async assignContact(taskId: string, contactId: string): Promise<TaskAssigneeWithContact | null> {
     this.savingState.set(true);
     this.errorState.set(null);
@@ -74,6 +87,13 @@ export class TaskAssigneeService {
     return createdAssignment;
   }
 
+  /**
+   * Removes contact.
+   *
+   * @param taskId - The identifier of the affected task.
+   * @param contactId - The identifier of the affected contact.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async removeContact(taskId: string, contactId: string): Promise<boolean> {
     this.savingState.set(true);
     this.errorState.set(null);

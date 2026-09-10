@@ -23,6 +23,13 @@ export function toNewTaskWithDetails(
   };
 }
 
+/**
+ * Converts data to new task.
+ *
+ * @param value - The value to process.
+ * @param status - The task status to use.
+ * @returns The resulting value.
+ */
 function toNewTask(value: TaskFormValue, status: TaskStatus): NewTask {
   return {
     title: value.title.trim(),
@@ -34,6 +41,13 @@ function toNewTask(value: TaskFormValue, status: TaskStatus): NewTask {
   };
 }
 
+/**
+ * Converts data to new subtask.
+ *
+ * @param subtask - The subtask to process.
+ * @param position - The target position to use.
+ * @returns The resulting value.
+ */
 function toNewSubtask(subtask: TaskFormSubtaskValue, position: number): NewTaskSubtask {
   return {
     title: subtask.title.trim(),
@@ -42,6 +56,12 @@ function toNewSubtask(subtask: TaskFormSubtaskValue, position: number): NewTaskS
   };
 }
 
+/**
+ * Returns the required task category.
+ *
+ * @param value - The value to process.
+ * @returns The resulting value.
+ */
 function requireTaskCategory(value: string): TaskCategory {
   if (value === 'user_story' || value === 'technical_task') return value;
   throw new Error('A valid task category is required.');

@@ -37,6 +37,9 @@ export class SubtaskInput {
   readonly editErrorId = `subtask-edit-error-${this.instanceId}`;
   private readonly editInput = viewChild<ElementRef<HTMLInputElement>>('editInput');
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     effect(() => this.editInput()?.nativeElement.focus());
   }
@@ -50,22 +53,38 @@ export class SubtaskInput {
     this.clearDraft();
   }
 
+  /**
+   * Clears draft.
+   */
   clearDraft(): void {
     this.draft.set('');
     this.draftError.set(null);
   }
 
+  /**
+   * Performs the reset operation.
+   */
   reset(): void {
     this.clearDraft();
     this.cancelEditing();
   }
 
+  /**
+   * Handles draft input.
+   *
+   * @param event - The event to handle.
+   */
   onDraftInput(event: Event): void {
     if (this.disabled()) return;
     this.draft.set(inputValue(event));
     this.draftError.set(null);
   }
 
+  /**
+   * Handles draft keydown.
+   *
+   * @param event - The event to handle.
+   */
   onDraftKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter') return;
     event.preventDefault();
@@ -89,18 +108,31 @@ export class SubtaskInput {
     this.cancelEditing();
   }
 
+  /**
+   * Cancels editing.
+   */
   cancelEditing(): void {
     this.editingKey.set(null);
     this.editDraft.set('');
     this.editError.set(null);
   }
 
+  /**
+   * Handles edit input.
+   *
+   * @param event - The event to handle.
+   */
   onEditInput(event: Event): void {
     if (this.disabled()) return;
     this.editDraft.set(inputValue(event));
     this.editError.set(null);
   }
 
+  /**
+   * Handles edit keydown.
+   *
+   * @param event - The event to handle.
+   */
   onEditKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Enter' && event.key !== 'Escape') return;
     event.preventDefault();
@@ -115,6 +147,11 @@ export class SubtaskInput {
     this.cancelEditing();
   }
 
+  /**
+   * Removes subtask.
+   *
+   * @param subtask - The subtask to process.
+   */
   removeSubtask(subtask: TaskFormSubtaskValue): void {
     if (this.disabled()) return;
     const keyToRemove = this.subtaskKey(subtask);
@@ -124,10 +161,22 @@ export class SubtaskInput {
     if (this.editingKey() === keyToRemove) this.cancelEditing();
   }
 
+  /**
+   * Performs the subtask key operation.
+   *
+   * @param subtask - The subtask to process.
+   * @returns The resulting string.
+   */
   subtaskKey(subtask: TaskFormSubtaskValue): string {
     return subtask.kind === 'existing' ? `existing-${subtask.id}` : subtask.clientId;
   }
 
+  /**
+   * Emits renamed subtasks.
+   *
+   * @param key - The key of the value to update.
+   * @param title - The title to process.
+   */
   private emitRenamedSubtasks(key: string, title: string): void {
     this.subtasksChange.emit(
       this.subtasks().map((subtask) =>
@@ -136,6 +185,13 @@ export class SubtaskInput {
     );
   }
 
+  /**
+   * Validates d title.
+   *
+   * @param value - The value to process.
+   * @param error - The signal that receives validation errors.
+   * @returns The resulting string.
+   */
   private validatedTitle(value: string, error: WritableSignal<string | null>): string {
     const title = value.trim();
     const message = validateSubtaskTitle(title);
@@ -144,6 +200,12 @@ export class SubtaskInput {
   }
 }
 
+/**
+ * Creates new subtask.
+ *
+ * @param title - The title to process.
+ * @returns The resulting value.
+ */
 function createNewSubtask(title: string): TaskFormSubtaskValue {
   return {
     kind: 'new',
@@ -153,12 +215,25 @@ function createNewSubtask(title: string): TaskFormSubtaskValue {
   };
 }
 
+/**
+ * Performs the rename subtask operation.
+ *
+ * @param subtask - The subtask to process.
+ * @param title - The title to process.
+ * @returns The resulting value.
+ */
 function renameSubtask(subtask: TaskFormSubtaskValue, title: string): TaskFormSubtaskValue {
   return subtask.kind === 'existing'
     ? { kind: 'existing', id: subtask.id, title, isCompleted: subtask.isCompleted }
     : { kind: 'new', clientId: subtask.clientId, title, isCompleted: false };
 }
 
+/**
+ * Validates subtask title.
+ *
+ * @param title - The title to process.
+ * @returns The resulting value, or `null` when unavailable.
+ */
 function validateSubtaskTitle(title: string): string | null {
   if (!title) return 'Subtask title is required.';
   return title.length > MAX_SUBTASK_TITLE_LENGTH
@@ -166,6 +241,12 @@ function validateSubtaskTitle(title: string): string | null {
     : null;
 }
 
+/**
+ * Extracts the current value from an input event.
+ *
+ * @param event - The event to handle.
+ * @returns The resulting string.
+ */
 function inputValue(event: Event): string {
   return (event.target as HTMLInputElement).value;
 }

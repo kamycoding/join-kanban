@@ -109,10 +109,18 @@ export class TaskForm {
   private acceptedInitialValue = createEmptyTaskFormValue();
   private hasAcceptedInitialValue = false;
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     effect(() => this.acceptInitialValue(this.initialValue()));
   }
 
+  /**
+   * Selects priority.
+   *
+   * @param priority - The task priority to select.
+   */
   selectPriority(priority: TaskPriority): void {
     if (!this.busy()) {
       this.formModel.update((value) => ({ ...value, priority }));
@@ -120,6 +128,11 @@ export class TaskForm {
     }
   }
 
+  /**
+   * Sets contact ids.
+   *
+   * @param contactIds - The identifiers of the affected contacts.
+   */
   setContactIds(contactIds: string[]): void {
     if (!this.busy()) {
       this.formModel.update((value) => ({ ...value, contactIds }));
@@ -127,6 +140,11 @@ export class TaskForm {
     }
   }
 
+  /**
+   * Sets subtasks.
+   *
+   * @param subtasks - The subtasks to process.
+   */
   setSubtasks(subtasks: TaskFormSubtaskValue[]): void {
     if (!this.busy()) {
       this.formModel.update((value) => ({ ...value, subtasks }));
@@ -134,12 +152,18 @@ export class TaskForm {
     }
   }
 
+  /**
+   * Performs the reset operation.
+   */
   reset(): void {
     if (!this.busy()) {
       this.resetTo(this.acceptedInitialValue);
     }
   }
 
+  /**
+   * Handles secondary action.
+   */
   onSecondaryAction(): void {
     if (this.busy()) return;
 
@@ -151,6 +175,11 @@ export class TaskForm {
     }
   }
 
+  /**
+   * Handles submission of the current form.
+   *
+   * @param event - The event to handle.
+   */
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
     if (this.busy()) return;
@@ -162,6 +191,11 @@ export class TaskForm {
     if (!wasSubmitted) this.focusFirstInvalidControl();
   }
 
+  /**
+   * Applies initial value.
+   *
+   * @param value - The value to process.
+   */
   private acceptInitialValue(value: TaskFormValue): void {
     untracked(() => {
       const shouldInitialize = !this.hasAcceptedInitialValue || !this.taskForm().dirty();
@@ -171,11 +205,19 @@ export class TaskForm {
     });
   }
 
+  /**
+   * Resets to.
+   *
+   * @param value - The value to process.
+   */
   private resetTo(value: TaskFormValue): void {
     this.taskForm().reset(cloneTaskFormValue(value));
     this.subtaskInput()?.reset();
   }
 
+  /**
+   * Focuses first invalid control.
+   */
   private focusFirstInvalidControl(): void {
     if (this.taskForm.title().invalid()) this.titleInput().nativeElement.focus();
     else if (this.taskForm.dueDate().invalid()) this.dueDateInput().nativeElement.focus();
@@ -183,6 +225,12 @@ export class TaskForm {
   }
 }
 
+/**
+ * Validates title.
+ *
+ * @param value - The value to process.
+ * @returns The resulting value, or `null` when unavailable.
+ */
 function validateTitle(value: string): { kind: string; message: string } | null {
   const title = value.trim();
   if (!title) return { kind: 'required', message: 'Title is required.' };
@@ -191,6 +239,14 @@ function validateTitle(value: string): { kind: string; message: string } | null 
     : null;
 }
 
+/**
+ * Validates due date.
+ *
+ * @param value - The value to process.
+ * @param minimumDate - The minimum date value to use.
+ * @param allowedPastDate - The allowed past date value to use.
+ * @returns The resulting value, or `null` when unavailable.
+ */
 function validateDueDate(
   value: string,
   minimumDate: string,
@@ -203,6 +259,12 @@ function validateDueDate(
     : null;
 }
 
+/**
+ * Converts data to local date input value.
+ *
+ * @param date - The date value to use.
+ * @returns The resulting string.
+ */
 function toLocalDateInputValue(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');

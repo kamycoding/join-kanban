@@ -26,6 +26,11 @@ export interface TaskFormValue {
   subtasks: TaskFormSubtaskValue[];
 }
 
+/**
+ * Creates empty task form value.
+ *
+ * @returns The resulting value.
+ */
 export function createEmptyTaskFormValue(): TaskFormValue {
   return {
     title: '',
@@ -47,6 +52,12 @@ export function cloneTaskFormValue(value: TaskFormValue): TaskFormValue {
   };
 }
 
+/**
+ * Performs the clone subtask operation.
+ *
+ * @param subtask - The subtask to process.
+ * @returns The resulting value.
+ */
 function cloneSubtask(subtask: TaskFormSubtaskValue): TaskFormSubtaskValue {
   if (subtask.kind === 'existing') {
     return {

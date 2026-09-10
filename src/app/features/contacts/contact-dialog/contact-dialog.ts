@@ -44,6 +44,9 @@ export class ContactDialog implements OnInit {
 
   private isClosing = false;
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     afterNextRender(() => {
       requestAnimationFrame(() => {
@@ -54,6 +57,9 @@ export class ContactDialog implements OnInit {
     });
   }
 
+  /**
+   * Initializes the component state and loads its required data.
+   */
   ngOnInit(): void {
     const state = this.state();
 
@@ -62,6 +68,11 @@ export class ContactDialog implements OnInit {
     }
   }
 
+  /**
+   * Handles submission of the current form.
+   *
+   * @param event - The event to handle.
+   */
   async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
 
@@ -72,12 +83,20 @@ export class ContactDialog implements OnInit {
     await submit(this.contactForm, async (field) => this.emitFormValue(field().value()));
   }
 
+  /**
+   * Handles delete.
+   *
+   * @param contact - The contact to process.
+   */
   onDelete(contact: Contact): void {
     if (!this.saving()) {
       this.deleteContact.emit(contact);
     }
   }
 
+  /**
+   * Requests close.
+   */
   requestClose(): void {
     if (this.saving()) {
       return;
@@ -94,6 +113,11 @@ export class ContactDialog implements OnInit {
     }
   }
 
+  /**
+   * Handles completion of the dialog transition.
+   *
+   * @param event - The event to handle.
+   */
   onDialogTransitionEnd(event: TransitionEvent): void {
     const isDialogTransform =
       event.target === event.currentTarget && event.propertyName === 'transform';
@@ -103,10 +127,20 @@ export class ContactDialog implements OnInit {
     }
   }
 
+  /**
+   * Determines whether the user prefers reduced motion.
+   *
+   * @returns Whether the requested condition is met.
+   */
   private prefersReducedMotion(): boolean {
     return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   }
 
+  /**
+   * Performs the prefill form operation.
+   *
+   * @param contact - The contact to process.
+   */
   private prefillForm(contact: Contact): void {
     this.formModel.set({
       name: `${contact.first_name} ${contact.last_name}`.trim(),
@@ -115,6 +149,11 @@ export class ContactDialog implements OnInit {
     });
   }
 
+  /**
+   * Emits form value.
+   *
+   * @param value - The value to process.
+   */
   private emitFormValue(value: ContactFormValue): void {
     const result = validateContactInput(value);
 

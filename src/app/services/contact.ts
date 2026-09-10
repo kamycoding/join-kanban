@@ -9,10 +9,16 @@ export class ContactService {
 
   readonly contacts = signal<Contact[]>([]);
 
+  /**
+   * Resets the service state to its initial values.
+   */
   clearState(): void {
     this.contacts.set([]);
   }
 
+  /**
+   * Retrieves contacts.
+   */
   async getContacts(): Promise<void> {
     const { data, error } = await this.supabase
       .from('contacts')
@@ -28,6 +34,14 @@ export class ContactService {
     this.contacts.set(data as Contact[]);
   }
 
+  /**
+   * Creates contact.
+   *
+   * @param fullName - The full name to process.
+   * @param email - The email address to process.
+   * @param phone - The phone number to process.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async createContact(fullName: string, email: string, phone: string): Promise<Contact | null> {
     const result = validateContactInput({ name: fullName, email, phone });
 
@@ -69,6 +83,11 @@ export class ContactService {
     return createdContact;
   }
 
+  /**
+   * Generates contact color.
+   *
+   * @returns The resulting string.
+   */
   private generateContactColor(): string {
     const colors = [
       '#ff7a00',
@@ -90,6 +109,15 @@ export class ContactService {
     return colors[randomIndex];
   }
 
+  /**
+   * Updates contact.
+   *
+   * @param id - The identifier of the affected record.
+   * @param fullName - The full name to process.
+   * @param email - The email address to process.
+   * @param phone - The phone number to process.
+   * @returns A promise that resolves to the resulting value, or `null` when unavailable.
+   */
   async updateContact(
     id: string,
     fullName: string,
@@ -137,6 +165,12 @@ export class ContactService {
     return updatedContact;
   }
 
+  /**
+   * Removes contact.
+   *
+   * @param id - The identifier of the affected record.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async deleteContact(id: string): Promise<boolean> {
     const { error } = await this.supabase.from('contacts').delete().eq('id', id);
 

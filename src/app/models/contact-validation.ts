@@ -26,6 +26,12 @@ const EMAIL_LOCAL_PART = /^[a-z\d.!#$%&'*+/=?^_`{|}~-]+$/i;
 const DOMAIN_LABEL = /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i;
 const TOP_LEVEL_DOMAIN = /^[a-z]{2,}$/i;
 
+/**
+ * Normalizes contact input.
+ *
+ * @param input - The input value to process.
+ * @returns The resulting value.
+ */
 export function normalizeContactInput(input: ContactInput): ContactInput {
   return {
     name: normalizeContactName(input.name),
@@ -34,6 +40,12 @@ export function normalizeContactInput(input: ContactInput): ContactInput {
   };
 }
 
+/**
+ * Validates contact name.
+ *
+ * @param value - The value to process.
+ * @returns The resulting value, or `null` when unavailable.
+ */
 export function validateContactName(value: string): ContactValidationIssue | null {
   const name = normalizeContactName(value);
 
@@ -55,6 +67,12 @@ export function validateContactName(value: string): ContactValidationIssue | nul
   return null;
 }
 
+/**
+ * Validates contact email.
+ *
+ * @param value - The value to process.
+ * @returns The resulting value, or `null` when unavailable.
+ */
 export function validateContactEmail(value: string): ContactValidationIssue | null {
   const email = value.trim();
 
@@ -76,6 +94,12 @@ export function validateContactEmail(value: string): ContactValidationIssue | nu
   return null;
 }
 
+/**
+ * Validates contact phone.
+ *
+ * @param value - The value to process.
+ * @returns The resulting value, or `null` when unavailable.
+ */
 export function validateContactPhone(value: string): ContactValidationIssue | null {
   const phone = value.trim();
 
@@ -99,6 +123,12 @@ export function validateContactPhone(value: string): ContactValidationIssue | nu
   return null;
 }
 
+/**
+ * Validates contact input.
+ *
+ * @param input - The input value to process.
+ * @returns The resulting value.
+ */
 export function validateContactInput(input: ContactInput): ContactValidationResult {
   const value = normalizeContactInput(input);
   const errors: ContactValidationErrors = {};
@@ -124,6 +154,12 @@ export function validateContactInput(input: ContactInput): ContactValidationResu
     : { valid: false, value, errors };
 }
 
+/**
+ * Splits contact name.
+ *
+ * @param fullName - The full name to process.
+ * @returns The resulting value.
+ */
 export function splitContactName(fullName: string): {
   first_name: string;
   last_name: string;
@@ -142,10 +178,22 @@ export function splitContactName(fullName: string): {
   };
 }
 
+/**
+ * Normalizes contact name.
+ *
+ * @param value - The value to process.
+ * @returns The resulting string.
+ */
 function normalizeContactName(value: string): string {
   return value.trim().replace(/\s+/g, ' ');
 }
 
+/**
+ * Determines whether the practical email.
+ *
+ * @param email - The email address to process.
+ * @returns Whether the requested condition is met.
+ */
 function isPracticalEmail(email: string): boolean {
   if (/\s/.test(email)) {
     return false;

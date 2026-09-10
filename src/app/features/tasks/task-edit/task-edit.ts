@@ -58,26 +58,45 @@ export class TaskEdit implements OnInit {
 
   private readonly panel = viewChild.required<ElementRef<HTMLElement>>('panel');
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     afterNextRender(() => this.focusFirstField());
   }
 
+  /**
+   * Initializes the component state and loads its required data.
+   */
   async ngOnInit(): Promise<void> {
     await this.contactService.getContacts();
   }
 
+  /**
+   * Performs the cancel operation.
+   */
   cancel(): void {
     if (this.saving()) return;
 
     this.cancelled.emit();
   }
 
+  /**
+   * Handles a click on the overlay backdrop.
+   *
+   * @param event - The event to handle.
+   */
   onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.cancel();
     }
   }
 
+  /**
+   * Handles save.
+   *
+   * @param value - The value to process.
+   */
   async onSave(value: TaskFormValue): Promise<void> {
     if (this.saving()) return;
 
@@ -91,11 +110,19 @@ export class TaskEdit implements OnInit {
     }
   }
 
+  /**
+   * Handles the Escape key action.
+   */
   @HostListener('keydown.escape')
   onEscape(): void {
     this.cancel();
   }
 
+  /**
+   * Keeps focus within tab focus.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('document:keydown', ['$event'])
   containTabFocus(event: KeyboardEvent): void {
     if (event.key !== 'Tab') return;
@@ -122,6 +149,11 @@ export class TaskEdit implements OnInit {
     }
   }
 
+  /**
+   * Redirects focus.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('document:focusin', ['$event'])
   redirectFocus(event: FocusEvent): void {
     const panel = this.panel().nativeElement;
@@ -131,6 +163,11 @@ export class TaskEdit implements OnInit {
     }
   }
 
+  /**
+   * Persists plan.
+   *
+   * @param plan - The update plan to process.
+   */
   private async persistPlan(plan: TaskEditPlan): Promise<void> {
     const taskId = this.task().id;
 
@@ -148,6 +185,13 @@ export class TaskEdit implements OnInit {
     await this.finishSave();
   }
 
+  /**
+   * Synchronizes assignees.
+   *
+   * @param plan - The update plan to process.
+   * @param taskId - The identifier of the affected task.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   private async syncAssignees(plan: TaskEditPlan, taskId: string): Promise<boolean> {
     for (const contactId of plan.assigneesToRemove) {
       const removed = await this.taskAssigneeService.removeContact(taskId, contactId);
@@ -170,6 +214,13 @@ export class TaskEdit implements OnInit {
     return true;
   }
 
+  /**
+   * Synchronizes subtasks.
+   *
+   * @param plan - The update plan to process.
+   * @param taskId - The identifier of the affected task.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   private async syncSubtasks(plan: TaskEditPlan, taskId: string): Promise<boolean> {
     for (const subtaskId of plan.subtasksToDelete) {
       const deleted = await this.subtaskService.deleteSubtask(subtaskId);
@@ -205,6 +256,9 @@ export class TaskEdit implements OnInit {
     return true;
   }
 
+  /**
+   * Finishes save.
+   */
   private async finishSave(): Promise<void> {
     const refreshed = await this.taskService.getTasks();
 
@@ -215,11 +269,19 @@ export class TaskEdit implements OnInit {
     }
   }
 
+  /**
+   * Persists failed.
+   *
+   * @param message - The message to display.
+   */
   private async saveFailed(message: string | null): Promise<void> {
     this.persistenceError.set(message ?? 'Task could not be saved.');
     await this.taskService.getTasks();
   }
 
+  /**
+   * Focuses first field.
+   */
   private focusFirstField(): void {
     this.panel().nativeElement.querySelector<HTMLElement>('input')?.focus();
   }

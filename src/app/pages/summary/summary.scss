@@ -456,6 +456,12 @@ $fluid-to: 1372; // where the drawn spacing fits again
   }
 }
 
+@media (max-width: 400px) {
+  .summary__row--trio {
+    transform: translateY(-15px);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Some people get motion sick from movement on screen and switch it off in
 // their operating system. The colour change stays, the growing stops.

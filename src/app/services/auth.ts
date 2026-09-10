@@ -57,6 +57,9 @@ export class AuthService {
   });
   readonly ready: Promise<void>;
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     const { data } = this.supabase.auth.onAuthStateChange((_event, session) => {
       this.sessionState.set(session);
@@ -72,6 +75,14 @@ export class AuthService {
     this.ready = this.restoreSession();
   }
 
+  /**
+   * Performs the sign up operation.
+   *
+   * @param name - The name to process.
+   * @param email - The email address to process.
+   * @param password - The password to process.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async signUp(name: string, email: string, password: string): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -122,6 +133,13 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * Performs the sign in with password operation.
+   *
+   * @param email - The email address to process.
+   * @param password - The password to process.
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async signInWithPassword(email: string, password: string): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -146,6 +164,11 @@ export class AuthService {
     return data.session !== null;
   }
 
+  /**
+   * Performs the sign in anonymously operation.
+   *
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async signInAnonymously(): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -170,6 +193,11 @@ export class AuthService {
     return data.session !== null;
   }
 
+  /**
+   * Performs the sign out operation.
+   *
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async signOut(): Promise<boolean> {
     this.loadingState.set(true);
     this.errorState.set(null);
@@ -188,6 +216,11 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * Loads profile.
+   *
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async loadProfile(): Promise<boolean> {
     const userId = this.user()?.id;
 
@@ -212,6 +245,11 @@ export class AuthService {
     return true;
   }
 
+  /**
+   * Validates session.
+   *
+   * @returns A promise that resolves to whether the operation succeeded.
+   */
   async validateSession(): Promise<boolean> {
     if (!this.isAuthenticated()) {
       return false;
@@ -229,10 +267,16 @@ export class AuthService {
     return false;
   }
 
+  /**
+   * Clears error.
+   */
   clearError(): void {
     this.errorState.set(null);
   }
 
+  /**
+   * Restores session.
+   */
   private async restoreSession(): Promise<void> {
     const { data, error } = await this.supabase.auth.getSession();
 

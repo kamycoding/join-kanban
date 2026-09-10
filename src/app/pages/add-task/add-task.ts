@@ -61,16 +61,25 @@ export class AddTask implements OnInit, OnDestroy {
   private readonly taskForm = viewChild.required(TaskForm);
   private redirectTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /**
+   * Initializes the component state and loads its required data.
+   */
   async ngOnInit(): Promise<void> {
     await this.contactService.getContacts();
   }
 
+  /**
+   * Releases pending work and resources owned by the component.
+   */
   ngOnDestroy(): void {
     if (this.redirectTimer !== null) {
       clearTimeout(this.redirectTimer);
     }
   }
 
+  /**
+   * Handles cleared.
+   */
   onCleared(): void {
     this.successToast.set(false);
     this.persistenceError.set(null);
@@ -85,6 +94,11 @@ export class AddTask implements OnInit, OnDestroy {
     this.cancelled.emit();
   }
 
+  /**
+   * Handles submitted.
+   *
+   * @param value - The value to process.
+   */
   async onSubmitted(value: TaskFormValue): Promise<void> {
     if (this.saving()) return;
 
@@ -108,6 +122,9 @@ export class AddTask implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Schedules board redirect.
+   */
   private scheduleBoardRedirect(): void {
     if (this.redirectTimer !== null) {
       clearTimeout(this.redirectTimer);

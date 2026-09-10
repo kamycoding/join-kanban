@@ -1,11 +1,5 @@
 <div class="login-page" [class.login-page--intro]="introPending()">
-  <img
-    class="logo logo--dark"
-    src="/img/join-logo-dark.svg"
-    alt="Join"
-    width="100"
-    height="122"
-  />
+  <img class="logo logo--dark" src="/img/join-logo-dark.svg" alt="Join" width="100" height="122" />
   <img
     class="logo logo--intro"
     src="/img/join-logo.svg"
@@ -94,7 +88,7 @@
       </div>
 
       <div class="actions">
-        <app-button size="large" type="submit" [disabled]="submitting()">
+        <app-button size="large" type="submit" [fullWidth]="true" [disabled]="submitting()">
           {{ submitting() ? 'Logging in…' : 'Log in' }}
         </app-button>
 
@@ -102,6 +96,7 @@
           variant="outline"
           size="large"
           type="button"
+          [fullWidth]="true"
           [disabled]="submitting()"
           (click)="onGuestLogin()"
         >

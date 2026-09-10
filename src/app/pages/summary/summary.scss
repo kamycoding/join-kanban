@@ -1,3 +1,4 @@
+@use 'sass:math';
 @use '../../../styles/breakpoints' as *;
 
 // ---------------------------------------------------------------------------
@@ -14,6 +15,26 @@ $gap-mobile: 24px;
 $headline-gap: 30px; // title, rule, subtitle
 $card-gap: 18px; // icon to number inside a card
 $card-growth: 16px; // a hovered card gets this much wider and taller
+$card-inset: 16px; // keeps the figures off the card edge when it turns narrow
+
+// Above the tablet breakpoint the greeting sits beside the cards, but at the
+// drawn 96px padding and 80px gap the two only fit from 1372px up:
+// 232 sidebar + 2x96 + 560 panel + 80 + 308 greeting. Between the breakpoint
+// and there, the spacing gives way so the cards keep their width. It does so
+// continuously - a media query would put the step back somewhere else, and a
+// step is what this was about.
+$fluid-from: 1000; // where the greeting appears and the room runs out
+$fluid-to: 1372; // where the drawn spacing fits again
+
+@function fluid($small, $large) {
+  $slope: math.div($large - $small, $fluid-to - $fluid-from);
+
+  @return clamp(
+    #{$small}px,
+    calc(#{$small}px + (100vw - #{$fluid-from}px) * #{$slope}),
+    #{$large}px
+  );
+}
 
 // The host is a grid item of .app-shell__content, so without min-width its
 // automatic minimum size is the content width and the page bursts its column.
@@ -27,7 +48,7 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
   display: block;
   min-width: 0;
   min-height: 100%;
-  padding: 110px 96px 96px;
+  padding: fluid(72, 110) fluid(40, 96) fluid(40, 96);
 
   background-color: var(--color-bg-app);
 }
@@ -67,18 +88,23 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
 .summary__content {
   display: flex;
   align-items: center;
-  gap: 80px;
-  margin-top: 56px;
+  gap: fluid(40, 80);
+  margin-top: fluid(40, 56);
 }
 
 // The panel holds whatever the left column currently shows: the cards, or the
 // loading and error lines while there are none. It carries the width so those
 // states do not each have to repeat it.
+// `flex: 1 1 0` hands the panel whatever is left once the greeting has taken
+// its text width, capped at the 560px of the design. With `width: 100%` and
+// `min-width: 0` instead, the panel carried the whole shortfall on its own and
+// collapsed from 906px to 309px at a single pixel of window width, while the
+// greeting kept its size.
 .summary__panel {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   gap: var(--space-4);
-  width: 100%;
   min-width: 0;
   max-width: 560px;
 }
@@ -128,14 +154,20 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
 // Every card links to the board. On hover Figma turns it dark and grows the
 // area by 16px in both directions while the icon and the text keep their size,
 // so this must not be a transform.
+// The card had no inner padding at all and relied on `justify-content: center`
+// alone, so as soon as it turned narrow the number and its label sat right on
+// the edge. Border-box keeps the padding from adding to the row height, since
+// the project has no global reset.
 .summary__card {
   position: relative;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: $card-gap;
   min-width: 0;
   height: 100%;
+  padding-inline: $card-inset;
 
   border-radius: var(--radius-3xl);
   background-color: var(--color-white);
@@ -272,8 +304,10 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
   gap: 0;
 }
 
+// 61px between the urgent figure and the deadline is the first thing that
+// pushes the content of this card past its own edge once it narrows.
 .summary__card--urgency {
-  gap: 61px;
+  gap: fluid(24, 61);
 }
 
 .summary__urgent {
@@ -299,6 +333,7 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
 // -- Greeting ---------------------------------------------------------------
 .summary__greeting {
   display: flex;
+  flex: 0 1 auto;
   flex-direction: column;
   gap: 3px;
   margin: 0;
@@ -387,8 +422,11 @@ $card-growth: 16px; // a hovered card gets this much wider and taller
     --card-height: 116px;
   }
 
+  // At 320px the card is 132px wide and the icon, gap and figures need nearly
+  // all of it, so the inset halves rather than squeezing the label.
   .summary__card {
     border-radius: var(--radius-menu);
+    padding-inline: calc(#{$card-inset} / 2);
   }
 
   // Figma spaces this 20px on a 428px screen. At 320px the content needs

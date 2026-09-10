@@ -35,9 +35,6 @@ function formatDay(day: string): string {
   return dayFormat.format(new Date(year, month - 1, date));
 }
 
-/** The keys a profile name could arrive under, in the order they are tried. */
-const NAME_KEYS = ['name', 'full_name', 'display_name'] as const;
-
 /**
  * Figma only draws "Good morning". Noon and six in the evening are the usual
  * borders for the other two.
@@ -120,25 +117,27 @@ export class Summary implements OnInit {
   readonly greeting = greetingFor(new Date());
 
   /**
-   * The name of the signed-in profile, null for a guest and for a profile that
-   * carries no name yet. Figma greets both the same way, without a name.
+   * The name of the signed-in profile, null for a guest. Figma greets a guest
+   * without a name.
+   *
+   * The row in `profiles` is the source of truth - it is what the person can
+   * change later. The name handed to the sign-up only fills the gap between
+   * registering and the first `loadProfile()`, when there is no row to read yet.
    */
   readonly userName = computed(() => {
     if (this.auth.isGuest()) {
       return null;
     }
 
-    const metadata = this.auth.user()?.user_metadata ?? {};
+    const profileName = this.auth.profile()?.full_name.trim();
 
-    for (const key of NAME_KEYS) {
-      const value: unknown = metadata[key];
-
-      if (typeof value === 'string' && value.trim() !== '') {
-        return value.trim();
-      }
+    if (profileName) {
+      return profileName;
     }
 
-    return null;
+    const signUpName: unknown = this.auth.user()?.user_metadata?.['full_name'];
+
+    return typeof signUpName === 'string' && signUpName.trim() !== '' ? signUpName.trim() : null;
   });
 
   async ngOnInit(): Promise<void> {

@@ -4,6 +4,8 @@
 // long-form text, so the rules live here instead of being copied per page.
 // ---------------------------------------------------------------------------
 
+@use 'breakpoints' as *;
+
 .static-page {
   box-sizing: border-box;
   max-width: 1000px;
@@ -92,4 +94,13 @@
 
   font-size: var(--font-size-t6);
   font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: $bp-mobile) {
+  .static-page {
+    width: 100%;
+    min-width: 0;
+    padding-inline: var(--space-4);
+    overflow-wrap: anywhere;
+  }
 }

@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
 import { TaskPriority, TaskStatus, TaskWithDetails } from '../../models/task';
+import { UserProfile } from '../../models/user-profile';
 import { AuthService } from '../../services/auth';
 import { TaskService } from '../../services/task';
 import { Summary } from './summary';
@@ -20,6 +21,7 @@ describe('Summary', () => {
   };
   let isGuest: WritableSignal<boolean>;
   let user: WritableSignal<{ user_metadata: Record<string, unknown> } | null>;
+  let profile: WritableSignal<UserProfile | null>;
 
   function createTask(
     id: string,
@@ -42,6 +44,24 @@ describe('Summary', () => {
       subtasks: [],
       assignees: [],
     };
+  }
+
+  /** A profile row as `loadProfile()` puts it into the service. */
+  function createProfile(full_name: string, is_guest = false): UserProfile {
+    return {
+      id: 'user-1',
+      full_name,
+      is_guest,
+      created_at: '2026-09-01T00:00:00.000Z',
+    };
+  }
+
+  /** Signs somebody in: the guard is off and a profile row has arrived. */
+  async function signedInAs(...args: Parameters<typeof createProfile>): Promise<void> {
+    isGuest.set(false);
+    profile.set(createProfile(...args));
+    fixture.detectChanges();
+    await fixture.whenStable();
   }
 
   /** The numbers of the six cards, in the order the design shows them. */
@@ -85,6 +105,7 @@ describe('Summary', () => {
     tasks = signal<TaskWithDetails[]>([]);
     isGuest = signal(true);
     user = signal<{ user_metadata: Record<string, unknown> } | null>(null);
+    profile = signal<UserProfile | null>(null);
     taskService = {
       tasks,
       loading: signal(false),
@@ -96,7 +117,7 @@ describe('Summary', () => {
       imports: [Summary],
       providers: [
         provideRouter([]),
-        { provide: AuthService, useValue: { isGuest, user } as unknown as AuthService },
+        { provide: AuthService, useValue: { isGuest, user, profile } as unknown as AuthService },
       ],
     })
       .overrideProvider(TaskService, { useValue: taskService })
@@ -192,6 +213,25 @@ describe('Summary', () => {
     expect(alert.textContent).toContain('Tasks could not be loaded');
   });
 
+  it('hides the cards behind an error instead of counting zero', async () => {
+    await withTasks(createTask('1', 'todo'));
+    taskService.error.set('Tasks could not be loaded');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelectorAll('.summary__card').length).toBe(0);
+  });
+
+  it('shows the error rather than the loading notice when both are set', async () => {
+    taskService.loading.set(true);
+    taskService.error.set('Tasks could not be loaded');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.summary__loading')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.summary__error')).toBeTruthy();
+  });
+
   it('says so while no task is due', () => {
     expect(deadlineText()).toBe('No upcoming deadline');
   });
@@ -229,27 +269,39 @@ describe('Summary', () => {
     expect(greetingText()).toBe('Good morning!');
   });
 
-  it('greets a signed-in user by name', async () => {
-    isGuest.set(false);
-    user.set({ user_metadata: { name: 'Sofia Müller' } });
-    fixture.detectChanges();
-    await fixture.whenStable();
+  it('greets a signed-in user by the name on their profile', async () => {
+    await signedInAs('Sofia Müller');
 
     expect(greetingText()).toBe('Good morning, Sofia Müller');
   });
 
-  it('falls back to the other name keys a profile may carry', async () => {
+  it('prefers the profile over the name handed to the sign-up', async () => {
+    user.set({ user_metadata: { full_name: 'Old Name' } });
+    await signedInAs('Sofia Müller');
+
+    expect(greetingText()).toBe('Good morning, Sofia Müller');
+  });
+
+  it('uses the sign-up name until the profile has arrived', async () => {
     isGuest.set(false);
-    user.set({ user_metadata: { name: '  ', full_name: 'Björn Daigger' } });
+    user.set({ user_metadata: { full_name: 'Björn Daigger' } });
     fixture.detectChanges();
     await fixture.whenStable();
 
     expect(greetingText()).toBe('Good morning, Björn Daigger');
   });
 
-  it('drops the name when the profile carries none', async () => {
+  it('drops the name when neither profile nor sign-up carry one', async () => {
     isGuest.set(false);
     user.set({ user_metadata: {} });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(greetingText()).toBe('Good morning!');
+  });
+
+  it('greets a guest without a name even though the profile carries one', async () => {
+    profile.set(createProfile('Guest', true));
     fixture.detectChanges();
     await fixture.whenStable();
 

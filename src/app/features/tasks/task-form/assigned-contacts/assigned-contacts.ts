@@ -34,6 +34,9 @@ export class AssignedContacts {
   readonly summaryId = `assigned-contacts-summary-${this.instanceId}`;
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     effect(() => {
       if (this.disabled()) {
@@ -42,6 +45,11 @@ export class AssignedContacts {
     });
   }
 
+  /**
+   * Closes on outside click.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('document:click', ['$event'])
   closeOnOutsideClick(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target as Node)) {
@@ -49,6 +57,11 @@ export class AssignedContacts {
     }
   }
 
+  /**
+   * Closes on escape.
+   *
+   * @param event - The event to handle.
+   */
   @HostListener('keydown.escape', ['$event'])
   closeOnEscape(event: Event): void {
     if (this.open()) {
@@ -58,12 +71,20 @@ export class AssignedContacts {
     }
   }
 
+  /**
+   * Toggles dropdown.
+   */
   toggleDropdown(): void {
     if (!this.disabled()) {
       this.open.update((value) => !value);
     }
   }
 
+  /**
+   * Toggles contact.
+   *
+   * @param contactId - The identifier of the affected contact.
+   */
   toggleContact(contactId: string): void {
     if (this.disabled()) return;
 
@@ -73,31 +94,70 @@ export class AssignedContacts {
     );
   }
 
+  /**
+   * Determines whether the selected.
+   *
+   * @param contactId - The identifier of the affected contact.
+   * @returns Whether the requested condition is met.
+   */
   isSelected(contactId: string): boolean {
     return this.selectedIds().includes(contactId);
   }
 
+  /**
+   * Performs the name operation.
+   *
+   * @param contact - The contact to process.
+   * @returns The resulting string.
+   */
   name(contact: Contact): string {
     return `${contact.first_name} ${contact.last_name}`.trim();
   }
 
+  /**
+   * Returns the contact's display initials.
+   *
+   * @param contact - The contact to process.
+   * @returns The resulting string.
+   */
   initials(contact: Contact): string {
     return `${this.firstCharacter(contact.first_name)}${this.firstCharacter(contact.last_name)}`.toUpperCase();
   }
 
+  /**
+   * Selects ed contacts.
+   *
+   * @returns The resulting collection.
+   */
   selectedContacts(): Contact[] {
     return this.contacts().filter((contact) => this.isSelected(contact.id));
   }
 
+  /**
+   * Performs the trigger labelled by operation.
+   *
+   * @returns The resulting string.
+   */
   triggerLabelledBy(): string {
     return this.labelledBy() ? `${this.labelledBy()} ${this.summaryId}` : this.summaryId;
   }
 
+  /**
+   * Closes dropdown.
+   *
+   * @param restoreFocus - Whether focus should return to the trigger element.
+   */
   private closeDropdown(restoreFocus = false): void {
     this.open.set(false);
     if (restoreFocus) this.trigger().nativeElement.focus();
   }
 
+  /**
+   * Returns the first character of a value in uppercase.
+   *
+   * @param value - The value to process.
+   * @returns The resulting string.
+   */
   private firstCharacter(value: string): string {
     return Array.from(value.trim())[0] ?? '';
   }

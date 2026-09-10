@@ -31,12 +31,18 @@ export class Overlay {
   private readonly previouslyFocused =
     document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
+  /**
+   * Initializes the instance and registers its required lifecycle behavior.
+   */
   constructor() {
     afterNextRender(() => this.closeButton().nativeElement.focus());
 
     inject(DestroyRef).onDestroy(() => this.restorePreviousFocus());
   }
 
+  /**
+   * Requests close.
+   */
   requestClose(): void {
     this.closeRequested.emit();
   }
@@ -53,6 +59,9 @@ export class Overlay {
     }
   }
 
+  /**
+   * Restores previous focus.
+   */
   private restorePreviousFocus(): void {
     const target = this.previouslyFocused;
 

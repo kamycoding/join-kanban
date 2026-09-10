@@ -12,6 +12,9 @@ export class PageHeader {
 
   readonly heading = input.required<string>();
 
+  /**
+   * Performs the go back operation.
+   */
   goBack(): void {
     this.location.back();
   }

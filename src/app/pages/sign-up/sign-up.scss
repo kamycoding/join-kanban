@@ -14,6 +14,7 @@
 
   display: block;
   min-width: 0;
+  background: var(--color-bg-app);
   color: var(--color-black);
 }
 
@@ -24,7 +25,10 @@
   row-gap: var(--space-5);
   justify-items: center;
   box-sizing: border-box;
+  width: 100%;
+  max-width: 90rem;
   min-height: 100dvh;
+  margin-inline: auto;
   overflow-x: hidden;
   padding: var(--sign-up-page-padding-top) var(--space-4) var(--sign-up-page-padding-bottom);
   background: var(--color-bg-app);
